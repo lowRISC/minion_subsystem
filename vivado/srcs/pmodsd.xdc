@@ -1,0 +1,18 @@
+## SD Pins (via PMOD JC and external Digilent PMOD adaptor)
+set_property PACKAGE_PIN G6 [get_ports pmod_sd_sclk]
+#set_property IOSTANDARD LVCMOS33 [get_ports sd_sclk]
+set_property PACKAGE_PIN E6 [get_ports pmod_sd_reset]
+set_property IOSTANDARD LVCMOS33 [get_ports pmod_sd_reset]
+set_property PACKAGE_PIN J4 [get_ports pmod_sd_detect]
+set_property IOSTANDARD LVCMOS33 [get_ports pmod_sd_detect]
+set_property PACKAGE_PIN F6 [get_ports pmod_sd_cmd]
+#set_property IOSTANDARD LVCMOS33 [get_ports sd_cmd]
+set_property PACKAGE_PIN J2 [get_ports {pmod_sd_dat[0]}]
+#set_property IOSTANDARD LVCMOS33 [get_ports {sd_dat[0]}]
+set_property PACKAGE_PIN E7 [get_ports {pmod_sd_dat[1]}]
+#set_property IOSTANDARD LVCMOS33 [get_ports {sd_dat[1]}]
+set_property PACKAGE_PIN J3 [get_ports {pmod_sd_dat[2]}]
+#set_property IOSTANDARD LVCMOS33 [get_ports {sd_dat[2]}]
+set_property PACKAGE_PIN K1 [get_ports {pmod_sd_dat[3]}]
+#set_property IOSTANDARD LVCMOS33 [get_ports {sd_dat[3]}]
+

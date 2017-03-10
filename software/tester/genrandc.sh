@@ -1,0 +1,1 @@
+head -12000c /dev/urandom | uuencode junk1 |sed -e 's=\\=\\\\=g' -e 's=\"=\\"=g' -e 's=^="=' -e 's=$="=' -e 's/\"begin 664 junk1\"/int _start() { static const char *junk1 =/' -e 's=\"end\"=; }=' |x86_64-unknown-linux-gnu-gcc -x c - -Ttext=0x10000000 --static -nostdlib -Xlinker --strip-all

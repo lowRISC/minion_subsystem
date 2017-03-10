@@ -1,0 +1,686 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Product Version: Vivado v2015.4.2 (64-bit)              -->
+<!--                                                         -->
+<!-- Copyright 1986-2015 Xilinx, Inc. All Rights Reserved.   -->
+
+<Project Version="7" Minor="10" Path="/local/scratch/svr-jrrk2-test-slave/lowrisc-chip-release/minion_subsystem/vivado/minion_top_kc705.xpr">
+  <DefaultLaunch Dir="$PRUNDIR"/>
+  <Configuration>
+    <Option Name="Id" Val="d0bc0506632b4ba99fa1c92d4677304c"/>
+    <Option Name="Part" Val="xc7k325tffg900-2"/>
+    <Option Name="CompiledLibDir" Val="$PCACHEDIR/compile_simlib"/>
+    <Option Name="CompiledLibDirModelSim" Val="$PCACHEDIR/compile_simlib/modelsim"/>
+    <Option Name="CompiledLibDirQuesta" Val="$PCACHEDIR/compile_simlib/questa"/>
+    <Option Name="CompiledLibDirIES" Val="$PCACHEDIR/compile_simlib/ies"/>
+    <Option Name="CompiledLibDirVCS" Val="$PCACHEDIR/compile_simlib/vcs"/>
+    <Option Name="CompiledLibDirRiviera" Val="$PCACHEDIR/compile_simlib/riviera"/>
+    <Option Name="CompiledLibDirActivehdl" Val="$PCACHEDIR/compile_simlib/activehdl"/>
+    <Option Name="TargetSimulator" Val="VCS"/>
+    <Option Name="BoardPart" Val="xilinx.com:kc705:part0:1.2"/>
+    <Option Name="ActiveSimSet" Val="sim_1"/>
+    <Option Name="DefaultLib" Val="xil_defaultlib"/>
+    <Option Name="EnableCoreContainer" Val="FALSE"/>
+    <Option Name="export.sim.base_dir" Val="$PPRDIR/."/>
+    <Option Name="CreateRefXciForCoreContainers" Val="FALSE"/>
+    <Option Name="IPUserFilesDir" Val="$PPRDIR/../../eth_top/eth_top.ip_user_files"/>
+    <Option Name="IPStaticSourceDir" Val="$PPRDIR/../../eth_top/eth_top.ip_user_files/ipstatic"/>
+    <Option Name="EnableBDX" Val="FALSE"/>
+  </Configuration>
+  <FileSets Version="1" Minor="31">
+    <FileSet Name="sources_1" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1">
+      <Filter Type="Srcs"/>
+      <File Path="$PPRDIR/srcs/types_common.vhd">
+        <FileInfo>
+          <Attr Name="Library" Val="commonlib"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/types_amba4.vhd">
+        <FileInfo>
+          <Attr Name="Library" Val="ambalib"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/include/riscv_defines.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/alu_div.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/greth_pkg.vhd">
+        <FileInfo>
+          <Attr Name="Library" Val="rocketlib"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/eth_rstgen.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/types_mem.vhd">
+        <FileInfo>
+          <Attr Name="Library" Val="techmap"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/syncram_2p_inferred.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/gencomp.vhd">
+        <FileInfo>
+          <Attr Name="Library" Val="techmap"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/register_file_ff.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/prefetch_L0_buffer.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/prefetch_buffer.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/mult.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/hwloop_regs.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/hwloop_controller.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/exc_controller.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/decoder.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/controller.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/compressed_decoder.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/alu.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/sd_crc_16.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/sd_crc_7.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/greth_rx.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/greth_tx.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/syncram_2p_tech.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/rtl/components/cluster_clock_gating.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/load_store_unit.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/if_stage.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/id_stage.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/ex_stage.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/debug_unit.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/cs_registers.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/sd_defines.h">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/sd_data_serial_host.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/sd_cmd_serial_host.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/grethc64.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/iobuf_inferred.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/iobuf_virtex6.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/eth_axi_mst.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/igdsbuf_k7.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/ps2_keyboard.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/ps2_translation_table.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/dualmem.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/rachelset.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../software/bootstrap/code.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../software/bootstrap/data.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/coremem.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/uart.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/include/riscv_config.sv">
+        <FileInfo SFType="VHeader">
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/ips/riscv/riscv_core.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/my_fifo.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/sd_clock_divider.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/sd_top.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/types_pll.vhd">
+        <FileInfo>
+          <Attr Name="Library" Val="techmap"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/grethaxi.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/types_buf.vhd">
+        <FileInfo>
+          <Attr Name="Library" Val="techmap"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/reset_glb.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/igdsbuf_tech.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/iobuf_tech.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/sram8_xilinx.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/config_kc705.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/types_rocket.vhd">
+        <FileInfo>
+          <Attr Name="Library" Val="rocketlib"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/config_common.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/rx_delay.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/fstore2.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/Seg_7_Display.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/ps2.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../pulpino/rtl/includes/config.sv">
+        <FileInfo SFType="VHeader">
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/minion_soc.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/eth_soc_kc705.vhd">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/eth_top_kc705.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <Config>
+        <Option Name="DesignMode" Val="RTL"/>
+        <Option Name="TopModule" Val="eth_top"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../pulpino/rtl/includes"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../pulpino/ips/riscv/include"/>
+        <Define Name="FPGA"/>
+        <Define Name="FPGA_FULL"/>
+        <Define Name="NEXYS4"/>
+        <Define Name="ETH_DEBUG"/>
+        <Define Name="PULP_FPGA_EMUL" Val="1"/>
+      </Config>
+    </FileSet>
+    <FileSet Name="constrs_1" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1">
+      <Filter Type="Constrs"/>
+      <File Path="$PPRDIR/srcs/pin_plan_kc705.xdc">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/srcs/ilm.xdc">
+        <FileInfo>
+          <Attr Name="UserDisabled" Val="1"/>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+        </FileInfo>
+      </File>
+      <Config>
+        <Option Name="TargetConstrsFile" Val="$PPRDIR/srcs/pin_plan_kc705.xdc"/>
+        <Option Name="ConstrsType" Val="XDC"/>
+      </Config>
+    </FileSet>
+    <FileSet Name="sim_1" Type="SimulationSrcs" RelSrcDir="$PSRCDIR/sim_1">
+      <Filter Type="Srcs"/>
+      <Config>
+        <Option Name="DesignMode" Val="RTL"/>
+        <Option Name="TopModule" Val="eth_top"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../../lowrisc-chip-eth-debug/fpga/board/nexys4_ddr/src"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../../lowrisc-chip-eth-debug/fpga/board/nexys4_ddr/generated-src"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../../lowrisc-chip-eth-debug/fpga/board/nexys4_ddr/lowrisc-chip-imp/lowrisc-chip-imp.srcs/sources_1/ip/mig_7series_0/mig_7series_0/example_design/sim"/>
+        <Option Name="SrcSet" Val="sources_1"/>
+        <Option Name="xsim.elaborate.xelab.more_options" Val="-cc gcc -sv_lib dpi"/>
+        <Define Name="FPGA"/>
+      </Config>
+    </FileSet>
+    <FileSet Name="clk_wiz_kc705_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/clk_wiz_kc705_0">
+      <File Path="$PPRDIR/srcs/ip/clk_wiz_kc705_0/clk_wiz_kc705_0.xci">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <Config>
+        <Option Name="TopModule" Val="clk_wiz_kc705_0"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../pulpino/rtl/includes"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../pulpino/ips/riscv/include"/>
+        <Option Name="UseBlackboxStub" Val="1"/>
+        <Define Name="FPGA"/>
+        <Define Name="FPGA_FULL"/>
+        <Define Name="NEXYS4"/>
+        <Define Name="ETH_DEBUG"/>
+        <Define Name="PULP_FPGA_EMUL" Val="1"/>
+      </Config>
+    </FileSet>
+  </FileSets>
+  <Simulators>
+    <Simulator Name="XSim">
+      <Option Name="Description" Val="Vivado Simulator"/>
+      <Option Name="CompiledLib" Val="0"/>
+    </Simulator>
+    <Simulator Name="ModelSim">
+      <Option Name="Description" Val="ModelSim Simulator"/>
+    </Simulator>
+    <Simulator Name="Questa">
+      <Option Name="Description" Val="Questa Advanced Simulator"/>
+    </Simulator>
+    <Simulator Name="IES">
+      <Option Name="Description" Val="Incisive Enterprise Simulator (IES)"/>
+    </Simulator>
+    <Simulator Name="VCS">
+      <Option Name="Description" Val="Verilog Compiler Simulator (VCS)"/>
+    </Simulator>
+    <Simulator Name="Riviera">
+      <Option Name="Description" Val="Riviera-PRO Simulator"/>
+    </Simulator>
+  </Simulators>
+  <Runs Version="1" Minor="10">
+    <Run Id="synth_1" Type="Ft3:Synth" SrcSet="sources_1" Part="xc7k325tffg900-2" ConstrsSet="constrs_1" Description="Vivado Synthesis Defaults" State="current" Dir="$PRUNDIR/synth_1" IncludeInArchive="true">
+      <Strategy Version="1" Minor="2">
+        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2015"/>
+        <Step Id="synth_design"/>
+      </Strategy>
+      <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
+    </Run>
+    <Run Id="clk_wiz_kc705_0_synth_1" Type="Ft3:Synth" SrcSet="clk_wiz_kc705_0" Part="xc7k325tffg900-2" ConstrsSet="clk_wiz_kc705_0" Description="Vivado Synthesis Defaults" Dir="$PRUNDIR/clk_wiz_kc705_0_synth_1" IncludeInArchive="true">
+      <Strategy Version="1" Minor="2">
+        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2015"/>
+        <Step Id="synth_design"/>
+      </Strategy>
+      <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
+    </Run>
+    <Run Id="impl_1" Type="Ft2:EntireDesign" Part="xc7k325tffg900-2" ConstrsSet="constrs_1" Description="Vivado Implementation Defaults" State="current" Dir="$PRUNDIR/impl_1" SynthRun="synth_1" IncludeInArchive="true">
+      <Strategy Version="1" Minor="2">
+        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2015"/>
+        <Step Id="init_design"/>
+        <Step Id="opt_design"/>
+        <Step Id="power_opt_design"/>
+        <Step Id="place_design"/>
+        <Step Id="post_place_power_opt_design"/>
+        <Step Id="phys_opt_design"/>
+        <Step Id="route_design"/>
+        <Step Id="post_route_phys_opt_design"/>
+        <Step Id="write_bitstream"/>
+      </Strategy>
+      <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
+    </Run>
+    <Run Id="clk_wiz_kc705_0_impl_1" Type="Ft2:EntireDesign" Part="xc7k325tffg900-2" ConstrsSet="clk_wiz_kc705_0" Description="Vivado Implementation Defaults" SynthRun="clk_wiz_kc705_0_synth_1" IncludeInArchive="true">
+      <Strategy Version="1" Minor="2">
+        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2015"/>
+        <Step Id="init_design"/>
+        <Step Id="opt_design"/>
+        <Step Id="power_opt_design"/>
+        <Step Id="place_design"/>
+        <Step Id="post_place_power_opt_design"/>
+        <Step Id="phys_opt_design"/>
+        <Step Id="route_design"/>
+        <Step Id="post_route_phys_opt_design"/>
+        <Step Id="write_bitstream"/>
+      </Strategy>
+    </Run>
+  </Runs>
+  <MsgRule>
+    <MsgAttr Name="RuleType" Val="0"/>
+    <MsgAttr Name="Limit" Val="-1"/>
+    <MsgAttr Name="NewSeverity" Val="ANY"/>
+    <MsgAttr Name="Id" Val="[Synth 8-350]"/>
+    <MsgAttr Name="Severity" Val="ANY"/>
+    <MsgAttr Name="ShowRule" Val="1"/>
+    <MsgAttr Name="RuleSource" Val="2"/>
+    <MsgAttr Name="StringIsRegExp" Val="0"/>
+    <MsgAttr Name="RuleId" Val="1"/>
+    <MsgAttr Name="Note" Val=""/>
+    <MsgAttr Name="Author" Val=""/>
+    <MsgAttr Name="CreatedTimestamp" Val=""/>
+  </MsgRule>
+  <MsgRule>
+    <MsgAttr Name="RuleType" Val="0"/>
+    <MsgAttr Name="Limit" Val="-1"/>
+    <MsgAttr Name="NewSeverity" Val="ANY"/>
+    <MsgAttr Name="Id" Val="[Synth 8-256]"/>
+    <MsgAttr Name="Severity" Val="ANY"/>
+    <MsgAttr Name="ShowRule" Val="1"/>
+    <MsgAttr Name="RuleSource" Val="2"/>
+    <MsgAttr Name="StringIsRegExp" Val="0"/>
+    <MsgAttr Name="RuleId" Val="2"/>
+    <MsgAttr Name="Note" Val=""/>
+    <MsgAttr Name="Author" Val=""/>
+    <MsgAttr Name="CreatedTimestamp" Val=""/>
+  </MsgRule>
+  <MsgRule>
+    <MsgAttr Name="RuleType" Val="0"/>
+    <MsgAttr Name="Limit" Val="-1"/>
+    <MsgAttr Name="NewSeverity" Val="ANY"/>
+    <MsgAttr Name="Id" Val="[Synth 8-638]"/>
+    <MsgAttr Name="Severity" Val="ANY"/>
+    <MsgAttr Name="ShowRule" Val="1"/>
+    <MsgAttr Name="RuleSource" Val="2"/>
+    <MsgAttr Name="StringIsRegExp" Val="0"/>
+    <MsgAttr Name="RuleId" Val="3"/>
+    <MsgAttr Name="Note" Val=""/>
+    <MsgAttr Name="Author" Val=""/>
+    <MsgAttr Name="CreatedTimestamp" Val=""/>
+  </MsgRule>
+  <MsgRule>
+    <MsgAttr Name="RuleType" Val="0"/>
+    <MsgAttr Name="Limit" Val="-1"/>
+    <MsgAttr Name="NewSeverity" Val="ANY"/>
+    <MsgAttr Name="Id" Val="[Synth 8-3969]"/>
+    <MsgAttr Name="Severity" Val="ANY"/>
+    <MsgAttr Name="ShowRule" Val="1"/>
+    <MsgAttr Name="RuleSource" Val="2"/>
+    <MsgAttr Name="StringIsRegExp" Val="0"/>
+    <MsgAttr Name="RuleId" Val="4"/>
+    <MsgAttr Name="Note" Val=""/>
+    <MsgAttr Name="Author" Val=""/>
+    <MsgAttr Name="CreatedTimestamp" Val=""/>
+  </MsgRule>
+  <MsgRule>
+    <MsgAttr Name="RuleType" Val="0"/>
+    <MsgAttr Name="Limit" Val="-1"/>
+    <MsgAttr Name="NewSeverity" Val="ANY"/>
+    <MsgAttr Name="Id" Val="[Synth 8-4480]"/>
+    <MsgAttr Name="Severity" Val="ANY"/>
+    <MsgAttr Name="ShowRule" Val="1"/>
+    <MsgAttr Name="RuleSource" Val="2"/>
+    <MsgAttr Name="StringIsRegExp" Val="0"/>
+    <MsgAttr Name="RuleId" Val="5"/>
+    <MsgAttr Name="Note" Val=""/>
+    <MsgAttr Name="Author" Val=""/>
+    <MsgAttr Name="CreatedTimestamp" Val=""/>
+  </MsgRule>
+  <MsgRule>
+    <MsgAttr Name="RuleType" Val="0"/>
+    <MsgAttr Name="Limit" Val="-1"/>
+    <MsgAttr Name="NewSeverity" Val="ANY"/>
+    <MsgAttr Name="Id" Val="[Drc 23-20]"/>
+    <MsgAttr Name="Severity" Val="ANY"/>
+    <MsgAttr Name="ShowRule" Val="1"/>
+    <MsgAttr Name="RuleSource" Val="2"/>
+    <MsgAttr Name="StringIsRegExp" Val="0"/>
+    <MsgAttr Name="RuleId" Val="6"/>
+    <MsgAttr Name="Note" Val=""/>
+    <MsgAttr Name="Author" Val=""/>
+    <MsgAttr Name="CreatedTimestamp" Val=""/>
+  </MsgRule>
+  <MsgRule>
+    <MsgAttr Name="RuleType" Val="0"/>
+    <MsgAttr Name="Limit" Val="-1"/>
+    <MsgAttr Name="NewSeverity" Val="ANY"/>
+    <MsgAttr Name="Id" Val="[Netlist 29-345]"/>
+    <MsgAttr Name="Severity" Val="ANY"/>
+    <MsgAttr Name="ShowRule" Val="1"/>
+    <MsgAttr Name="RuleSource" Val="2"/>
+    <MsgAttr Name="StringIsRegExp" Val="0"/>
+    <MsgAttr Name="RuleId" Val="7"/>
+    <MsgAttr Name="Note" Val=""/>
+    <MsgAttr Name="Author" Val=""/>
+    <MsgAttr Name="CreatedTimestamp" Val=""/>
+  </MsgRule>
+  <MsgRule>
+    <MsgAttr Name="RuleType" Val="0"/>
+    <MsgAttr Name="Limit" Val="-1"/>
+    <MsgAttr Name="NewSeverity" Val="ANY"/>
+    <MsgAttr Name="Id" Val="[IP_Flow 19-3664]"/>
+    <MsgAttr Name="Severity" Val="ANY"/>
+    <MsgAttr Name="ShowRule" Val="1"/>
+    <MsgAttr Name="RuleSource" Val="2"/>
+    <MsgAttr Name="StringIsRegExp" Val="0"/>
+    <MsgAttr Name="RuleId" Val="8"/>
+    <MsgAttr Name="Note" Val=""/>
+    <MsgAttr Name="Author" Val=""/>
+    <MsgAttr Name="CreatedTimestamp" Val=""/>
+  </MsgRule>
+</Project>
