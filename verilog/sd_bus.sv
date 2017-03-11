@@ -35,11 +35,15 @@
                 output reg [7:0]   clock_divider_sd_clk,
                 output reg         sd_data_rst,
                 output reg         sd_clk_rst,
-                output             sd_cmd_oe,
-                output             sd_cmd_to_mem,
-                output             sd_dat_oe,
-                output [3:0]       sd_dat_to_mem
+ output reg	    sd_cmd_oe,
+ output reg	    sd_cmd_to_mem,
+ output reg	    sd_dat_oe,
+ output reg [3:0]   sd_dat_to_mem
                 );
+   wire 	    sd_cmd_oe_pos;
+   wire 	    sd_cmd_to_mem_pos;
+   wire 	    sd_dat_oe_pos;
+   wire [3:0] 	    sd_dat_to_mem_pos;
 
    reg                             sd_cmd_to_host_dly;
    reg [3:0]                       sd_dat_to_host_dly;
@@ -61,10 +65,26 @@
    reg [5:0]                       sd_cmd_i;
    reg [31:0]                      sd_cmd_arg;
    reg [31:0]                      sd_cmd_timeout;
-   reg                             sd_cmd_start, sd_cmd_rst;
+   reg                             sd_cmd_start, sd_cmd_rst, dmy;
    wire [5:0]                      sd_cmd_state;
    wire [6:0]                      sd_data_state;
 
+always @(negedge sd_clk or negedge rstn)
+   if (rstn == 0)
+     begin
+        sd_cmd_oe <= 1'b0;
+        sd_cmd_to_mem <= 1'b0;
+        sd_dat_oe <= 1'b0;
+        sd_dat_to_mem <= 4'b0;
+     end
+   else
+     begin
+        sd_cmd_oe <= sd_cmd_oe_pos;
+        sd_cmd_to_mem <= sd_cmd_to_mem_pos;
+        sd_dat_oe <= sd_dat_oe_pos;
+        sd_dat_to_mem <= sd_dat_to_mem_pos;
+     end // else: !if(!rstn)
+   
    always @(posedge msoc_clk or negedge rstn)
      if (rstn == 0)
        begin
@@ -164,10 +184,10 @@
                 .sd_rd_o(tx_rd_fifo),
                 .sd_we_o(rx_wr_fifo),
                 .sd_data_o(data_in_rx_fifo),    
-                .sd_dat_to_mem(sd_dat_to_mem),
-                .sd_cmd_to_mem(sd_cmd_to_mem),
-                .sd_dat_oe(sd_dat_oe),
-                .sd_cmd_oe(sd_cmd_oe),
+				.sd_dat_to_mem(sd_dat_to_mem_pos),
+				.sd_cmd_to_mem(sd_cmd_to_mem_pos),
+				.sd_dat_oe(sd_dat_oe_pos),
+				.sd_cmd_oe(sd_cmd_oe_pos),
                 .sd_cmd_state(sd_cmd_state),
                 .sd_data_state(sd_data_state),
                 .sd_data_crc_s(sd_data_crc_s),

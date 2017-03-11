@@ -235,7 +235,7 @@ module sd_data_serial_host(
                         DAT_dat_o <= 4'hf;
                      end
                 end
-                else if (transf_cnt >= data_cycles+17) begin /* wait for write ack */
+                else begin /* wait for write ack */
                     DAT_oe_o <= 0;
                     crc_s[4] <= DAT_dat_reg[0];
                     if (!DAT_dat_reg[0])
