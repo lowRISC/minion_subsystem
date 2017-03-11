@@ -491,7 +491,6 @@
         <Define Name="NEXYS4"/>
         <Define Name="ETH_DEBUG"/>
         <Define Name="PULP_FPGA_EMUL" Val="1"/>
-        <Define Name="PMOD"/>
       </Config>
     </FileSet>
     <FileSet Name="constrs_1" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1">
