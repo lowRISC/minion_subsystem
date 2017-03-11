@@ -38,13 +38,13 @@ output  o_erstn    ,
    inout wire [3:0]  sd_dat,
    inout wire        sd_cmd,
    output reg        sd_reset,
-
+`ifdef PMOD
    output wire 	     pmod_sd_sclk,
    input wire        pmod_sd_detect,
    inout wire [3:0]  pmod_sd_dat,
    inout wire        pmod_sd_cmd,
    output reg        pmod_sd_reset,
-
+`endif
 // pusb button array
 input GPIO_SW_C,
 input GPIO_SW_W,
