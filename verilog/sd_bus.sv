@@ -38,7 +38,8 @@
  output reg	    sd_cmd_oe,
  output reg	    sd_cmd_to_mem,
  output reg	    sd_dat_oe,
- output reg [3:0]   sd_dat_to_mem
+ output reg [3:0]   sd_dat_to_mem,
+ output wire [31:0] sd_status
                 );
    wire 	    sd_cmd_oe_pos;
    wire 	    sd_cmd_to_mem_pos;
@@ -49,7 +50,7 @@
    reg [3:0]                       sd_dat_to_host_dly;
    
    wire [133:0]                    sd_cmd_response;
-   wire [31:0]                     sd_status, sd_cmd_wait, sd_data_wait;
+   wire [31:0] 	    sd_cmd_wait, sd_data_wait;
    wire [6:0]                      sd_cmd_crc_val;
    wire [47:0]                     sd_cmd_packet;
    wire                            sd_cmd_finish, sd_data_finish, sd_cmd_crc_ok, sd_cmd_index_ok;

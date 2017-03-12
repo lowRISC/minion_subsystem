@@ -515,6 +515,7 @@
       </File>
       <File Path="$PPRDIR/srcs/pmodsd.xdc">
         <FileInfo>
+          <Attr Name="UserDisabled" Val="1"/>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
         </FileInfo>

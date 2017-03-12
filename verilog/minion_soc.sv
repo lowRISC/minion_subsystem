@@ -120,7 +120,7 @@
    reg [31:0]           keycode;
    wire [31:0]          keyb_fifo_status = {keyb_empty,keyb_almostfull,keyb_full,keyb_rderr,keyb_wrerr,keyb_rdcount,keyb_wrcount};
    wire [35:0]          keyb_fifo_out;
-   
+  
    assign one_hot_rdata[9] = core_lsu_addr[2] ? {keyb_empty,keyb_fifo_out[15:0]} : keyb_fifo_status;
    
    ps2 keyb_mouse(
@@ -582,6 +582,35 @@ wire int_dat_sel = ~from_dip_reg[0] || ~sd_dat_oe;
    endgenerate                                  
    
    wire data_rst = ~(sd_data_rst&rstn);
+   wire [31:0]  sd_status;
+   wire 	sd_busy = sd_status[4];
+   wire 	sd_data_busy = sd_status[9];
+   wire 	finish_data = sd_status[10];
+   wire 	start_data = sd_status[11];
+ 	
+   wire         capture_almostfull, capture_full, capture_rderr, capture_wrerr, capture_empty;   
+   wire [11:0]  capture_wrcount, capture_rdcount;
+   wire [8:0]   capture_fifo_data_out;
+   wire [31:0]  capture_fifo_status = {capture_almostfull,capture_full,capture_rderr,capture_wrerr,capture_rdcount,capture_wrcount};
+   
+   assign one_hot_rdata[11] = core_lsu_addr[2] ? capture_fifo_status : {23'b0,capture_fifo_data_out};
+   
+   my_fifo #(.width(9)) capture_rx_fifo (
+                                      .rd_clk(~msoc_clk),      // input wire read clk
+                                      .wr_clk(sd_clk_o),      // input wire write clk
+                                      .rst(data_rst),      // input wire rst
+                                      .din({sd_busy,sd_data_busy,sd_dat_oe,sd_cmd_to_host_maj,sd_dat_to_host_maj}),
+                                      .wr_en(start_data && !finish_data),  // input wire wr_en
+                                      .rd_en(core_lsu_req&core_lsu_we&one_hot_data_addr[11]),  // input wire rd_en
+                                      .dout(capture_fifo_data_out),    // output wire [width-1 : 0] dout
+                                      .rdcount(capture_rdcount),         // 12-bit output: Read count
+                                      .rderr(capture_rderr),             // 1-bit output: Read error
+                                      .wrcount(capture_wrcount),         // 12-bit output: Write count
+                                      .wrerr(capture_wrerr),             // 1-bit output: Write error
+                                      .almostfull(capture_almostfull),   // output wire almost full
+                                      .full(capture_full),    // output wire full
+                                      .empty(capture_empty)  // output wire empty
+                                      );
    
    my_fifo #(.width(36)) tx_fifo (
                                   .rd_clk(~sd_clk_o),      // input wire read clk
@@ -660,7 +689,8 @@ wire int_dat_sel = ~from_dip_reg[0] || ~sd_dat_oe;
                 .sd_dat_to_mem(sd_dat_to_mem),
                 .sd_cmd_to_mem(sd_cmd_to_mem),
                 .sd_dat_oe(sd_dat_oe),
-                .sd_cmd_oe(sd_cmd_oe)
+                .sd_cmd_oe(sd_cmd_oe),
+		.sd_status(sd_status)
                 );
 
 endmodule // chip_top
