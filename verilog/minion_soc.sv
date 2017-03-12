@@ -405,7 +405,8 @@
    wire [3:0]   pmod_sd_dat_to_host;
    wire         pmod_sd_cmd_to_host;
 `endif
-   wire [3:0]   sd_dat_to_mem, sd_dat_to_host, sd_dat_to_host_maj;
+   wire [3:0]   sd_dat_to_mem;
+   wire [3:0]   sd_dat_to_host, sd_dat_to_host_maj;
    wire         sd_cmd_to_mem, sd_cmd_to_host, sd_cmd_to_host_maj, sd_cmd_oe;
    wire         sd_clk_o;       
    
@@ -584,6 +585,7 @@ wire int_dat_sel = ~from_dip_reg[0] || ~sd_dat_oe;
    wire data_rst = ~(sd_data_rst&rstn);
    wire [31:0]  sd_status;
    wire 	sd_busy = sd_status[4];
+   wire 	start_capture = sd_status[5];
    wire 	sd_data_busy = sd_status[9];
    wire 	finish_data = sd_status[10];
    wire 	start_data = sd_status[11];
@@ -593,14 +595,24 @@ wire int_dat_sel = ~from_dip_reg[0] || ~sd_dat_oe;
    wire [8:0]   capture_fifo_data_out;
    wire [31:0]  capture_fifo_status = {capture_almostfull,capture_full,capture_rderr,capture_wrerr,capture_rdcount,capture_wrcount};
    
+   reg [9:0] capture_in1, capture_in2, capture_in3, capture_in4;
+   
+   always @(posedge sd_clk_o)
+    begin
+    capture_in4 <= capture_in3;
+    capture_in3 <= capture_in2;
+    capture_in2 <= capture_in1;
+    capture_in1 <= {start_data,sd_busy,sd_data_busy,sd_dat_oe,sd_cmd_to_host_maj,sd_dat_to_host_maj};
+    end
+    
    assign one_hot_rdata[11] = core_lsu_addr[2] ? capture_fifo_status : {23'b0,capture_fifo_data_out};
    
    my_fifo #(.width(9)) capture_rx_fifo (
                                       .rd_clk(~msoc_clk),      // input wire read clk
                                       .wr_clk(sd_clk_o),      // input wire write clk
                                       .rst(data_rst),      // input wire rst
-                                      .din({sd_busy,sd_data_busy,sd_dat_oe,sd_cmd_to_host_maj,sd_dat_to_host_maj}),
-                                      .wr_en(start_data && !finish_data),  // input wire wr_en
+                                      .din(capture_in4),
+                                      .wr_en(start_capture && !capture_almostfull),  // input wire wr_en
                                       .rd_en(core_lsu_req&core_lsu_we&one_hot_data_addr[11]),  // input wire rd_en
                                       .dout(capture_fifo_data_out),    // output wire [width-1 : 0] dout
                                       .rdcount(capture_rdcount),         // 12-bit output: Read count

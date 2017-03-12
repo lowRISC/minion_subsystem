@@ -285,7 +285,6 @@ module sd_cmd_serial_host (
                 else
                   begin
                      crc_enable <= 0;
-                     start_data_o <= with_data;
                   end
                 if (counter <= resp_len+7) begin
                    response_o <= {response_o[RESP_SIZE_LONG+5:0],cmd_dat_reg};
@@ -293,6 +292,7 @@ module sd_cmd_serial_host (
                 else begin
                    crc_enable <= 0;
                    crc_ok_o <= (response_o[6:0] == crc_val_o);
+                   start_data_o <= with_data;
                 end
                 counter <= counter + 1;
              end

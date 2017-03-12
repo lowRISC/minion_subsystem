@@ -3,7 +3,7 @@
 <!--                                                         -->
 <!-- Copyright 1986-2015 Xilinx, Inc. All Rights Reserved.   -->
 
-<Project Version="7" Minor="10" Path="/local/scratch/svr-jrrk2-test-slave/lowrisc-chip-release/minion_subsystem/vivado/minion_top_nexys4ddr.xpr">
+<Project Version="7" Minor="10" Path="/home/svr-jrrk2-test-slave/lowrisc-chip-release/minion_subsystem/vivado/minion_top_nexys4ddr.xpr">
   <DefaultLaunch Dir="$PRUNDIR"/>
   <Configuration>
     <Option Name="Id" Val="d0bc0506632b4ba99fa1c92d4677304c"/>

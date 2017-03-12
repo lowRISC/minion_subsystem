@@ -115,7 +115,7 @@
    assign status_o = {1'b0,crc_val_o[6:0],
                       1'b0,crc_actual_o[6:0],
                       4'b0,start_data,finish_data_o,sd_data_busy,finish_cmd_o,
-                      index_ok_o,crc_ok_o,1'b0,sd_busy};
+                      index_ok_o,crc_ok_o,start_i,sd_busy};
    
    always @(negedge sd_clk)
      begin

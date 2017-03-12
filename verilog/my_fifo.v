@@ -74,8 +74,8 @@
                 .ALMOST_EMPTY_OFFSET(13'h0080),    // Sets the almost empty threshold
                 .ALMOST_FULL_OFFSET(13'h0080),     // Sets almost full threshold
                 .DATA_WIDTH(width),                // Sets data width to 4-36
-                .DO_REG(0),                        // Enable output register (1-0) Must be 1 if EN_SYN = FALSE
-                .EN_SYN("TRUE"),                   // Specifies FIFO as dual-clock (FALSE) or Synchronous (TRUE)
+                .DO_REG(1),                        // Enable output register (1-0) Must be 1 if EN_SYN = FALSE
+                .EN_SYN("FALSE"),                  // Specifies FIFO as dual-clock (FALSE) or Synchronous (TRUE)
                 .FIFO_MODE("FIFO18"),              // Sets mode to FIFO18 or FIFO18_36
                 .FIRST_WORD_FALL_THROUGH("FALSE"), // Sets the FIFO FWFT to FALSE, TRUE
                 .INIT(36'h000000000),              // Initial values on output port
