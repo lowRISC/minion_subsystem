@@ -583,12 +583,12 @@ wire int_dat_sel = ~from_dip_reg[0] || ~sd_dat_oe;
    endgenerate                                  
    
    wire data_rst = ~(sd_data_rst&rstn);
-   wire [31:0]  sd_status;
-   wire 	sd_busy = sd_status[4];
-   wire 	start_capture = sd_status[5];
-   wire 	sd_data_busy = sd_status[9];
-   wire 	finish_data = sd_status[10];
-   wire 	start_data = sd_status[11];
+   wire [31:0]  sd_status, sd_cmd_resp_sel;
+   wire 	sd_busy = sd_status_reg[4];
+   wire 	start_capture = sd_status_reg[5];
+   wire 	sd_data_busy = sd_status_reg[9];
+   wire 	finish_data = sd_status_reg[10];
+   wire 	start_data = sd_status_reg[11];
  	
    wire         capture_almostfull, capture_full, capture_rderr, capture_wrerr, capture_empty;   
    wire [11:0]  capture_wrcount, capture_rdcount;
@@ -596,7 +596,14 @@ wire int_dat_sel = ~from_dip_reg[0] || ~sd_dat_oe;
    wire [31:0]  capture_fifo_status = {capture_almostfull,capture_full,capture_rderr,capture_wrerr,capture_rdcount,capture_wrcount};
    
    reg [9:0] capture_in1, capture_in2, capture_in3, capture_in4;
-   
+   reg [31:0] sd_status_reg, sd_cmd_resp_sel_reg;
+ 
+   always @(posedge msoc_clk)
+     begin
+     sd_cmd_resp_sel_reg <= sd_cmd_resp_sel;
+     sd_status_reg <= sd_status;
+     end
+       
    always @(posedge sd_clk_o)
     begin
     capture_in4 <= capture_in3;
@@ -663,7 +670,8 @@ wire int_dat_sel = ~from_dip_reg[0] || ~sd_dat_oe;
    wire [31:0] rx_fifo_status = {rx_almostfull,rx_full,rx_rderr,rx_wrerr,rx_rdcount,rx_wrcount};
    wire [31:0] tx_fifo_status = {tx_almostfull,tx_full,tx_rderr,tx_wrerr,tx_rdcount,tx_wrcount};
    
-   assign one_hot_rdata[5] = 32'HDEADBEEF;
+   assign one_hot_rdata[5] = sd_status_reg;
+   assign one_hot_rdata[6] = sd_cmd_resp_sel_reg;
    assign one_hot_rdata[7] = from_dip_reg;
    assign one_hot_rdata[8] = shared_rdata;
 
@@ -689,7 +697,7 @@ wire int_dat_sel = ~from_dip_reg[0] || ~sd_dat_oe;
                 .sd_dat_to_host(sd_dat_to_host_maj),
                 .sd_cmd_to_host(sd_cmd_to_host_maj),
                 //---------------Output ports---------------
-                .sd_cmd_resp_sel(one_hot_rdata[6]),
+                .sd_cmd_resp_sel(sd_cmd_resp_sel),
                 .data_in_rx_fifo(data_in_rx_fifo),
                 .tx_rd_fifo(tx_rd_fifo),
                 .rx_wr_fifo(rx_wr_fifo),
@@ -702,7 +710,7 @@ wire int_dat_sel = ~from_dip_reg[0] || ~sd_dat_oe;
                 .sd_cmd_to_mem(sd_cmd_to_mem),
                 .sd_dat_oe(sd_dat_oe),
                 .sd_cmd_oe(sd_cmd_oe),
-		.sd_status(sd_status)
+		        .sd_status(sd_status)
                 );
 
 endmodule // chip_top
