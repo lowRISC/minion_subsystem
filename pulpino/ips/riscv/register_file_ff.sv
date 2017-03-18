@@ -91,12 +91,12 @@ module riscv_register_file
       always_ff @(posedge clk, negedge rst_n)
       begin : register_write_behavioral
         if (rst_n==1'b0) begin
-          rf_reg[i] <= 'b0;
+          rf_reg[i] = 'b0;
         end else begin
           if(we_b_dec[i] == 1'b1)
-            rf_reg[i] <= wdata_b_i;
+            rf_reg[i] = wdata_b_i;
           else if(we_a_dec[i] == 1'b1)
-            rf_reg[i] <= wdata_a_i;
+            rf_reg[i] = wdata_a_i;
         end
       end
 

@@ -518,6 +518,7 @@ module riscv_debug_unit
   assign settings_o      = settings_q;
 
 // synopsys translate_off   
+`ifndef verilator
   //----------------------------------------------------------------------------
   // Assertions
   //----------------------------------------------------------------------------
@@ -534,6 +535,7 @@ module riscv_debug_unit
   assert property (
     @(posedge clk) (debug_req_i) |-> (debug_addr_i[1:0] == 2'b00) );
 
+`endif
 // synopsys translate_on
 
 endmodule // debug_unit

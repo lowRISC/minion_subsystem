@@ -47,201 +47,201 @@
 ////                                                              ////
 //////////////////////////////////////////////////////////////////////
 `include "sd_defines.h"
-`define SIZE 7
 
 module sd_data_serial_host(
-                           input                     sd_clk,
-                           input                     rst,
-                           //Tx Fifo
-                           input [31:0]              data_in,
-                           output reg                rd,
-                           //Rx Fifo
-                           output reg [31:0]         data_out_o,
-                           output reg                we_o,
-                           //tristate data
-                           output reg                DAT_oe_o,
-                           output reg [3:0]          DAT_dat_o,
-                           input [3:0]               DAT_dat_i,
-                           //Control signals
-                           input [`BLKSIZE_W-1:0]    blksize,
-                           input                     bus_4bit,
-                           input [1:0]               start,
-                           input [31:0]              timeout_i,
-                           output                    sd_data_busy,
-                           output                    busy,
-                           output reg [4:0]          crc_s,
-                           output reg [3:0]          crc_lane_ok,
-                           output reg                finish_o,
-                           output reg [31:0]         wait_reg_o,
-                           output reg [`BLKSIZE_W:0] sd_transf_cnt,
-                           output reg [`SIZE-1:0]    state,
-                           output reg [15:0]         crc_din[3:0],
-                           output wire [15:0]        crc_calc[3:0]
-                           );
-   
-   reg [`BLKSIZE_W-1+4:0]                            transf_cnt;
-   reg [31:0]                                        data_out;
-   reg                                               we;
-   reg [3:0]                                         DAT_dat_reg;
-   reg [`BLKSIZE_W-1+4:0]                            data_cycles;
-   reg                                               bus_4bit_reg;
-   //CRC16
+           input 			 sd_clk,
+           input 			 rst,
+           //Tx Fifo
+           input [31:0] 		 data_in,
+           output reg 			 rd,
+           //Rx Fifo
+           output reg [31:0] 		 data_out,
+           output reg 			 we,
+           //tristate data
+           output reg 			 DAT_oe_o,
+           output reg [3:0] 		 DAT_dat_o,
+           input [3:0] 			 DAT_dat_i,
+           //Control signals
+           input [`BLKSIZE_W-1:0] 	 blksize,
+           input 			 bus_4bit,
+           input [`BLKCNT_W-1:0] 	 blkcnt,
+           input [1:0] 			 start,
+           input [1:0] 			 byte_alignment,
+	   input [31:0] 		 timeout_i,
+           output 			 sd_data_busy,
+           output 			 busy,
+           output			 crc_ok,
+           output reg 			 finish_o,
+	   output reg [31:0] 		 wait_reg_o,
+	   output reg [`BLKSIZE_W-1+4:0] transf_cnt_o
+       );
+
+reg [4:0] crc_s;
+reg [3:0] crc_lane_ok;
+reg [15:0]         crc_din[3:0];
+wire [15:0]        crc_calc[3:0];
+reg [31:0]                                        data_out0;
+reg                                               we0;
+reg [3:0] DAT_dat_reg;
+reg [`BLKSIZE_W-1+4:0] data_cycles;
+reg bus_4bit_reg;
+//CRC16
    reg [4:0]                                         crc_in;
-   reg                                               crc_rst;
-   parameter IDLE       = 7'b0000001;
-   parameter WRITE_DAT  = 7'b0000010;
-   parameter WRITE_CRC  = 7'b0000100;
-   parameter WRITE_BUSY = 7'b0001000;
-   parameter READ_WAIT  = 7'b0010000;
-   parameter READ_DAT   = 7'b0100000;
-   parameter FINISH     = 7'b1000000;
-   reg [2:0]                                         crc_status;
-   reg                                               busy_int;
-   reg [`BLKSIZE_W-1:0]                              blksize_reg;
-   reg [4:0]                                         crc_c;
+reg crc_rst;
+parameter SIZE = 7;
+reg [SIZE-1:0] state;
+reg [SIZE-1:0] next_state;
+parameter IDLE       = 7'b0000001;
+parameter WRITE_DAT  = 7'b0000010;
+parameter WRITE_CRC  = 7'b0000100;
+parameter WRITE_BUSY = 7'b0001000;
+parameter READ_WAIT  = 7'b0010000;
+parameter READ_DAT   = 7'b0100000;
+parameter FINISH     = 7'b1000000;
+reg [2:0] crc_status;
+reg busy_int;
+reg [`BLKSIZE_W-1:0] blksize_reg;
+reg [4:0] crc_c;
    reg [3:0]                                         crnt_din;
-   reg [4:0]                                         data_index;
-   
+reg [4:0] data_index;
+
    integer                                           k;
-   genvar                                            i;
-   generate
-      for(i=0; i<4; i=i+1) begin: CRC_16_gen
+genvar i;
+generate
+    for(i=0; i<4; i=i+1) begin: CRC_16_gen
          sd_crc_16 CRC_16_i (crc_in[i], crc_in[4], ~sd_clk, crc_rst, crc_calc[i]);
-      end
-   endgenerate
+    end
+endgenerate
 
-   assign busy = (state != IDLE) && (state != FINISH);
-   assign sd_data_busy = !DAT_dat_reg[0];
+assign busy = (state != IDLE) && (state != FINISH);
+assign sd_data_busy = !DAT_dat_reg[0];
+assign crc_ok = &crc_lane_ok;
 
-   always @(posedge sd_clk or posedge rst)
-     begin: FSM_OUT
-        if (rst) begin
-           state <= IDLE;
-           DAT_oe_o <= 0;
-           crc_in <= 0;
-           crc_rst <= 1;
-           transf_cnt <= 0;
-           crc_c <= 15;
-           rd <= 0;
-           crc_c <= 0;
-           DAT_dat_o <= 0;
-           crc_status <= 0;
-           crc_lane_ok <= 0;
-           crc_s <= 0;
-           we <= 0;
-           we_o <= 0;
-           data_out <= 0;
-           busy_int <= 0;
-           data_index <= 0;
-           data_cycles <= 0;
-           bus_4bit_reg <= 0;     
-           wait_reg_o <= 0;
-           finish_o <= 0;
+always @(posedge sd_clk or posedge rst)
+begin: FSM_OUT
+    if (rst) begin
+        state <= IDLE;
+        DAT_oe_o <= 0;
+        crc_in <= 0;
+        crc_rst <= 1;
+        transf_cnt_o <= 0;
+        crc_c <= 15;
+        rd <= 0;
+        crc_c <= 0;
+        DAT_dat_o <= 0;
+        crc_status <= 0;
+        crc_lane_ok <= 0;
+        crc_s <= 0;
+        we0 <= 0;
+        we <= 0;
+        data_out0 <= 0;
+        busy_int <= 0;
+        data_index <= 0;
+        data_cycles <= 0;
+        bus_4bit_reg <= 0;     
+        wait_reg_o <= 0;
+        finish_o <= 0;
            DAT_dat_reg <= 0;
-           data_out_o <= 0;
-           sd_transf_cnt <= 0;
-        end
-        else begin
+           data_out <= 0;
+           transf_cnt_o <= 0;
+    end
+    else begin
            // sd data input pad register
            DAT_dat_reg <= DAT_dat_i;
            crnt_din = 4'hf;
-           if (we) data_out_o <= data_out;
-           we_o <= we;
-           case(state)
-             IDLE: begin
+           if (we0) data_out <= data_out0;
+           we <= we0;
+        case(state)
+            IDLE: begin
                 for (k = 0; k < 4; k=k+1)
                   crc_din[k] <= 0;
                 DAT_oe_o <= 0;
                 DAT_dat_o <= 4'b1111;
                 crc_in <= 0;
                 crc_rst <= 1;
-                transf_cnt <= 0;
+                transf_cnt_o <= 0;
                 crc_c <= 16;
                 crc_status <= 0;
                 crc_lane_ok <= 0;
                 crc_s <= 0;
-                we <= 0;
+                we0 <= 0;
                 rd <= 0;
                 data_index <= 0;
                 blksize_reg <= blksize;
                 data_cycles <= (bus_4bit ? {2'b0,blksize,1'b0} + 'd2 : {blksize,3'b0} + 'd8);
                 bus_4bit_reg <= bus_4bit;
-                wait_reg_o <= 0;
-                finish_o <= 0;
-                data_out_o <= 0;
-                sd_transf_cnt <= 0;
+	        wait_reg_o <= 0;
+	        finish_o <= 0;
+                data_out <= 0;
                 if (start == 2'b01)
                   state <= WRITE_DAT;
                 else if (start == 2'b10)
                   state <= READ_WAIT;
-             end
-             WRITE_DAT: begin
-                transf_cnt <= transf_cnt + 16'h1;
+            end
+            WRITE_DAT: begin
+                transf_cnt_o <= transf_cnt_o + 16'h1;
                 rd <= 0;
                 //special case
-                if (transf_cnt == 0) begin
-                   crc_rst <= 0;
+                if (transf_cnt_o == 0) begin
+                    crc_rst <= 0;
                    data_index <= 0;
                    crnt_din = bus_4bit_reg ? 4'h0 : 4'he;
                    rd <= 1;
-                   DAT_oe_o<=1;
+                    DAT_oe_o <= 1;
                    DAT_dat_o <= crnt_din;
-                   sd_transf_cnt <= 0;
                 end
-                else if (transf_cnt < data_cycles+16) begin /* send the write data */
-                   if (bus_4bit_reg) begin
+                else if (transf_cnt_o < data_cycles+16) begin /* send the write data */
+                    if (bus_4bit_reg) begin
                       crnt_din = {
-                                  data_in[31-({data_index[2:0],2'b00})], 
-                                  data_in[30-({data_index[2:0],2'b00})], 
-                                  data_in[29-({data_index[2:0],2'b00})], 
-                                  data_in[28-({data_index[2:0],2'b00})]
-                                  };
-                      if (data_index[2:0] == 3'h7 && transf_cnt < data_cycles-2) begin
+                            data_in[31-({data_index[2:0],2'b00})], 
+                            data_in[30-({data_index[2:0],2'b00})], 
+                            data_in[29-({data_index[2:0],2'b00})], 
+                            data_in[28-({data_index[2:0],2'b00})]
+                            };
+                      if (data_index[2:0] == 3'h7 && transf_cnt_o < data_cycles-2) begin
                          begin
                             rd <= 1;
-                            sd_transf_cnt <= transf_cnt[15:3];
                          end
-                      end
-                   end
-                   else begin
+                        end
+                    end
+                    else begin
                       crnt_din = {3'h7, data_in[31-data_index]};
-                      if (data_index == 29/*not 31 - read delay !!!*/) begin
+                        if (data_index == 29/*not 31 - read delay !!!*/) begin
                          begin
                             rd <= 1;
-                            sd_transf_cnt <= {2'b00,transf_cnt[15:5]};
                          end
-                      end
-                   end
-                   data_index <= data_index + 5'h1;
-                   if (transf_cnt < data_cycles-1)
+                        end
+                    end
+                    data_index <= data_index + 5'h1;
+                   if (transf_cnt_o < data_cycles-1)
                      begin
                         crc_in <= {1'b1,crnt_din};
                         DAT_dat_o <= crnt_din;
-                     end
+                end
                    else if (crc_c!=0) begin /* send the CRC */
                       crc_in <= 0;
-                      crc_c <= crc_c - 5'h1;
-                      DAT_oe_o <= 1;
+                    crc_c <= crc_c - 5'h1;
+                    DAT_oe_o <= 1;
                       DAT_dat_o[0] <= crc_calc[0][crc_c-1];
-                      if (bus_4bit_reg)
+                    if (bus_4bit_reg)
                         DAT_dat_o[3:1] <= {crc_calc[3][crc_c-1], crc_calc[2][crc_c-1], crc_calc[1][crc_c-1]};
-                      else
+                    else
                         DAT_dat_o[3:1] <= {3'h7};
-                   end
+                end
                    else /* send the stop bit */
                      begin
                         crc_in <= 0;
-                        DAT_oe_o <= 1;
-                        DAT_dat_o <= 4'hf;
-                     end
+                    DAT_oe_o <= 1;
+                    DAT_dat_o <= 4'hf;
+                end
                 end
                 else begin /* wait for write ack */
                     DAT_oe_o <= 0;
                     crc_s[4] <= DAT_dat_reg[0];
                     if (!DAT_dat_reg[0])
                         state <= WRITE_CRC;
-                    end
-             end
+                end
+            end
              WRITE_CRC: begin /* get write ack */
                 DAT_oe_o <= 0;
                 crc_status <= crc_status + 3'h1;
@@ -249,73 +249,71 @@ module sd_data_serial_host(
                 busy_int <= 1;
                 if (crc_status == 3)
                   state <= WRITE_BUSY;
-             end
+            end
              WRITE_BUSY: begin /* wait for write completion */
                 busy_int <= !DAT_dat_reg[0];
                 if (!busy_int)
                   state <= FINISH;
-             end
+                end
              READ_WAIT: begin /* wait for a start bit in read mode */
                 DAT_oe_o <= 0;
                 crc_rst <= 0;
                 crc_in <= 0;
                 crc_c <= 15;// end
-                transf_cnt <= 0;
+                transf_cnt_o <= 0;
                 data_index <= 0;
-                wait_reg_o <= wait_reg_o + 1;
+	        wait_reg_o <= wait_reg_o + 1;
                 if ((wait_reg_o >= 3) && !DAT_dat_reg[0]) begin // allow time for bus to change direction
                    state <= READ_DAT;
-                end
+            end
                 else if (wait_reg_o >= timeout_i) begin // prevent hang if card did not respond
                    state <= FINISH;
                 end
              end
              READ_DAT: begin /* read the data and calculate CRC */
-                we <= 0;
-                if (transf_cnt < data_cycles-2) begin
-                   if (bus_4bit_reg) begin
+                we0 <= 0;
+                if (transf_cnt_o < data_cycles-2) begin
+                    if (bus_4bit_reg) begin
                       if (&data_index[2:0])
                         begin
-                           we <= 1;
-                           sd_transf_cnt <= transf_cnt[15:3];
+                           we0 <= 1;
                         end;
-                      data_out[31-({data_index[2:0],2'b00})] <= DAT_dat_reg[3];
-                      data_out[30-({data_index[2:0],2'b00})] <= DAT_dat_reg[2];
-                      data_out[29-({data_index[2:0],2'b00})] <= DAT_dat_reg[1];
-                      data_out[28-({data_index[2:0],2'b00})] <= DAT_dat_reg[0];
-                   end
-                   else begin
+                        data_out0[31-({data_index[2:0],2'b00})] <= DAT_dat_reg[3];
+                        data_out0[30-({data_index[2:0],2'b00})] <= DAT_dat_reg[2];
+                        data_out0[29-({data_index[2:0],2'b00})] <= DAT_dat_reg[1];
+                        data_out0[28-({data_index[2:0],2'b00})] <= DAT_dat_reg[0];
+                    end
+                    else begin
                       if (&data_index)
                         begin
-                           we <= 1;
-                           sd_transf_cnt <= {2'b00,transf_cnt[15:5]};
+                           we0 <= 1;
                         end;
-                      data_out[31-data_index] <= DAT_dat_reg[0];
-                   end
-                   data_index <= data_index + 5'h1;
+                        data_out0[31-data_index] <= DAT_dat_reg[0];
+                    end
+                    data_index <= data_index + 5'h1;
                    crc_in <= {1'b1,DAT_dat_reg};
-                   transf_cnt <= transf_cnt + 16'h1;
+                   transf_cnt_o <= transf_cnt_o + 16'h1;
                 end
                 else if (crc_c != 5'h1f) begin
                    for (k = 0; k < 4; k=k+1)
                      begin
                         crc_din[k][crc_c[3:0]] <= DAT_dat_reg[k];
                      end
-                   transf_cnt <= transf_cnt + 16'h1;
+                   transf_cnt_o <= transf_cnt_o + 16'h1;
                    crc_in <= 0;
-                   we<=0;
-                   crc_c <= crc_c - 5'h1;
-                end
+                    we0 <=0;
+                        crc_c <= crc_c - 5'h1;
+                        end
                 else
                   begin
                      for (k = 0; k < 4; k=k+1)
                        crc_lane_ok[k] <= crc_calc[k] == crc_din[k];
                      state <= FINISH;
-                  end
-             end // case: READ_DAT
-             FINISH:
+                end
+            end // case: READ_DAT
+	  FINISH:
                begin
-                  finish_o <= 1;
+	    finish_o <= 1;
                   if (start == 2'b00)
                     state <= IDLE;
                end
@@ -325,8 +323,8 @@ module sd_data_serial_host(
            //abort
            if (start == 2'b11)
              state <= IDLE;       
-        end
-     end
+    end
+end
 
 endmodule
 

@@ -583,6 +583,7 @@ module riscv_controller
   assign perf_ld_stall_o  = load_stall_o;
 
 // synopsys translate_off
+`ifndef verilator
 
   //----------------------------------------------------------------------------
   // Assertions
@@ -592,6 +593,7 @@ module riscv_controller
   // possible without branch prediction in the IF stage
   assert property (
     @(posedge clk) (branch_taken_ex_i) |=> (~branch_taken_ex_i) ) else $warning("Two branches back-to-back are taken");
+`endif
 // synopsys translate_on
 
 endmodule // controller

@@ -283,6 +283,7 @@ module riscv_mult
   assign ready_o      = mulh_ready;
 
 // synopsys translate_off
+`ifndef verilator
   //----------------------------------------------------------------------------
   // Assertions
   //----------------------------------------------------------------------------
@@ -305,6 +306,7 @@ module riscv_mult
     |->
     (result_o == (({32'b0, op_a_i} * {32'b0, op_b_i}) >> 32) ) );
 
+`endif
 // synopsys translate_on
 
 endmodule
