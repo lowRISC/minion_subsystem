@@ -583,7 +583,7 @@ my_fifo #(.width(36)) rx_fifo (
 );
 
    wire [133:0] sd_cmd_response;
-   reg  [31:0] 	sd_cmd_resp_sel;
+   reg  [31:0] 	sd_cmd_resp_sel, sd_status_reg;
    wire [31:0] 	sd_status, sd_cmd_wait, sd_data_wait;
    wire [6:0] 	sd_cmd_crc_val;
    wire [47:0] 	sd_cmd_packet;
@@ -592,6 +592,8 @@ my_fifo #(.width(36)) rx_fifo (
    wire [31:0]  tx_fifo_status = {tx_almostfull,tx_full,tx_rderr,tx_wrerr,tx_rdcount,tx_wrcount};
    	
    always @(posedge msoc_clk)
+     begin
+     sd_status_reg = sd_status;
      case(core_lsu_addr[6:2])
        0: sd_cmd_resp_sel = sd_cmd_response[38:7];
        1: sd_cmd_resp_sel = sd_cmd_response[70:39];
@@ -618,10 +620,11 @@ my_fifo #(.width(36)) rx_fifo (
       25: sd_cmd_resp_sel = sd_cmd_timeout;
      default: sd_cmd_resp_sel = 32'HDEADBEEF;
      endcase // case (core_lsu_addr[6:2])
+     end
    
    assign sd_status[3:0] = {tx_full,tx_empty,rx_full,rx_empty};
 
-   assign one_hot_rdata[5] = sd_status; // legacy setting
+   assign one_hot_rdata[5] = sd_status_reg; // legacy setting
    assign one_hot_rdata[6] = sd_cmd_resp_sel;
    assign one_hot_rdata[7] = from_dip_reg;
    assign one_hot_rdata[8] = shared_rdata;
