@@ -549,7 +549,7 @@ my_fifo #(.width(9)) uart_rx_fifo (
    endgenerate					
 				   
 my_fifo #(.width(36)) tx_fifo (
-  .rd_clk(~sd_clk_o),      // input wire read clk
+  .rd_clk(sd_clk_o),      // input wire read clk
   .wr_clk(~msoc_clk),      // input wire write clk
   .rst(data_rst),      // input wire rst
   .din({dummy[3:0],core_lsu_wdata}),      // input wire [31 : 0] din
@@ -567,7 +567,7 @@ my_fifo #(.width(36)) tx_fifo (
 
 my_fifo #(.width(36)) rx_fifo (
   .rd_clk(~msoc_clk),      // input wire read clk
-  .wr_clk(~sd_clk_o),      // input wire write clk
+  .wr_clk(sd_clk_o),      // input wire write clk
   .rst(data_rst),      // input wire rst
   .din({dummy[11:8],data_in_rx_fifo}),      // input wire [31 : 0] din
   .wr_en(rx_wr_fifo),  // input wire wr_en
@@ -591,7 +591,7 @@ my_fifo #(.width(36)) rx_fifo (
    wire [31:0]  rx_fifo_status = {rx_almostfull,rx_full,rx_rderr,rx_wrerr,rx_rdcount,rx_wrcount};
    wire [31:0]  tx_fifo_status = {tx_almostfull,tx_full,tx_rderr,tx_wrerr,tx_rdcount,tx_wrcount};
    	
-   always_comb
+   always @(posedge msoc_clk)
      case(core_lsu_addr[6:2])
        0: sd_cmd_resp_sel = sd_cmd_response[38:7];
        1: sd_cmd_resp_sel = sd_cmd_response[70:39];
