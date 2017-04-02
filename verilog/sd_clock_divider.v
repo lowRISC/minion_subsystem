@@ -56,14 +56,8 @@ module sd_clock_divider (
    reg [7:0]                         ClockDiv;
    reg                               SD_CLK_O;
 
-   BUFR #(
-          .BUFR_DIVIDE("BYPASS"),   // Values: "BYPASS, 1, 2, 3, 4, 5, 6, 7, 8" 
-          .SIM_DEVICE("7SERIES")  // Must be set to "7SERIES" 
-          )
-   SD_CLK_buf_inst (
+   BUFG SD_CLK_buf_inst (
                     .O(SD_CLK), // 1-bit output: Clock output
-                    .CE(1'b1),   // 1-bit input: Active high, clock enable (Divided modes only)
-                    .CLR(1'b0), // 1-bit input: Active high, asynchronous clear (Divided modes only)
                     .I(SD_CLK_O)  // 1-bit input: Clock input
                     );
 

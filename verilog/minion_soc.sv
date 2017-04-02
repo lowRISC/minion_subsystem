@@ -549,7 +549,7 @@ my_fifo #(.width(9)) uart_rx_fifo (
    endgenerate					
 				   
 my_fifo #(.width(36)) tx_fifo (
-  .rd_clk(sd_clk_o),      // input wire read clk
+  .rd_clk(~sd_clk_o),      // input wire read clk
   .wr_clk(~msoc_clk),      // input wire write clk
   .rst(data_rst),      // input wire rst
   .din({dummy[3:0],core_lsu_wdata}),      // input wire [31 : 0] din
