@@ -3,7 +3,7 @@
 ////  ps2_translation_table.v                                     ////
 ////                                                              ////
 ////  This file is part of the "ps2" project                      ////
-////  http://www.opencores.org/cores/ps2/                         ////
+////  https://github.com/freecores/ps2/verilog                    ////
 ////                                                              ////
 ////  Author(s):                                                  ////
 ////      - mihad@opencores.org                                   ////

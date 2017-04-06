@@ -1,52 +1,4 @@
-// 
-// (c) Copyright 2008 - 2013 Xilinx, Inc. All rights reserved.
-// 
-// This file contains confidential and proprietary information
-// of Xilinx, Inc. and is protected under U.S. and
-// international copyright and other intellectual property
-// laws.
-// 
-// DISCLAIMER
-// This disclaimer is not a license and does not grant any
-// rights to the materials distributed herewith. Except as
-// otherwise provided in a valid license issued to you by
-// Xilinx, and to the maximum extent permitted by applicable
-// law: (1) THESE MATERIALS ARE MADE AVAILABLE "AS IS" AND
-// WITH ALL FAULTS, AND XILINX HEREBY DISCLAIMS ALL WARRANTIES
-// AND CONDITIONS, EXPRESS, IMPLIED, OR STATUTORY, INCLUDING
-// BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, NON-
-// INFRINGEMENT, OR FITNESS FOR ANY PARTICULAR PURPOSE; and
-// (2) Xilinx shall not be liable (whether in contract or tort,
-// including negligence, or under any other theory of
-// liability) for any loss or damage of any kind or nature
-// related to, arising under or in connection with these
-// materials, including for any direct, or any indirect,
-// special, incidental, or consequential loss or damage
-// (including loss of data, profits, goodwill, or any type of
-// loss or damage suffered as a result of any action brought
-// by a third party) even if such damage or loss was
-// reasonably foreseeable or Xilinx had been advised of the
-// possibility of the same.
-// 
-// CRITICAL APPLICATIONS
-// Xilinx products are not designed or intended to be fail-
-// safe, or for use in any application requiring fail-safe
-// performance, such as life-support or safety devices or
-// systems, Class III medical devices, nuclear facilities,
-// applications related to the deployment of airbags, or any
-// other applications that could lead to death, personal
-// injury, or severe property or environmental damage
-// (individually and collectively, "Critical
-// Applications"). Customer assumes the sole risk and
-// liability of any use of Xilinx products in Critical
-// Applications, subject only to applicable laws and
-// regulations governing limitations on product liability.
-// 
-// THIS COPYRIGHT NOTICE AND DISCLAIMER MUST BE RETAINED AS
-// PART OF THIS FILE AT ALL TIMES.
-// 
-
-// Copyright 2015 ETH Zurich and University of Bologna.
+// Copyright 2015 ETH Zurich, University of Bologna, and University of Cambridge
 // Copyright and related rights are licensed under the Solderpad Hardware
 // License, Version 0.51 (the "License"); you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
@@ -68,6 +20,7 @@ module minion_soc
  input wire        clk_200MHz,
  input wire        pxl_clk,
  input wire 	   msoc_clk,
+ input wire 	   sd_prediv_clk,
  input wire 	   rstn,
  output reg [7:0]  to_led,
  input wire [15:0] from_dip,
@@ -99,10 +52,7 @@ module minion_soc
  output           VGA_VS_O,
  output  [3:0]    VGA_RED_O,
  output  [3:0]    VGA_BLUE_O,
- output  [3:0]    VGA_GREEN_O,
- output [6:0]SEG,
- output [7:0]AN,
- output DP
+ output  [3:0]    VGA_GREEN_O
  );
  
  wire [19:0] dummy;
@@ -128,11 +78,6 @@ module minion_soc
       .rx_translated_scan_code(scancode),
       .rx_ascii_read(ascii_ready));
  
- always @(posedge msoc_clk) if (ascii_ready)
-     begin     
-     keycode <= {readch[6:0], scancode, keycode[31:16]};
-     end
- 
  my_fifo #(.width(36)) keyb_fifo (
        .rd_clk(~msoc_clk),      // input wire read clk
        .wr_clk(~msoc_clk),      // input wire write clk
@@ -150,14 +95,6 @@ module minion_soc
        .empty(keyb_empty)  // output wire empty
      );
     
- seg7decimal sevenSeg (
- .x(keycode[31:0]),
- .clk(msoc_clk),
- .seg(SEG[6:0]),
- .an(AN[7:0]),
- .dp(DP) 
- );
- 
     wire [7:0] red,  green, blue;
  
     fstore2 the_fstore(
@@ -399,6 +336,19 @@ assign one_hot_rdata[3] = {uart_wrcount,uart_almostfull,uart_full,uart_rderr,uar
    wire       sd_clk_o;       
    wire       sd_cmd_finish, sd_data_finish, sd_cmd_crc_ok, sd_cmd_index_ok;
 
+   reg [2:0]  sd_data_start_reg;
+   reg [1:0]  sd_align_reg;
+   reg [15:0] sd_blkcnt_reg;
+   reg [11:0] sd_blksize_reg;
+   
+   reg [7:0]  clock_divider_sd_clk_reg;
+   reg [2:0]  sd_cmd_setting_reg;
+   reg [5:0]  sd_cmd_i_reg;
+   reg [31:0] sd_cmd_arg_reg;
+   reg [31:0] sd_cmd_timeout_reg;
+
+   reg sd_cmd_start_reg;
+
    reg [2:0]  sd_data_start;
    reg [1:0]  sd_align;
    reg [15:0] sd_blkcnt;
@@ -410,7 +360,7 @@ assign one_hot_rdata[3] = {uart_wrcount,uart_almostfull,uart_full,uart_rderr,uar
    reg [31:0] sd_cmd_arg;
    reg [31:0] sd_cmd_timeout;
 
-reg 	   sd_cmd_start, sd_cmd_rst, sd_data_rst, sd_clk_rst;
+   reg 	   sd_cmd_start, sd_cmd_rst, sd_data_rst, sd_clk_rst;
    reg [15:0] from_dip_reg;
 
 always @(posedge msoc_clk or negedge rstn)
@@ -419,20 +369,20 @@ always @(posedge msoc_clk or negedge rstn)
     from_dip_reg <= 0;
 	u_recv <= 0;
 	core_lsu_addr_dly <= 0;
-	sd_align <= 0;
-	sd_blkcnt <= 0;
-	sd_blksize <= 0;
-	sd_data_start <= 0;
+	sd_align_reg <= 0;
+	sd_blkcnt_reg <= 0;
+	sd_blksize_reg <= 0;
+	sd_data_start_reg <= 0;
 	clock_divider_sd_clk <= 0;
-	sd_cmd_i <= 0;
-	sd_cmd_arg <= 0;
-	sd_cmd_setting <= 0;
-	sd_cmd_start <= 0;
+	sd_cmd_i_reg <= 0;
+	sd_cmd_arg_reg <= 0;
+	sd_cmd_setting_reg <= 0;
+	sd_cmd_start_reg <= 0;
 	sd_reset <= 0;
 	sd_data_rst <= 0;
 	sd_cmd_rst <= 0;
 	sd_clk_rst <= 0;
-	sd_cmd_timeout <= 0;
+	sd_cmd_timeout_reg <= 0;
 	to_led <= 0;
 	u_baud <= 16'd87;
 	u_trans <= 1'b0;
@@ -445,16 +395,16 @@ always @(posedge msoc_clk or negedge rstn)
 	core_lsu_addr_dly <= core_lsu_addr;
 	if (core_lsu_req&core_lsu_we&one_hot_data_addr[6])
 	  case(core_lsu_addr[5:2])
-	    0: sd_align <= core_lsu_wdata;
-	    1: clock_divider_sd_clk <= core_lsu_wdata;
-	    2: sd_cmd_arg <= core_lsu_wdata;
-	    3: sd_cmd_i <= core_lsu_wdata;
-	    4: {sd_data_start,sd_cmd_setting[2:0]} <= core_lsu_wdata;
-	    5: sd_cmd_start <= core_lsu_wdata;
+	    0: sd_align_reg <= core_lsu_wdata;
+	    1: clock_divider_sd_clk_reg <= core_lsu_wdata;
+	    2: sd_cmd_arg_reg <= core_lsu_wdata;
+	    3: sd_cmd_i_reg <= core_lsu_wdata;
+	    4: {sd_data_start_reg,sd_cmd_setting_reg[2:0]} <= core_lsu_wdata;
+	    5: sd_cmd_start_reg <= core_lsu_wdata;
 	    6: {sd_reset,sd_clk_rst,sd_data_rst,sd_cmd_rst} <= core_lsu_wdata;
-	    7: sd_blkcnt <= core_lsu_wdata;
-	    8: sd_blksize <= core_lsu_wdata;
-	    9: sd_cmd_timeout <= core_lsu_wdata;
+	    7: sd_blkcnt_reg <= core_lsu_wdata;
+	    8: sd_blksize_reg <= core_lsu_wdata;
+	    9: sd_cmd_timeout_reg <= core_lsu_wdata;
 	  endcase
 	if (core_lsu_req&core_lsu_we&one_hot_data_addr[7])
 	  to_led <= core_lsu_wdata;
@@ -466,6 +416,19 @@ always @(posedge msoc_clk or negedge rstn)
       endcase
      end
 
+always @(posedge sd_clk_o)
+    begin
+	sd_align <= sd_align_reg;
+	clock_divider_sd_clk <= clock_divider_sd_clk_reg;
+	sd_cmd_arg <= sd_cmd_arg_reg;
+	sd_cmd_i <= sd_cmd_i_reg;
+	{sd_data_start,sd_cmd_setting} <= {sd_data_start_reg,sd_cmd_setting_reg};
+	sd_cmd_start <= sd_cmd_start_reg;
+	sd_blkcnt <= sd_blkcnt_reg;
+	sd_blksize <= sd_blksize_reg;
+	sd_cmd_timeout <= sd_cmd_timeout_reg;
+    end
+    
 my_fifo #(.width(9)) uart_rx_fifo (
   .rd_clk(~msoc_clk),      // input wire read clk
   .wr_clk(~msoc_clk),      // input wire write clk
@@ -582,42 +545,49 @@ my_fifo #(.width(36)) rx_fifo (
   .empty(rx_empty)  // output wire empty
 );
 
-   wire [133:0] sd_cmd_response;
-   reg  [31:0] 	sd_cmd_resp_sel, sd_status_reg;
-   wire [31:0] 	sd_status, sd_cmd_wait, sd_data_wait;
-   wire [6:0] 	sd_cmd_crc_val;
-   wire [47:0] 	sd_cmd_packet;
-   wire [15:0] 	sd_transf_cnt;
+   logic [133:0]    sd_cmd_response, sd_cmd_response_reg;
+   logic [31:0] 	sd_cmd_resp_sel, sd_status_reg;
+   logic [31:0] 	sd_status, sd_cmd_wait, sd_data_wait, sd_cmd_wait_reg, sd_data_wait_reg;
+   logic [6:0] 	    sd_cmd_crc_val;
+   logic [47:0] 	sd_cmd_packet, sd_cmd_packet_reg;
+   logic [15:0] 	sd_transf_cnt, sd_transf_cnt_reg;
+   logic            sd_detect_reg;
+   
    wire [31:0]  rx_fifo_status = {rx_almostfull,rx_full,rx_rderr,rx_wrerr,rx_rdcount,rx_wrcount};
    wire [31:0]  tx_fifo_status = {tx_almostfull,tx_full,tx_rderr,tx_wrerr,tx_rdcount,tx_wrcount};
    	
    always @(posedge msoc_clk)
      begin
      sd_status_reg = sd_status;
+     sd_cmd_response_reg = sd_cmd_response;
+     sd_cmd_wait_reg = sd_cmd_wait;
+     sd_data_wait_reg = sd_data_wait;
+     sd_cmd_packet_reg = sd_cmd_packet;
+     sd_transf_cnt_reg = sd_transf_cnt;	
      case(core_lsu_addr[6:2])
-       0: sd_cmd_resp_sel = sd_cmd_response[38:7];
-       1: sd_cmd_resp_sel = sd_cmd_response[70:39];
-       2: sd_cmd_resp_sel = sd_cmd_response[102:71];
-       3: sd_cmd_resp_sel = sd_cmd_response[133:103];
-       4: sd_cmd_resp_sel = sd_cmd_wait;
-       5: sd_cmd_resp_sel = sd_status;
-       6: sd_cmd_resp_sel = sd_cmd_packet[31:0];
-       7: sd_cmd_resp_sel = sd_cmd_packet[47:32];       
-       8: sd_cmd_resp_sel = sd_data_wait;
-       9: sd_cmd_resp_sel = sd_transf_cnt;
+       0: sd_cmd_resp_sel = sd_cmd_response_reg[38:7];
+       1: sd_cmd_resp_sel = sd_cmd_response_reg[70:39];
+       2: sd_cmd_resp_sel = sd_cmd_response_reg[102:71];
+       3: sd_cmd_resp_sel = sd_cmd_response_reg[133:103];
+       4: sd_cmd_resp_sel = sd_cmd_wait_reg;
+       5: sd_cmd_resp_sel = sd_status_reg;
+       6: sd_cmd_resp_sel = sd_cmd_packet_reg[31:0];
+       7: sd_cmd_resp_sel = sd_cmd_packet_reg[47:32];       
+       8: sd_cmd_resp_sel = sd_data_wait_reg;
+       9: sd_cmd_resp_sel = sd_transf_cnt_reg;
       10: sd_cmd_resp_sel = rx_fifo_status;
       11: sd_cmd_resp_sel = tx_fifo_status;
-      12: sd_cmd_resp_sel = sd_detect;
- 	  16: sd_cmd_resp_sel = sd_align;
-      17: sd_cmd_resp_sel = clock_divider_sd_clk;
-      18: sd_cmd_resp_sel = sd_cmd_arg;
-      19: sd_cmd_resp_sel = sd_cmd_i;
-      20: sd_cmd_resp_sel = {sd_data_start,sd_cmd_setting[2:0]};
-      21: sd_cmd_resp_sel = sd_cmd_start;
+      12: sd_cmd_resp_sel = sd_detect_reg;
+ 	  16: sd_cmd_resp_sel = sd_align_reg;
+      17: sd_cmd_resp_sel = clock_divider_sd_clk_reg;
+      18: sd_cmd_resp_sel = sd_cmd_arg_reg;
+      19: sd_cmd_resp_sel = sd_cmd_i_reg;
+      20: sd_cmd_resp_sel = {sd_data_start_reg,sd_cmd_setting_reg};
+      21: sd_cmd_resp_sel = sd_cmd_start_reg;
       22: sd_cmd_resp_sel = {sd_reset,sd_clk_rst,sd_data_rst,sd_cmd_rst};
-      23: sd_cmd_resp_sel = sd_blkcnt;
-      24: sd_cmd_resp_sel = sd_blksize;
-      25: sd_cmd_resp_sel = sd_cmd_timeout;
+      23: sd_cmd_resp_sel = sd_blkcnt_reg;
+      24: sd_cmd_resp_sel = sd_blksize_reg;
+      25: sd_cmd_resp_sel = sd_cmd_timeout_reg;
      default: sd_cmd_resp_sel = 32'HDEADBEEF;
      endcase // case (core_lsu_addr[6:2])
      end
@@ -630,7 +600,7 @@ my_fifo #(.width(36)) rx_fifo (
    assign one_hot_rdata[8] = shared_rdata;
 
 sd_clock_divider clock_divider0(
-    .CLK (msoc_clk),
+    .CLK (sd_prediv_clk),
     .DIVIDER (clock_divider_sd_clk),
     .RST  (~(sd_clk_rst&rstn)),
     .SD_CLK  (sd_clk_o)
