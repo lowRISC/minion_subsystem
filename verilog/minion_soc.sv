@@ -373,7 +373,7 @@ always @(posedge msoc_clk or negedge rstn)
 	sd_blkcnt_reg <= 0;
 	sd_blksize_reg <= 0;
 	sd_data_start_reg <= 0;
-	clock_divider_sd_clk <= 0;
+	clock_divider_sd_clk_reg <= 0;
 	sd_cmd_i_reg <= 0;
 	sd_cmd_arg_reg <= 0;
 	sd_cmd_setting_reg <= 0;
