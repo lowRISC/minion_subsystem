@@ -20,7 +20,6 @@ module minion_soc
  input wire        clk_200MHz,
  input wire        pxl_clk,
  input wire 	   msoc_clk,
- input wire 	   sd_prediv_clk,
  input wire 	   rstn,
  output reg [7:0]  to_led,
  input wire [15:0] from_dip,
@@ -341,7 +340,7 @@ assign one_hot_rdata[3] = {uart_wrcount,uart_almostfull,uart_full,uart_rderr,uar
    reg [15:0] sd_blkcnt_reg;
    reg [11:0] sd_blksize_reg;
    
-   reg [7:0]  clock_divider_sd_clk_reg;
+   reg [15:0] clock_divider_sd_clk_reg;
    reg [2:0]  sd_cmd_setting_reg;
    reg [5:0]  sd_cmd_i_reg;
    reg [31:0] sd_cmd_arg_reg;
@@ -354,7 +353,7 @@ assign one_hot_rdata[3] = {uart_wrcount,uart_almostfull,uart_full,uart_rderr,uar
    reg [15:0] sd_blkcnt;
    reg [11:0] sd_blksize;
    
-   reg [7:0]  clock_divider_sd_clk;
+   reg [15:0] clock_divider_sd_clk;
    reg [2:0]  sd_cmd_setting;
    reg [5:0]  sd_cmd_i;
    reg [31:0] sd_cmd_arg;
@@ -363,9 +362,15 @@ assign one_hot_rdata[3] = {uart_wrcount,uart_almostfull,uart_full,uart_rderr,uar
    reg 	   sd_cmd_start, sd_cmd_rst, sd_data_rst, sd_clk_rst;
    reg [15:0] from_dip_reg;
 
+logic [6:0] sd_clk_daddr;
+logic       sd_clk_dclk, sd_clk_den, sd_clk_drdy, sd_clk_dwe, sd_clk_locked;
+logic [15:0] sd_clk_din, sd_clk_dout;
+
+assign sd_clk_dclk = msoc_clk;
+
 always @(posedge msoc_clk or negedge rstn)
-   if (!rstn)
-     begin
+  if (!rstn)
+    begin
     from_dip_reg <= 0;
 	u_recv <= 0;
 	core_lsu_addr_dly <= 0;
@@ -373,7 +378,10 @@ always @(posedge msoc_clk or negedge rstn)
 	sd_blkcnt_reg <= 0;
 	sd_blksize_reg <= 0;
 	sd_data_start_reg <= 0;
-	clock_divider_sd_clk <= 0;
+	sd_clk_din <= 0;
+	sd_clk_den <= 0;
+	sd_clk_dwe <= 0;
+	sd_clk_daddr <= 0;
 	sd_cmd_i_reg <= 0;
 	sd_cmd_arg_reg <= 0;
 	sd_cmd_setting_reg <= 0;
@@ -396,7 +404,7 @@ always @(posedge msoc_clk or negedge rstn)
 	if (core_lsu_req&core_lsu_we&one_hot_data_addr[6])
 	  case(core_lsu_addr[5:2])
 	    0: sd_align_reg <= core_lsu_wdata;
-	    1: clock_divider_sd_clk_reg <= core_lsu_wdata;
+	    1: sd_clk_din <= core_lsu_wdata;
 	    2: sd_cmd_arg_reg <= core_lsu_wdata;
 	    3: sd_cmd_i_reg <= core_lsu_wdata;
 	    4: {sd_data_start_reg,sd_cmd_setting_reg[2:0]} <= core_lsu_wdata;
@@ -405,6 +413,7 @@ always @(posedge msoc_clk or negedge rstn)
 	    7: sd_blkcnt_reg <= core_lsu_wdata;
 	    8: sd_blksize_reg <= core_lsu_wdata;
 	    9: sd_cmd_timeout_reg <= core_lsu_wdata;
+	   10: {sd_clk_dwe,sd_clk_den,sd_clk_daddr} <= core_lsu_wdata;
 	  endcase
 	if (core_lsu_req&core_lsu_we&one_hot_data_addr[7])
 	  to_led <= core_lsu_wdata;
@@ -419,7 +428,6 @@ always @(posedge msoc_clk or negedge rstn)
 always @(posedge sd_clk_o)
     begin
 	sd_align <= sd_align_reg;
-	clock_divider_sd_clk <= clock_divider_sd_clk_reg;
 	sd_cmd_arg <= sd_cmd_arg_reg;
 	sd_cmd_i <= sd_cmd_i_reg;
 	{sd_data_start,sd_cmd_setting} <= {sd_data_start_reg,sd_cmd_setting_reg};
@@ -578,8 +586,9 @@ my_fifo #(.width(36)) rx_fifo (
       10: sd_cmd_resp_sel = rx_fifo_status;
       11: sd_cmd_resp_sel = tx_fifo_status;
       12: sd_cmd_resp_sel = sd_detect_reg;
+      15: sd_cmd_resp_sel = {sd_clk_locked,sd_clk_drdy,sd_clk_dout};
  	  16: sd_cmd_resp_sel = sd_align_reg;
-      17: sd_cmd_resp_sel = clock_divider_sd_clk_reg;
+      17: sd_cmd_resp_sel = sd_clk_din;
       18: sd_cmd_resp_sel = sd_cmd_arg_reg;
       19: sd_cmd_resp_sel = sd_cmd_i_reg;
       20: sd_cmd_resp_sel = {sd_data_start_reg,sd_cmd_setting_reg};
@@ -588,6 +597,7 @@ my_fifo #(.width(36)) rx_fifo (
       23: sd_cmd_resp_sel = sd_blkcnt_reg;
       24: sd_cmd_resp_sel = sd_blksize_reg;
       25: sd_cmd_resp_sel = sd_cmd_timeout_reg;
+      26: sd_cmd_resp_sel = {sd_clk_dwe,sd_clk_den,sd_clk_daddr};
      default: sd_cmd_resp_sel = 32'HDEADBEEF;
      endcase // case (core_lsu_addr[6:2])
      end
@@ -599,12 +609,23 @@ my_fifo #(.width(36)) rx_fifo (
    assign one_hot_rdata[7] = from_dip_reg;
    assign one_hot_rdata[8] = shared_rdata;
 
-sd_clock_divider clock_divider0(
-    .CLK (sd_prediv_clk),
-    .DIVIDER (clock_divider_sd_clk),
-    .RST  (~(sd_clk_rst&rstn)),
-    .SD_CLK  (sd_clk_o)
-    );
+clk_wiz_1 sd_clk_div
+     (
+     // Clock in ports
+      .clk_in1(msoc_clk),      // input clk_in1
+      // Clock out ports
+      .clk_sdclk(sd_clk_o),     // output clk_sdclk
+      // Dynamic reconfiguration ports
+      .daddr(sd_clk_daddr), // input [6:0] daddr
+      .dclk(sd_clk_dclk), // input dclk
+      .den(sd_clk_den), // input den
+      .din(sd_clk_din), // input [15:0] din
+      .dout(sd_clk_dout), // output [15:0] dout
+      .drdy(sd_clk_drdy), // output drdy
+      .dwe(sd_clk_dwe), // input dwe
+      // Status and control signals
+      .reset(~(sd_clk_rst&rstn)), // input reset
+      .locked(sd_clk_locked));      // output locked
 
 sd_top sdtop(
     .sd_clk     (sd_clk_o),
