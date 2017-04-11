@@ -47,11 +47,11 @@ module minion_soc
  inout wire PS2_DATA,
  
    // display
- output           VGA_HS_O,
- output           VGA_VS_O,
- output  [3:0]    VGA_RED_O,
- output  [3:0]    VGA_BLUE_O,
- output  [3:0]    VGA_GREEN_O
+ output wire           VGA_HS_O,
+ output wire           VGA_VS_O,
+ output wire  [3:0]    VGA_RED_O,
+ output wire  [3:0]    VGA_BLUE_O,
+ output wire  [3:0]    VGA_GREEN_O
  );
  
  wire [19:0] dummy;
