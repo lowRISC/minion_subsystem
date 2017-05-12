@@ -14,45 +14,63 @@
 
 module minion_soc
   (
- output wire 	   uart_tx,
- input wire 	   uart_rx,
+ output wire             uart_tx,
+ input wire             uart_rx,
  // clock and reset
- input wire        clk_200MHz,
- input wire        pxl_clk,
- input wire 	   msoc_clk,
- input wire 	   rstn,
- output reg [7:0]  to_led,
- input wire [15:0] from_dip,
- output wire 	   sd_sclk,
- input wire 	   sd_detect,
- inout wire [3:0]  sd_dat,
- inout wire 	   sd_cmd,
- output reg 	   sd_reset,
- output wire [31:0] 	   core_lsu_addr,
- output reg  [31:0] 	   core_lsu_addr_dly,
- output wire [31:0] 	   core_lsu_wdata,
- output wire [3:0] 	   core_lsu_be,
- output wire	   ce_d,
- output wire	   we_d,
- output wire	   shared_sel,
- input wire [31:0] 	   shared_rdata,
+ input wire             clk_200MHz,
+ input wire             pxl_clk,
+ input wire             msoc_clk,
+ input wire             rstn,
+ output reg [7:0]   to_led,
+ input wire [15:0]  from_dip,
+ output wire             sd_sclk,
+ input wire             sd_detect,
+ inout wire [3:0]   sd_dat,
+ inout wire             sd_cmd,
+ output reg             sd_reset,
+ output wire [31:0] core_lsu_addr,
+ output reg [31:0]  core_lsu_addr_dly,
+ output wire [31:0] core_lsu_wdata,
+ output wire [3:0]  core_lsu_be,
+ output wire             ce_d,
+ output wire             we_d,
+ output wire             shared_sel,
+ input wire [31:0]  shared_rdata,
+ output wire             tap_sel,
+ input wire [31:0]  tap_rdata,
  // pusb button array
- input wire GPIO_SW_C,
- input wire GPIO_SW_W,
- input wire GPIO_SW_E,
- input wire GPIO_SW_N,
- input wire GPIO_SW_S,
+ input wire             GPIO_SW_C,
+ input wire             GPIO_SW_W,
+ input wire             GPIO_SW_E,
+ input wire             GPIO_SW_N,
+ input wire             GPIO_SW_S,
  //keyboard
- inout wire PS2_CLK,
- inout wire PS2_DATA,
+ inout wire             PS2_CLK,
+ inout wire             PS2_DATA,
  
    // display
- output           VGA_HS_O,
- output           VGA_VS_O,
- output  [3:0]    VGA_RED_O,
- output  [3:0]    VGA_BLUE_O,
- output  [3:0]    VGA_GREEN_O
- );
+ output wire             VGA_HS_O,
+ output wire             VGA_VS_O,
+ output wire [3:0]  VGA_RED_O,
+ output wire [3:0]  VGA_BLUE_O,
+ output wire [3:0]  VGA_GREEN_O,
+
+ // debug port  
+ input wire                 debug_req,
+ output wire             debug_gnt,
+ output wire             debug_rvalid,
+ input wire [31:0]         debug_addr,
+ input wire                 debug_we,
+ input wire [31:0]         debug_wdata,
+ output wire [31:0] debug_rdata,
+ input wire                 debug_halt,
+ output wire             debug_halted,
+ input wire                 debug_resume,
+ input wire    [3:0]        datamem_enb,
+ output wire [31:0] datamem_doutb,            
+ input wire    [3:0]        progmem_enb,
+ output wire [31:0] progmem_doutb
+   );
  
  wire [19:0] dummy;
  wire        irst, ascii_ready;
@@ -93,8 +111,8 @@ module minion_soc
        .full(keyb_full),    // output wire full
        .empty(keyb_empty)  // output wire empty
      );
-    
-    wire [7:0] red,  green, blue;
+
+   wire [7:0] red,  green, blue;
  
     fstore2 the_fstore(
       .pixel2_clk(pxl_clk),
@@ -143,13 +161,6 @@ logic         core_lsu_rvalid;
 logic         core_lsu_we;
 logic [31:0]  core_lsu_rdata;
 
-  logic                  debug_req = 1'b0;
-  logic                  debug_gnt;
-  logic                  debug_rvalid;
-  logic [14:0]           debug_addr = 15'b0;
-  logic                  debug_we = 1'b0;
-  logic [31: 0]          debug_wdata = 32'b0;
-  logic [31: 0]          debug_rdata;
   logic [31: 0]          core_instr_rdata;
 
   logic        fetch_enable_i = 1'b1;
@@ -163,15 +174,16 @@ logic [31:0]  core_lsu_rdata;
   logic [31:0] one_hot_rdata[15:0];
 
   assign shared_sel = one_hot_data_addr[8];
-   
+  assign tap_sel = one_hot_data_addr[15];
+
 always_comb
   begin:onehot
      integer i;
      core_lsu_rdata = 32'b0;
      for (i = 0; i < 16; i++)
        begin
-	  one_hot_data_addr[i] = core_lsu_addr[23:20] == i;
-	  core_lsu_rdata |= (one_hot_data_addr[i] ? one_hot_rdata[i] : 32'b0);
+          one_hot_data_addr[i] = core_lsu_addr[23:20] == i;
+          core_lsu_rdata |= (one_hot_data_addr[i] ? one_hot_rdata[i] : 32'b0);
        end
   end
 
@@ -212,13 +224,13 @@ RISCV_CORE
   .debug_req_i     ( debug_req         ),
   .debug_gnt_o     ( debug_gnt         ),
   .debug_rvalid_o  ( debug_rvalid      ),
-  .debug_addr_i    ( debug_addr        ),
+  .debug_addr_i    ( debug_addr[14:0]  ),
   .debug_we_i      ( debug_we          ),
   .debug_wdata_i   ( debug_wdata       ),
   .debug_rdata_o   ( debug_rdata       ),
-  .debug_halted_o  (                   ),
-  .debug_halt_i    ( 1'b0              ),
-  .debug_resume_i  ( 1'b1              ),
+  .debug_halted_o  ( debug_halted      ),
+  .debug_halt_i    ( debug_halt        ),
+  .debug_resume_i  ( debug_resume      ),
 
   .fetch_enable_i  ( fetch_enable_i    ),
   .core_busy_o     ( core_busy_o       ),
@@ -249,18 +261,18 @@ datamem block_d (
   .addra(core_lsu_addr[15:2]),
   .dina(core_lsu_wdata),
   .douta(one_hot_rdata[1]),
-  .web(1'b0),
-  .enb(4'b0000),
-  .addrb(core_lsu_addr[15:2]),
-  .dinb(core_lsu_wdata),
-  .doutb()
+  .web(debug_we),
+  .enb(datamem_enb),
+  .addrb(debug_addr),
+  .dinb(debug_wdata),
+  .doutb(datamem_doutb)
  );
 
 //----------------------------------------------------------------------------//
 // Instruction RAM
 //----------------------------------------------------------------------------//
 
-   logic 	ce_i;
+   logic         ce_i;
    logic        we_i;
 
 coremem coremem_i
@@ -282,19 +294,21 @@ progmem block_i (
     .addra(core_instr_addr[15:2]),
     .dina(32'b0),
     .douta(core_instr_rdata),
-    .web(ce_d & one_hot_data_addr[0] & we_d),
-    .enb(we_d ? core_lsu_be : 4'b1111),
-    .addrb(core_lsu_addr[15:2]),
-    .dinb(core_lsu_wdata),
-    .doutb(one_hot_rdata[0])
+    .web(debug_halt ? debug_we : ce_d & one_hot_data_addr[0] & we_d),
+    .enb(debug_halt ? progmem_enb : we_d ? core_lsu_be : 4'b1111),
+    .addrb(debug_halt ? debug_addr : core_lsu_addr[15:2]),
+    .dinb(debug_halt ? debug_wdata : core_lsu_wdata),
+    .doutb(progmem_doutb)
    );
 
+   assign one_hot_rdata[0] = progmem_doutb;
+             
   //////////////////////////////////////////////////////////////////
   ///                                                            ///
   /// APB Slave 0: APB UART interface                            ///
   ///                                                            ///
   //////////////////////////////////////////////////////////////////
-	     
+
 reg u_trans;
 reg u_recv;
 reg [15:0] u_baud;
@@ -306,7 +320,7 @@ reg  [7:0] u_tx_byte;
 
 rx_delay uart_rx_dly(
 .clk(msoc_clk),
-.in(uart_rx),		     
+.in(uart_rx),                     
 .maj(uart_maj));
 
 uart i_uart(
@@ -359,7 +373,7 @@ assign one_hot_rdata[3] = {uart_wrcount,uart_almostfull,uart_full,uart_rderr,uar
    reg [31:0] sd_cmd_arg;
    reg [31:0] sd_cmd_timeout;
 
-   reg 	   sd_cmd_start, sd_cmd_rst, sd_data_rst, sd_clk_rst;
+   reg            sd_cmd_start, sd_cmd_rst, sd_data_rst, sd_clk_rst;
    reg [15:0] from_dip_reg;
 
 logic [6:0] sd_clk_daddr;
@@ -372,52 +386,52 @@ always @(posedge msoc_clk or negedge rstn)
   if (!rstn)
     begin
     from_dip_reg <= 0;
-	u_recv <= 0;
-	core_lsu_addr_dly <= 0;
-	sd_align_reg <= 0;
-	sd_blkcnt_reg <= 0;
-	sd_blksize_reg <= 0;
-	sd_data_start_reg <= 0;
-	sd_clk_din <= 0;
-	sd_clk_den <= 0;
-	sd_clk_dwe <= 0;
-	sd_clk_daddr <= 0;
-	sd_cmd_i_reg <= 0;
-	sd_cmd_arg_reg <= 0;
-	sd_cmd_setting_reg <= 0;
-	sd_cmd_start_reg <= 0;
-	sd_reset <= 0;
-	sd_data_rst <= 0;
-	sd_cmd_rst <= 0;
-	sd_clk_rst <= 0;
-	sd_cmd_timeout_reg <= 0;
-	to_led <= 0;
-	u_baud <= 16'd87;
-	u_trans <= 1'b0;
-	u_tx_byte <= 8'b0;
+        u_recv <= 0;
+        core_lsu_addr_dly <= 0;
+        sd_align_reg <= 0;
+        sd_blkcnt_reg <= 0;
+        sd_blksize_reg <= 0;
+        sd_data_start_reg <= 0;
+        sd_clk_din <= 0;
+        sd_clk_den <= 0;
+        sd_clk_dwe <= 0;
+        sd_clk_daddr <= 0;
+        sd_cmd_i_reg <= 0;
+        sd_cmd_arg_reg <= 0;
+        sd_cmd_setting_reg <= 0;
+        sd_cmd_start_reg <= 0;
+        sd_reset <= 0;
+        sd_data_rst <= 0;
+        sd_cmd_rst <= 0;
+        sd_clk_rst <= 0;
+        sd_cmd_timeout_reg <= 0;
+        to_led <= 0;
+        u_baud <= 16'd54;
+        u_trans <= 1'b0;
+        u_tx_byte <= 8'b0;
     end
    else
      begin
     from_dip_reg <= from_dip;
-	u_recv <= received;
-	core_lsu_addr_dly <= core_lsu_addr;
-	if (core_lsu_req&core_lsu_we&one_hot_data_addr[6])
-	  case(core_lsu_addr[5:2])
-	    0: sd_align_reg <= core_lsu_wdata;
-	    1: sd_clk_din <= core_lsu_wdata;
-	    2: sd_cmd_arg_reg <= core_lsu_wdata;
-	    3: sd_cmd_i_reg <= core_lsu_wdata;
-	    4: {sd_data_start_reg,sd_cmd_setting_reg[2:0]} <= core_lsu_wdata;
-	    5: sd_cmd_start_reg <= core_lsu_wdata;
-	    6: {sd_reset,sd_clk_rst,sd_data_rst,sd_cmd_rst} <= core_lsu_wdata;
-	    7: sd_blkcnt_reg <= core_lsu_wdata;
-	    8: sd_blksize_reg <= core_lsu_wdata;
-	    9: sd_cmd_timeout_reg <= core_lsu_wdata;
-	   10: {sd_clk_dwe,sd_clk_den,sd_clk_daddr} <= core_lsu_wdata;
-	  endcase
-	if (core_lsu_req&core_lsu_we&one_hot_data_addr[7])
-	  to_led <= core_lsu_wdata;
-	u_trans <= 1'b0;
+        u_recv <= received;
+        core_lsu_addr_dly <= core_lsu_addr;
+        if (core_lsu_req&core_lsu_we&one_hot_data_addr[6])
+          case(core_lsu_addr[5:2])
+            0: sd_align_reg <= core_lsu_wdata;
+            1: sd_clk_din <= core_lsu_wdata;
+            2: sd_cmd_arg_reg <= core_lsu_wdata;
+            3: sd_cmd_i_reg <= core_lsu_wdata;
+            4: {sd_data_start_reg,sd_cmd_setting_reg[2:0]} <= core_lsu_wdata;
+            5: sd_cmd_start_reg <= core_lsu_wdata;
+            6: {sd_reset,sd_clk_rst,sd_data_rst,sd_cmd_rst} <= core_lsu_wdata;
+            7: sd_blkcnt_reg <= core_lsu_wdata;
+            8: sd_blksize_reg <= core_lsu_wdata;
+            9: sd_cmd_timeout_reg <= core_lsu_wdata;
+           10: {sd_clk_dwe,sd_clk_den,sd_clk_daddr} <= core_lsu_wdata;
+          endcase
+        if (core_lsu_req&core_lsu_we&one_hot_data_addr[7])
+          to_led <= core_lsu_wdata;
+        u_trans <= 1'b0;
     if (core_lsu_req&core_lsu_we&one_hot_data_addr[2])
       case(core_lsu_addr[5:2])
         0: begin u_trans <= 1'b1; u_tx_byte <= core_lsu_wdata[7:0]; end
@@ -427,14 +441,14 @@ always @(posedge msoc_clk or negedge rstn)
 
 always @(posedge sd_clk_o)
     begin
-	sd_align <= sd_align_reg;
-	sd_cmd_arg <= sd_cmd_arg_reg;
-	sd_cmd_i <= sd_cmd_i_reg;
-	{sd_data_start,sd_cmd_setting} <= {sd_data_start_reg,sd_cmd_setting_reg};
-	sd_cmd_start <= sd_cmd_start_reg;
-	sd_blkcnt <= sd_blkcnt_reg;
-	sd_blksize <= sd_blksize_reg;
-	sd_cmd_timeout <= sd_cmd_timeout_reg;
+        sd_align <= sd_align_reg;
+        sd_cmd_arg <= sd_cmd_arg_reg;
+        sd_cmd_i <= sd_cmd_i_reg;
+        {sd_data_start,sd_cmd_setting} <= {sd_data_start_reg,sd_cmd_setting_reg};
+        sd_cmd_start <= sd_cmd_start_reg;
+        sd_blkcnt <= sd_blkcnt_reg;
+        sd_blksize <= sd_blksize_reg;
+        sd_cmd_timeout <= sd_cmd_timeout_reg;
     end
     
 my_fifo #(.width(9)) uart_rx_fifo (
@@ -517,8 +531,8 @@ my_fifo #(.width(9)) uart_rx_fifo (
             .maj(sd_dat_to_host_maj[sd_dat_ix]));
         end
         
-   endgenerate					
-				   
+   endgenerate                                        
+                                   
 my_fifo #(.width(36)) tx_fifo (
   .rd_clk(~sd_clk_o),      // input wire read clk
   .wr_clk(~msoc_clk),      // input wire write clk
@@ -554,16 +568,16 @@ my_fifo #(.width(36)) rx_fifo (
 );
 
    logic [133:0]    sd_cmd_response, sd_cmd_response_reg;
-   logic [31:0] 	sd_cmd_resp_sel, sd_status_reg;
-   logic [31:0] 	sd_status, sd_cmd_wait, sd_data_wait, sd_cmd_wait_reg, sd_data_wait_reg;
-   logic [6:0] 	    sd_cmd_crc_val;
-   logic [47:0] 	sd_cmd_packet, sd_cmd_packet_reg;
-   logic [15:0] 	sd_transf_cnt, sd_transf_cnt_reg;
+   logic [31:0]         sd_cmd_resp_sel, sd_status_reg;
+   logic [31:0]         sd_status, sd_cmd_wait, sd_data_wait, sd_cmd_wait_reg, sd_data_wait_reg;
+   logic [6:0]             sd_cmd_crc_val;
+   logic [47:0]         sd_cmd_packet, sd_cmd_packet_reg;
+   logic [15:0]         sd_transf_cnt, sd_transf_cnt_reg;
    logic            sd_detect_reg;
    
    wire [31:0]  rx_fifo_status = {rx_almostfull,rx_full,rx_rderr,rx_wrerr,rx_rdcount,rx_wrcount};
    wire [31:0]  tx_fifo_status = {tx_almostfull,tx_full,tx_rderr,tx_wrerr,tx_rdcount,tx_wrcount};
-   	
+           
    always @(posedge msoc_clk)
      begin
      sd_status_reg = sd_status;
@@ -571,7 +585,7 @@ my_fifo #(.width(36)) rx_fifo (
      sd_cmd_wait_reg = sd_cmd_wait;
      sd_data_wait_reg = sd_data_wait;
      sd_cmd_packet_reg = sd_cmd_packet;
-     sd_transf_cnt_reg = sd_transf_cnt;	
+     sd_transf_cnt_reg = sd_transf_cnt;        
      case(core_lsu_addr[6:2])
        0: sd_cmd_resp_sel = sd_cmd_response_reg[38:7];
        1: sd_cmd_resp_sel = sd_cmd_response_reg[70:39];
@@ -587,7 +601,7 @@ my_fifo #(.width(36)) rx_fifo (
       11: sd_cmd_resp_sel = tx_fifo_status;
       12: sd_cmd_resp_sel = sd_detect_reg;
       15: sd_cmd_resp_sel = {sd_clk_locked,sd_clk_drdy,sd_clk_dout};
- 	  16: sd_cmd_resp_sel = sd_align_reg;
+           16: sd_cmd_resp_sel = sd_align_reg;
       17: sd_cmd_resp_sel = sd_clk_din;
       18: sd_cmd_resp_sel = sd_cmd_arg_reg;
       19: sd_cmd_resp_sel = sd_cmd_i_reg;
@@ -608,6 +622,7 @@ my_fifo #(.width(36)) rx_fifo (
    assign one_hot_rdata[6] = sd_cmd_resp_sel;
    assign one_hot_rdata[7] = from_dip_reg;
    assign one_hot_rdata[8] = shared_rdata;
+   assign one_hot_rdata[15] = tap_rdata;
 
 clk_wiz_1 sd_clk_div
      (

@@ -1,95 +1,184 @@
 // See LICENSE for license details.
+`default_nettype none
+
+import dii_package::dii_flit;
 
 module eth_top
   (
   //! LEDs.
-output [7:0] o_led,
-input  [3:0] i_dip,
+output wire  [9:0] o_led,
+input wire  [7:0] i_dip,
 
   //! Ethernet MAC PHY interface signals
-output  o_erefclk     , // RMII clock out
-input  i_gmiiclk_p    , // GMII clock in
-input  i_gmiiclk_n    ,
-output  o_egtx_clk    ,
-input  i_etx_clk      ,
-input  i_erx_clk      ,
-input [3:0] i_erxd    ,
-input  i_erx_dv       ,
-input  i_erx_er       ,
-input  i_erx_col      ,
-input  i_erx_crs      ,
-input  i_emdint       ,
-output [3:0] o_etxd   ,
-output  o_etx_en      ,
-output  o_etx_er      ,
-output  o_emdc        ,
-inout   io_emdio   ,
-output  o_erstn    ,   
+output wire   o_erefclk     , // RMII clock out
+input wire  i_gmiiclk_p    , // GMII clock in
+input wire  i_gmiiclk_n    ,
+output wire   o_egtx_clk    ,
+input wire  i_etx_clk      ,
+input wire  i_erx_clk      ,
+input wire [3:0] i_erxd    ,
+input wire  i_erx_dv       ,
+input wire  i_erx_er       ,
+input wire  i_erx_col      ,
+input wire  i_erx_crs      ,
+input wire  i_emdint       ,
+output wire  [3:0] o_etxd   ,
+output wire   o_etx_en      ,
+output wire   o_etx_er      ,
+output wire   o_emdc        ,
+inout wire  io_emdio   ,
+output wire   o_erstn    ,   
    
    // clock and reset
-   input         clk_p,
-   input         clk_n,
-   input         rst_top,
+   input wire         clk_p,
+   input wire         clk_n,
+   input wire         rst_top,
    
-   output wire 	   uart_tx,
+   output wire 	     uart_tx,
    input wire        uart_rx,
+   output wire       uart_rts,
+   input wire        uart_cts,
+
    output wire 	     sd_sclk,
    input wire        sd_detect,
    inout wire [3:0]  sd_dat,
    inout wire        sd_cmd,
    output reg        sd_reset,
 // pusb button array
-input GPIO_SW_C,
-input GPIO_SW_W,
-input GPIO_SW_E,
-input GPIO_SW_N,
-input GPIO_SW_S,
+input wire GPIO_SW_C,
+input wire GPIO_SW_W,
+input wire GPIO_SW_E,
+input wire GPIO_SW_N,
+input wire GPIO_SW_S,
 //keyboard
-inout PS2_CLK,
-inout PS2_DATA,
+inout wire PS2_CLK,
+inout wire PS2_DATA,
 
   // display
-output           VGA_HS_O,
-output           VGA_VS_O,
-output  [3:0]    VGA_RED_O,
-output  [3:0]    VGA_BLUE_O,
-output  [3:0]    VGA_GREEN_O,
-output [6:0]SEG,
-output [7:0]AN,
-output DP
-           );
+output wire           VGA_HS_O,
+output wire           VGA_VS_O,
+output wire  [3:0]    VGA_RED_O,
+output wire  [3:0]    VGA_BLUE_O,
+output wire  [3:0]    VGA_GREEN_O,
 
-logic clk_locked, clk_200MHz;
-logic [127:0] dib, dob, enb;
-logic [13:0] addrb;
-logic web;
+   output wire       CA,
+   output wire       CB,
+   output wire       CC,
+   output wire       CD,
+   output wire       CE,
+   output wire       CF,
+   output wire       CG,
+   output wire       DP,
+   output wire [7:0] AN,
+
+   output reg   redled
+   );
+
+logic clk_locked, clk_200MHz, clk_12p5, msoc_clk, i_clk50, i_clk50_quad, clk_100, clk_25, uart_loop;
 logic [31:0] core_lsu_addr;
 logic [31:0] core_lsu_addr_dly;
 logic [31:0] core_lsu_wdata;
 logic [3:0] core_lsu_be;
 logic        ce_d;
 logic        we_d;
-logic     shared_sel;
-logic [31:0] shared_rdata;
-logic pxl_clk;
+logic     tap_sel;
+logic [31:0] tap_rdata, tap_rdata_pkt;
+logic pxl_clk, rx_reset, tx_clock, rx_clock, tx_enable_i, tx_byte_sent_o, tx_busy_o, rx_frame_o, rx_byte_received_o, rx_error_o;
+logic mac_tx_enable, mac_tx_gap, mac_tx_byte_sent, mac_rx_frame, mac_rx_byte_received, mac_rx_error;
+logic [47:0] mac_address_i;
+logic [7:0] rx_data_o, tx_data_i, mac_tx_data, mac_rx_data;
+logic [12:0] rx_frame_size_o, rx_packet_length;
+reg [13:0] addr_tap, nxt_addr;
+reg [15:0] rx_byte, rx_nxt;
+reg  [7:0] rx_byte_dly;
+reg  [1:0] rx_pair;
+reg        rx_wren, full, byte_sync;
+   // datamem shared port
+   logic [3:0] 	sharedmem_en;
+   logic [31:0] sharedmem_dout;
+   logic [31:0] shared_rdata;
+   logic        shared_sel;
 
-assign disp_seg_o = 0;
-assign disp_an_o = 0;
+// datamem shared port
+   logic [0:0] 	datamem_web;
+   logic [3:0] 	datamem_enb;
+   logic [31:0] datamem_doutb;
+  
+   // progmem shared port
+   logic [0:0] 	progmem_web;
+   logic [3:0] 	progmem_enb;
+   logic [31:0] progmem_doutb;
 
-assign addrb = core_lsu_addr[15:4];
-assign enb = (we_d ? {{8{core_lsu_be[3]}},{8{core_lsu_be[2]}},{8{core_lsu_be[1]}},{8{core_lsu_be[0]}}} : 32'hFFFFFFFF) << {core_lsu_addr[3:2],5'b00000};
-assign web = ce_d & shared_sel & we_d;
-assign dib = {4{core_lsu_wdata}};
-assign shared_rdata = dob >> {core_lsu_addr_dly[3:2],5'b00000};
+   logic     debug_req;
+   logic     debug_gnt;
+   logic     debug_rvalid;
+   logic [31:0] debug_addr;
+   logic 	debug_we;
+   logic [31:0] debug_wdata;
+   logic [31:0] debug_rdata;
+   logic        debug_reset;
+   logic        debug_runtest;
+   logic        debug_halt;
+   logic        debug_halted;
+   logic        debug_resume;
+   logic        debug_clk, debug_clk2;
+   logic [2:0]  debug_unused;
+   
+   logic [31:0] core_instr_rdata, debug_dout;
 
+    always @*
+        begin
+        debug_dout = 32'hDEADBEEF;
+        progmem_enb = 4'h0; datamem_enb = 4'h0; sharedmem_en = 4'h0;
+        casez(debug_addr[23:20])
+            4'h0: begin progmem_enb = 4'hf; debug_dout = progmem_doutb; end
+            4'h1: begin datamem_enb = 4'hf; debug_dout = datamem_doutb; end
+            4'h8: begin sharedmem_en = 4'hf; debug_dout = sharedmem_dout; end
+            4'hf: begin debug_dout = debug_rdata; end
+            endcase
+        end
+        
+jtag_dummy jtag1(
+    .DBG({debug_unused[2:0],debug_halt,debug_resume,debug_req}),
+    .WREN(debug_we),
+    .FROM_MEM(debug_dout),
+    .ADDR(debug_addr),
+    .TO_MEM(debug_wdata),
+    .TCK(debug_clk),
+    .TCK2(debug_clk2),
+    .RESET(debug_reset),
+    .RUNTEST(debug_runtest));
+
+   genvar                       r;
+
+   wire [3:0] m_enb = (we_d ? core_lsu_be : 4'hF);
+   wire m_web = ce_d & shared_sel & we_d;
+
+   generate for (r = 0; r < 4; r=r+1)
+     RAMB16_S9_S9
+     RAMB16_S9_S9_inst
+       (
+        .CLKA   ( debug_clk                ),     // Port A Clock
+        .DOA    ( sharedmem_dout[r*8 +: 8] ),     // Port A 1-bit Data Output
+        .ADDRA  ( debug_addr[12:2]         ),     // Port A 14-bit Address Input
+        .DIA    ( debug_wdata[r*8 +:8]     ),     // Port A 1-bit Data Input
+        .ENA    ( sharedmem_en[r]          ),     // Port A RAM Enable Input
+        .SSRA   ( 1'b0                     ),     // Port A Synchronous Set/Reset Input
+        .WEA    ( debug_we                 ),     // Port A Write Enable Input
+        .CLKB   ( msoc_clk                 ),     // Port B Clock
+        .DOB    ( shared_rdata[r*8 +: 8]   ),     // Port B 1-bit Data Output
+        .ADDRB  ( core_lsu_addr[12:2]      ),     // Port B 14-bit Address Input
+        .DIB    ( core_lsu_wdata[r*8 +: 8] ),     // Port B 1-bit Data Input
+        .ENB    ( m_enb[r]                 ),     // Port B RAM Enable Input
+        .SSRB   ( 1'b0                     ),     // Port B Synchronous Set/Reset Input
+        .WEB    ( m_web                    )      // Port B Write Enable Input
+        );
+   endgenerate
+
+assign tap_rdata = core_lsu_addr_dly[11] ? rx_packet_length : tap_rdata_pkt;
+   
 eth_soc eth0 
 ( 
-.clkb(msoc_clk),
-.addrb(addrb[13:0]),
-.dob(dob[127:0]),
-.web(web),
-.dib(dib[127:0]),
-.enb(enb[127:0]),
    //! Input reset. Active High. Usually assigned to button "Center".
   .i_rst       (~rst_top),
   .wPllLocked  (clk_locked),
@@ -118,45 +207,168 @@ eth_soc eth0
   .o_erstn       (o_erstn       ) 
 );
 
- //----------------------------------------------------------------------------
+   always @(negedge i_clk50)
+    begin
+        if (i_erx_dv)
+            begin
+            full = &addr_tap;
+            rx_pair <= i_erxd[1:0];
+            rx_nxt = {rx_pair,rx_byte[15:2]};
+            rx_byte <= rx_nxt;
+            if ((rx_nxt == 16'HD555) && (byte_sync == 0))
+                begin
+                byte_sync <= 1'b1;
+                rx_wren <= 1'b1;
+                addr_tap <= {addr_tap[13:2],2'b00};
+                end
+            else
+                begin
+                if (full == 0)
+                    begin
+                    nxt_addr = addr_tap+1;
+                    addr_tap <= byte_sync ? nxt_addr : nxt_addr&3;
+                    end
+                rx_wren <= &addr_tap[1:0];
+                end
+            end
+        else
+            begin
+            full = 1;
+            addr_tap <= 0;
+            rx_wren <= 0;
+            byte_sync <= 0;
+            end
+    end
+
+   assign o_led[8] = rx_error_o;
+   assign o_led[9] = rx_frame_o;
+   
+   framing framing_inst_0 (
+			.rx_reset_i             ( ~clk_locked ),
+			.tx_clock_i             ( i_clk50 ),
+			.tx_reset_i             ( ~clk_locked ),
+			.rx_clock_i             ( i_clk50 ),
+			.mac_address_i          ( 48'H230100890702 ),
+			.tx_enable_i            ( 0 ),
+			.tx_data_i              ( 8'H00 ),
+			.tx_byte_sent_o         ( tx_byte_sent_o ),
+			.tx_busy_o              ( tx_busy_o ),
+			.rx_frame_o             ( rx_frame_o ),
+			.rx_data_o              ( rx_data_o ),
+			.rx_byte_received_o     ( rx_byte_received_o ),
+			.rx_error_o             ( rx_error_o ),
+			.rx_frame_size_o        ( rx_frame_size_o ),
+			.mii_tx_enable_o        ( mac_tx_enable ),
+			.mii_tx_gap_o           ( mac_tx_gap ),
+			.mii_tx_data_o          ( mac_tx_data ),
+			.mii_tx_byte_sent_i     ( 1'b0 ),
+			.mii_rx_frame_i         ( byte_sync ),
+			.mii_rx_data_i          ( rx_byte ),
+			.mii_rx_byte_received_i ( rx_wren ),
+			.mii_rx_error_i         ( i_erx_er )
+		);
+
+   always @(posedge i_clk50)
+     begin
+	if (rx_frame_o && rx_byte_received_o)
+	  rx_packet_length <= rx_frame_size_o;
+     end
+   
+   RAMB16_S9_S36 RAMB16_S1_inst_0 (
+                                  .CLKA(i_clk50),               // Port A Clock
+                                  .CLKB(msoc_clk),              // Port A Clock
+                                  .DOA(),                       // Port A 9-bit Data Output
+                                  .ADDRA(i_dip[0] ? rx_frame_size_o : addr_tap[12:2]), // Port A 11-bit Address Input
+                                  .DIA(i_dip[0] ? rx_data_o : rx_byte[7:0]),           // Port A 8-bit Data Input
+                                  .DIPA(1'b0),                                         // Port A parity unused
+                                  .ENA(i_dip[0] ? rx_frame_o : full == 0),             // Port A RAM Enable Input
+                                  .SSRA(1'b0),                  // Port A Synchronous Set/Reset Input
+                                  .WEA(i_dip[0] ? rx_byte_received_o : rx_wren),       // Port A Write Enable Input
+                                  .DOB(tap_rdata_pkt),          // Port B 32-bit Data Output
+                                  .DOPB(),                      // Port B parity unused
+                                  .ADDRB(core_lsu_addr[10:2]),  // Port B 9-bit Address Input
+                                  .DIB(core_lsu_wdata),         // Port B 32-bit Data Input
+                                  .DIPB(4'b0),                  // Port B parity unused
+                                  .ENB(1'b1),                   // Port B RAM Enable Input
+                                  .SSRB(1'b0),                  // Port B Synchronous Set/Reset Input
+                                  .WEB(ce_d & tap_sel & we_d)   // Port B Write Enable Input
+                                  );
+
+//----------------------------------------------------------------------------
 //  Output     Output      Phase    Duty Cycle   Pk-to-Pk     Phase
 //   Clock     Freq (MHz)  (degrees)    (%)     Jitter (ps)  Error (ps)
 //----------------------------------------------------------------------------
-// CLK_OUT1___200.000______0.000______50.0______114.829_____98.575
-// CLK_OUT2____25.000______0.000______50.0______175.402_____98.575
-// CLK_OUT3____50.000______0.000______50.0______151.636_____98.575
-// CLK_OUT4____50.000_____90.000______50.0______151.636_____98.575
-//
-//----------------------------------------------------------------------------
-// Input Clock   Freq (MHz)    Input Jitter (UI)
-//----------------------------------------------------------------------------
-// __primary_________100.000____________0.010
+// CLK_OUT1___200.000______0.000______50.0______102.086_____87.180
+// CLK_OUT2____25.000______0.000______50.0______154.057_____87.180
+// CLK_OUT3____50.000______0.000______50.0______132.683_____87.180
+// CLK_OUT4____50.000_____90.000______50.0______132.683_____87.180
+// CLK_OUT5___120.000______0.000______50.0______112.035_____87.180
+// CLK_OUT6___100.000______0.000______50.0______115.831_____87.180
 
-// The following must be inserted into your Verilog file for this
-// core to be instantiated. Change the instance name and port connections
-// (in parentheses) to your own signal names.
-
-//----------- Begin Cut here for INSTANTIATION Template ---// INST_TAG
- 
   clk_wiz_nexys4ddr_0 clk_gen
    (
    .clk_in1     ( clk_p         ), // 100 MHz onboard
-   .clk_out1    ( clk_200MHz   ), // 200 MHz
-   .clk_out2    ( msoc_clk      ), // 30 MHz (for minion SOC)
-   .clk_out3    ( i_clk50       ), // 50 MHz
-   .clk_out4    ( i_clk50_quad  ), // 50 MHz
-   .clk_out5    ( pxl_clk       ), // 125 MHz
+   .clk_200     ( clk_200MHz    ), // 200 MHz
+   .clk_25      ( clk_25        ), // 25 MHz (for minion SOC)
+   .clk_50      ( i_clk50       ), // 50 MHz
+   .clk_50_quad ( i_clk50_quad  ), // 50 MHz
+   .clk_120     ( pxl_clk       ), // 120 MHz
+   .clk_100     ( clk_100       ), // 100 MHz
     // Status and control signals
       .resetn      ( rst_top       ),
       .locked      ( clk_locked    )
+      );
+      
+   // BUFGMUX_CTRL: 2-to-1 Global Clock MUX Buffer
+      //               Artix-7
+      // Xilinx HDL Language Template, version 2016.2
+   
+      BUFGMUX_CTRL BUFGMUX_CTRL_inst (
+         .O(msoc_clk),   // 1-bit output: Clock output
+         .I0(debug_clk2), // 1-bit input: Clock input (S=0)
+         .I1(clk_25), // 1-bit input: Clock input (S=1)
+         .S(debug_runtest)    // 1-bit input: Clock select
       );
 
    minion_soc
      msoc (
          .*,
          .from_dip(i_dip),
-         .to_led(o_led),
+         .to_led(o_led[7:0]),
+         .uart_rx(uart_loop),
+         .uart_tx(uart_loop),
          .rstn(clk_locked)
         );
 
+   wire [31:0]    bcd_digits = debug_addr;
+   wire [8*7-1:0] digits;
+   wire           overflow;
+
+   genvar i;
+
+   generate
+      for (i = 0; i < 8; i = i + 1) begin
+         sevensegment
+            u_seg(.in  (bcd_digits[(i+1)*4-1:i*4]),
+                  .out (digits[(i+1)*7-1:i*7]));
+      end
+   endgenerate
+
+   nexys4ddr_display
+     #(.FREQ(25000000))
+   u_display(.clk       (clk_100),
+             .rst       (~clk_locked),
+             .digits    (digits),
+             .decpoints (8'b00000000),
+             .CA        (CA),
+             .CB        (CB),
+             .CC        (CC),
+             .CD        (CD),
+             .CE        (CE),
+             .CF        (CF),
+             .CG        (CG),
+             .DP        (DP),
+             .AN        (AN));
+
 endmodule // chip_top
+`default_nettype wire

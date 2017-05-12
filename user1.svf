@@ -1,0 +1,22 @@
+TRST OFF;
+ENDIR IDLE;
+ENDDR IDLE;
+STATE RESET;
+STATE IDLE;
+FREQUENCY 1.00E+07 HZ;
+// select address reg
+SIR 6 TDI (03) ;
+// auto-inc on
+SDR 40 TDI (1200000040);
+// select data reg
+SIR 6 TDI (02) ;
+// readout 4 locations
+SDR 160 TDI (0) TDO (c071c0000cb264fffffffff8d07fffff00000000) MASK (ffffffffffffffffffffffffffffffffffffffff);
+// readout 4 locations
+SDR 320 TDI (0) TDO (0) MASK(0);
+// readout 4 locations
+SDR 640 TDI (0) TDO (0) MASK(0);
+// readout 4 locations
+SDR 1280 TDI (0) TDO (0) MASK(0);
+// readout 4 locations
+SDR 65536 TDI (0) TDO (0) MASK(0);
