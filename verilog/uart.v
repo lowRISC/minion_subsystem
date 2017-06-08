@@ -34,6 +34,7 @@ module uart(
             output           is_transmitting, // Low when transmit line is idle.
             output reg       recv_error, // Indicates error in receiving packet.
             input [15:0]     baud,
+            input            brk,
             input            recv_ack
             );
 
@@ -71,7 +72,7 @@ module uart(
    
    assign is_receiving = recv_state != RX_IDLE;
 
-   assign tx = tx_out[0];
+   assign tx = tx_out[0] & ~brk;
    assign is_transmitting = tx_state != TX_IDLE;
 
    always @(posedge clk) begin

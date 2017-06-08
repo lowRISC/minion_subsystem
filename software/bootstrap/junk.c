@@ -1,58 +1,23 @@
 #include "junk.h"
 
-void exit (int i) {
-  while (1);
-}
+static volatile unsigned int * const led_base = (volatile unsigned int*)(7<<20);
+static volatile unsigned int * const uart_base = (volatile unsigned int*)(3<<20);
+static volatile unsigned int * const ufifo_base = (volatile unsigned int*)(2<<20);
 
-#if 0
-void illegal_insn_handler_c(void)
-{
-  for(;;);
-}
-
-void int_time_cmp (void)
-{
-
-}
-
-void int_main(void)
-{
-  // select correct interrupt
-  // read cause register to get pending interrupt
-  // execute ISR.
-}
-
-void uart_set_cfg(int parity, uint16_t clk_counter)
-{
-
-}
-
-void __libc_init_array(void)
-{
-
-}
-
-void *memcpy(void *__restrict__ dst, const void * __restrict__ src, size_t N) {
-  char * __restrict__ dst_ = (char * __restrict__ )dst;
-  const char * __restrict__ src_ = (char * __restrict__ )src;
-  for (size_t i = 0; i != N; ++i)
-    dst_[i] = src_[i];
-  return dst;
+static void myputled(unsigned c) {
+  *led_base = c;
 }
 
 static void myputchar(const char c) {
-      // wait until there is space in the fifo
-      while( (*(volatile unsigned int*)(3<<20) & 0x400) != 0);
-      // load FIFO
-      *(volatile unsigned int*)(2<<20) = c;
-}
-
-static void myputs(const char *str)
-{
-  while (*str)
-    {
-      myputchar(*str++);
-    }
+  unsigned stat;
+  // wait until there is space in the fifo
+  do {
+    stat = *uart_base & 0x400;
+    myputled(stat);
+  }
+  while( stat != 0);
+  // load FIFO
+  *ufifo_base = c;
 }
 
 void myputhex(unsigned n, unsigned width)
@@ -63,25 +28,19 @@ void myputhex(unsigned n, unsigned width)
   else myputchar(n + '0');
 }
 
-size_t strlen (const char *str)
+static void myputs(const char *str)
 {
-  char *s = (char *)str;
-  size_t len = 0;
-
-  if (!s)
-    return 0;
-
-  while (*s++ != '\0')
-    ++len;
-  return len;
+  while (*str)
+    {
+      myputchar(*str++);
+    }
 }
-#endif
 
-void main()
+int main(void)
 {
   int i, j, tot = 1;
   const char *const goodbye = "Goodbye\r\n";
-  const char *old = goodbye+0x800000;
+  myputled(0x55);
   myputchar('H');
   myputchar('e');
   myputchar('l');
@@ -89,22 +48,7 @@ void main()
   myputchar('o');
   myputchar('\r');
   myputchar('\n');
-  for (i = 0; i < strlen(goodbye); i++)
-    {
-      myputhex(goodbye+i, 8);
-      myputchar(':');
-      myputchar(goodbye[i]);
-      myputchar(':');
-      myputchar(old[i]);
-      myputchar('\r');
-      myputchar('\n');
-    }
-  for(j = 1;j < 1000000;j++)
-    {
-      for (i = 10000000; i--; ) tot += i*j;
-      myputchar('*');
-      myputhex(tot, 8);
-      myputchar('\r');
-      myputchar('\n');
-    }
+  myputled(0xAA);
+  myputs(goodbye);
+  ufifo_base[2] = 1<<31;
 }

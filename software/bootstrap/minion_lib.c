@@ -234,6 +234,7 @@ int puts (const char *str)
   uart_send_string (str);
   uart_send('\r');
   uart_send('\n');
+  return 0;
 }
 
 int printf (const char *fmt, ...)

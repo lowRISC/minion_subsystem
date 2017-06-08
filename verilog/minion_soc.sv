@@ -16,6 +16,7 @@ module minion_soc
   (
  output wire 	   uart_tx,
  input wire 	   uart_rx,
+ output reg 	   u_break,
  // clock and reset
  input wire        clk_200MHz,
  input wire        pxl_clk,
@@ -62,6 +63,35 @@ module minion_soc
  reg [31:0]  keycode;
  wire [31:0] keyb_fifo_status = {keyb_empty,keyb_almostfull,keyb_full,keyb_rderr,keyb_wrerr,keyb_rdcount,keyb_wrcount};
  wire [35:0] keyb_fifo_out;
+  logic                  debug_req = 1'b0;
+  logic                  debug_gnt;
+  logic                  debug_rvalid;
+  logic [14:0]           debug_addr = 15'b0;
+  logic                  debug_we = 1'b0;
+  logic [31: 0]          debug_wdata = 32'b0;
+  logic [31: 0]          debug_rdata;
+  logic [31: 0]          core_instr_rdata;
+
+  logic        fetch_enable_i = 1'b1;
+  logic [31:0] irq_i = 32'b0;
+  logic        core_busy_o;
+  logic        clock_gating_i = 1'b1;
+  logic [31:0] boot_addr_i = 32'h80;
+  logic  [7:0] core_lsu_rx_byte;
+
+  logic [15:0] one_hot_data_addr;
+  logic [31:0] one_hot_rdata[15:0];
+// signals from/to core
+logic         core_instr_req;
+logic         core_instr_gnt;
+logic         core_instr_rvalid;
+logic [31:0]  core_instr_addr;
+
+logic         core_lsu_req;
+logic         core_lsu_gnt;
+logic         core_lsu_rvalid;
+logic         core_lsu_we;
+logic [31:0]  core_lsu_rdata;
  
   assign one_hot_rdata[9] = core_lsu_addr[2] ? {keyb_empty,keyb_fifo_out[15:0]} : keyb_fifo_status;
  
@@ -81,7 +111,7 @@ module minion_soc
        .rd_clk(~msoc_clk),      // input wire read clk
        .wr_clk(~msoc_clk),      // input wire write clk
        .rst(~rstn),      // input wire rst
-       .din({19'b0, readch[6:0], scancode}),      // input wire [31 : 0] din
+       .din({21'b0, readch[6:0], scancode}),      // input wire [31 : 0] din
        .wr_en(ascii_ready),  // input wire wr_en
        .rd_en(core_lsu_req&core_lsu_we&one_hot_data_addr[9]),  // input wire rd_en
        .dout(keyb_fifo_out),    // output wire [31 : 0] dout
@@ -94,8 +124,9 @@ module minion_soc
        .empty(keyb_empty)  // output wire empty
      );
     
-    wire [7:0] red,  green, blue;
- 
+   wire [7:0] red, green, blue, fstore_doutb;
+   assign one_hot_rdata[10] = fstore_doutb;
+   
     fstore2 the_fstore(
       .pixel2_clk(pxl_clk),
       .blank(),
@@ -113,8 +144,8 @@ module minion_soc
       .web(ce_d & one_hot_data_addr[10] & we_d),
       .enb(ce_d),
       .addrb(core_lsu_addr[14:2]),
-      .dinb(core_lsu_wdata),
-      .doutb(one_hot_rdata[10]),
+      .dinb(core_lsu_wdata[7:0]),
+      .doutb(fstore_doutb),
       .irst(~rstn),
       .clk_data(msoc_clk),
       .GPIO_SW_C(GPIO_SW_C),
@@ -131,36 +162,6 @@ module minion_soc
 //----------------------------------------------------------------------------//
 // Core Instantiation
 //----------------------------------------------------------------------------//
-// signals from/to core
-logic         core_instr_req;
-logic         core_instr_gnt;
-logic         core_instr_rvalid;
-logic [31:0]  core_instr_addr;
-
-logic         core_lsu_req;
-logic         core_lsu_gnt;
-logic         core_lsu_rvalid;
-logic         core_lsu_we;
-logic [31:0]  core_lsu_rdata;
-
-  logic                  debug_req = 1'b0;
-  logic                  debug_gnt;
-  logic                  debug_rvalid;
-  logic [14:0]           debug_addr = 15'b0;
-  logic                  debug_we = 1'b0;
-  logic [31: 0]          debug_wdata = 32'b0;
-  logic [31: 0]          debug_rdata;
-  logic [31: 0]          core_instr_rdata;
-
-  logic        fetch_enable_i = 1'b1;
-  logic [31:0] irq_i = 32'b0;
-  logic        core_busy_o;
-  logic        clock_gating_i = 1'b1;
-  logic [31:0] boot_addr_i = 32'h80;
-  logic  [7:0] core_lsu_rx_byte;
-
-  logic [15:0] one_hot_data_addr;
-  logic [31:0] one_hot_rdata[15:0];
 
   assign shared_sel = one_hot_data_addr[8];
    
@@ -322,6 +323,7 @@ uart i_uart(
     .is_transmitting(is_trans), // Low when transmit line is idle.
     .recv_error(recv_err), // Indicates error in receiving packet.
     .baud(u_baud),
+    .brk(u_break),
     .recv_ack(u_recv)
     );
 
@@ -392,9 +394,14 @@ always @(posedge msoc_clk or negedge rstn)
 	sd_clk_rst <= 0;
 	sd_cmd_timeout_reg <= 0;
 	to_led <= 0;
+`ifdef BYPASS_CLK_DIV
+	u_baud <= 16'd2;
+`else
 	u_baud <= 16'd87;
+`endif
 	u_trans <= 1'b0;
 	u_tx_byte <= 8'b0;
+        u_break <= 1'b0;
     end
    else
      begin
@@ -422,6 +429,7 @@ always @(posedge msoc_clk or negedge rstn)
       case(core_lsu_addr[5:2])
         0: begin u_trans <= 1'b1; u_tx_byte <= core_lsu_wdata[7:0]; end
         1: u_baud <= core_lsu_wdata;
+	2: u_break <= core_lsu_wdata[31];
       endcase
      end
 
@@ -609,6 +617,12 @@ my_fifo #(.width(36)) rx_fifo (
    assign one_hot_rdata[7] = from_dip_reg;
    assign one_hot_rdata[8] = shared_rdata;
 
+`ifdef BYPASS_CLK_DIV
+   
+   assign sd_clk_o = msoc_clk;
+
+`else
+
 clk_wiz_1 sd_clk_div
      (
      // Clock in ports
@@ -627,6 +641,8 @@ clk_wiz_1 sd_clk_div
       .reset(~(sd_clk_rst&rstn)), // input reset
       .locked(sd_clk_locked));      // output locked
 
+`endif
+   
 sd_top sdtop(
     .sd_clk     (sd_clk_o),
     .cmd_rst    (~(sd_cmd_rst&rstn)),

@@ -20,6 +20,7 @@ let cnv inf =
   and bigbuf = Array.make (1 lsl 16) (zero_big_int) in
   let linbuf = input_line infile in
   let addr = ref (Scanf.sscanf linbuf "@%X" (fun x -> x)) in
+  let last = ref 0 in
   print_endline ("Start = "^string_of_int !addr);
   (try while true do
     let linbuf = ref (input_line infile ^ " ") and lst = ref [] in
@@ -34,13 +35,22 @@ let cnv inf =
     done;
     let rlst = List.rev !lst in
     List.iter (fun data ->
-      bigbuf.(!addr) <- data;
-      incr addr;
-    ) rlst;
+		   if !addr >= 1 lsl 16 then
+		     begin
+		     if compare_big_int data zero_big_int <> 0 then
+		       print_endline ("Addr "^string_of_int !addr^" out of range in "^inf)
+		     end
+		   else
+		     begin
+		     bigbuf.(!addr) <- data;
+		     last := !addr;
+		     end;
+		   incr addr;
+		   ) rlst;
     done;
   with End_of_file -> ());
-  for i = 0 to !addr do
-      bigbuf.(i) <- if (i*4+3 < !addr) then
+  for i = 0 to !last do
+      bigbuf.(i) <- if (i*4+3 <= !last) then
           add_big_int (add_big_int (shift_left_big_int bigbuf.(i*4+3) 24)
                                (shift_left_big_int bigbuf.(i*4+2) 16))
                                (add_big_int (shift_left_big_int bigbuf.(i*4+1) 8) 

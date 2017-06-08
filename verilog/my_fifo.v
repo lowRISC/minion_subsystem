@@ -58,13 +58,13 @@
                         .WRCOUNT(wrcount),         // 12-bit output: Write count
                         .WRERR(wrerr),             // 1-bit output: Write error
                         // Read Control Signals: 1-bit (each) input: Read clock, enable and reset input signals
-                        .RDCLK(rd_clk),              // 1-bit input: Read clock
+                        .RDCLK(rd_clk),            // 1-bit input: Read clock
                         .RDEN(rd_en),              // 1-bit input: Read enable
                         .REGCE(1'b1),              // 1-bit input: Clock enable
                         .RST(rst),                 // 1-bit input: Asynchronous Reset
                         // Write Control Signals: 1-bit (each) input: Write clock and enable input signals
-                        .WRCLK(wr_clk),              // 1-bit input: Write clock
-                        .WREN(wr_en),               // 1-bit input: Write enable
+                        .WRCLK(wr_clk),            // 1-bit input: Write clock
+                        .WREN(wr_en&~rst),         // 1-bit input: Write enable
                         // Write Data: 32-bit (each) input: Write input data
                         .DI(DI),                   // 32-bit input: Data input
                         .DIP(DIP)                  // 4-bit input: Parity input
@@ -96,14 +96,14 @@
                         .WRCOUNT(wrcount),         // 12-bit output: Write count
                         .WRERR(wrerr),             // 1-bit output: Write error
                         // Read Control Signals: 1-bit (each) input: Read clock, enable and reset input signals
-                        .RDCLK(rd_clk),              // 1-bit input: Read clock
+                        .RDCLK(rd_clk),            // 1-bit input: Read clock
                         .RDEN(rd_en),              // 1-bit input: Read enable
                         .REGCE(1'b1),              // 1-bit input: Clock enable
                         .RST(rst),                 // 1-bit input: Asynchronous Reset
                         .RSTREG(rst),              // 1-bit input: Output register set/reset
                         // Write Control Signals: 1-bit (each) input: Write clock and enable input signals
-                        .WRCLK(wr_clk),              // 1-bit input: Write clock
-                        .WREN(wr_en),               // 1-bit input: Write enable
+                        .WRCLK(wr_clk),            // 1-bit input: Write clock
+                        .WREN(wr_en&~rst),         // 1-bit input: Write enable
                         // Write Data: 32-bit (each) input: Write input data
                         .DI(DI),                   // 32-bit input: Data input
                         .DIP(DIP)                  // 4-bit input: Parity input
