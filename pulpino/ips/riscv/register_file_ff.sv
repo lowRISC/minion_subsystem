@@ -53,7 +53,7 @@ module riscv_register_file
     input logic [ADDR_WIDTH-1:0]   waddr_b_i,
     input logic [DATA_WIDTH-1:0]   wdata_b_i,
     input logic                    we_b_i
-);
+); `include "riscv_defines.sv"
 
   localparam    NUM_WORDS = 2**ADDR_WIDTH;
 
@@ -61,7 +61,7 @@ module riscv_register_file
   logic [NUM_WORDS-1:0]                 we_a_dec;
   logic [NUM_WORDS-1:0]                 we_b_dec;
 
-  always_comb
+  always @*
   begin : we_a_decoder
     for (int i = 0; i < NUM_WORDS; i++) begin
       if (waddr_a_i == i)
@@ -71,7 +71,7 @@ module riscv_register_file
     end
   end
 
-  always_comb
+  always @*
   begin : we_b_decoder
     for (int i=0; i<NUM_WORDS; i++) begin
       if (waddr_b_i == i)
@@ -88,7 +88,7 @@ module riscv_register_file
     for (i = 1; i < NUM_WORDS; i++)
     begin : rf_gen
 
-      always_ff @(posedge clk, negedge rst_n)
+      always @(posedge clk, negedge rst_n)
       begin : register_write_behavioral
         if (rst_n==1'b0) begin
           rf_reg[i] = 'b0;

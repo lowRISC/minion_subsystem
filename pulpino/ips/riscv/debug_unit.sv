@@ -19,10 +19,9 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
+// import riscv_defines::*;
 
-import riscv_defines::*;
-
-module riscv_debug_unit
+module riscv_debug_unit#(`include "riscv_widths.sv")
 (
   input logic         clk,
   input logic         rst_n,
@@ -81,7 +80,7 @@ module riscv_debug_unit
 
   output logic        jump_req_o,
   output logic [31:0] jump_addr_o
-);
+); `include "riscv_defines.sv"
 
   enum logic [2:0] {RD_NONE, RD_CSR, RD_GPR, RD_DBGA, RD_DBGS} rdata_sel_q, rdata_sel_n;
 
@@ -116,7 +115,7 @@ module riscv_debug_unit
 
 
   // address decoding, write and read controller
-  always_comb
+  always @*
   begin
     rdata_sel_n    = RD_NONE;
     state_n        = FIRST;
@@ -158,11 +157,11 @@ module riscv_debug_unit
           end
         end else begin
           // non-CSR access
-          unique case (debug_addr_i[13:8])
+          case (debug_addr_i[13:8])
             6'b00_0000: begin // Debug Registers, always accessible
               debug_gnt_o = 1'b1;
 
-              unique case (debug_addr_i[6:2])
+              case (debug_addr_i[6:2])
                 5'b0_0000: begin // DBG_CTRL
                   if (debug_wdata_i[16]) begin
                     // HALT set
@@ -196,7 +195,7 @@ module riscv_debug_unit
               debug_gnt_o = 1'b1; // grant it even when invalid access to not block
 
               if (debug_halted_o) begin
-                unique case (debug_addr_i[6:2])
+                case (debug_addr_i[6:2])
                   5'b0_0000: jump_req_n = 1'b1; // DNPC
                   default:;
                 endcase
@@ -229,7 +228,7 @@ module riscv_debug_unit
           end
         end else begin
           // non-CSR access
-          unique case (debug_addr_i[13:8])
+          case (debug_addr_i[13:8])
             6'b00_0000: begin // Debug Registers, always accessible
               debug_gnt_o = 1'b1;
 
@@ -264,13 +263,13 @@ module riscv_debug_unit
   // Since those are combinational, we can do it in the cycle where we set
   // rvalid. The address has been latched into addr_q
   //----------------------------------------------------------------------------
-  always_comb
+  always @*
   begin
     dbg_rdata = '0;
 
     case (rdata_sel_q)
       RD_DBGA: begin
-        unique case (addr_q[6:2])
+        case (addr_q[6:2])
           5'h00: dbg_rdata[31:0] = {15'b0, debug_halted_o, 15'b0, settings_q[DBG_SETS_SSTE]}; // DBG_CTRL
           5'h01: dbg_rdata[31:0] = {15'b0, sleeping_i, 15'b0, dbg_ssth_q}; // DBG_HIT
           5'h02: begin // DBG_IE
@@ -300,7 +299,7 @@ module riscv_debug_unit
       end
 
       RD_DBGS: begin
-        unique case (addr_q[2:2])
+        case (addr_q[2:2])
           1'b0: dbg_rdata = npc_int; // DBG_NPC
           1'b1: dbg_rdata = ppc_int; // DBG_PPC
           default:;
@@ -314,7 +313,7 @@ module riscv_debug_unit
   //----------------------------------------------------------------------------
   // read data mux
   //----------------------------------------------------------------------------
-  always_comb
+  always @*
   begin
     debug_rdata_o = '0;
 
@@ -329,7 +328,7 @@ module riscv_debug_unit
   //----------------------------------------------------------------------------
   // rvalid generation
   //----------------------------------------------------------------------------
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if (~rst_n) begin
       debug_rvalid_o <= 1'b0;
@@ -341,7 +340,7 @@ module riscv_debug_unit
   //----------------------------------------------------------------------------
   // stall control
   //----------------------------------------------------------------------------
-  always_comb
+  always @*
   begin
     stall_ns       = stall_cs;
     dbg_req_o      = 1'b0;
@@ -394,7 +393,7 @@ module riscv_debug_unit
       dbg_ssth_n = 1'b0;
   end
 
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if (~rst_n) begin
       stall_cs    <= RUNNING;
@@ -410,7 +409,7 @@ module riscv_debug_unit
   //----------------------------------------------------------------------------
   // NPC/PPC selection
   //----------------------------------------------------------------------------
-  always_comb
+  always @*
   begin
     pc_tracking_fsm_ns = pc_tracking_fsm_cs;
 
@@ -418,7 +417,7 @@ module riscv_debug_unit
     npc_int = pc_if_i;
 
     // PPC/NPC mux
-    unique case (pc_tracking_fsm_cs)
+    case (pc_tracking_fsm_cs)
       IFID: begin
         ppc_int = pc_id_i;
         npc_int = pc_if_i;
@@ -462,7 +461,7 @@ module riscv_debug_unit
   end
 
 
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if (~rst_n) begin
       pc_tracking_fsm_cs <= IFID;

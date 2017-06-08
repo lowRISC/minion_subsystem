@@ -36,7 +36,7 @@ module uart(
             input [15:0]     baud,
             input            brk,
             input            recv_ack
-            );
+            ); `include "riscv_defines.sv"
 
    // parameter CLOCK_DIVIDE = 1302; // clock rate (50Mhz) / (baud rate (9600) * 4)
 

@@ -25,8 +25,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-
-import riscv_defines::*;
+// import riscv_defines::*;
 
 module riscv_if_stage
 #(
@@ -90,7 +89,7 @@ module riscv_if_stage
     // misc signals
     output logic        if_busy_o,             // is the IF stage busy fetching instructions?
     output logic        perf_imiss_o           // Instruction Fetch Miss
-);
+); `include "riscv_defines.sv"
 
   // offset FSM
   enum logic[0:0] {WAIT, IDLE } offset_fsm_cs, offset_fsm_ns;
@@ -117,11 +116,11 @@ module riscv_if_stage
 
 
   // exception PC selection mux
-  always_comb
+  always @*
   begin : EXC_PC_MUX
     exc_pc = 'x;
 
-    unique case (exc_pc_mux_i)
+    case (exc_pc_mux_i)
       EXC_PC_ILLINSN: exc_pc = { boot_addr_i[31:8], EXC_OFF_ILLINSN };
       EXC_PC_ECALL:   exc_pc = { boot_addr_i[31:8], EXC_OFF_ECALL   };
       EXC_PC_LOAD:    exc_pc = { boot_addr_i[31:8], EXC_OFF_LSUERR  };
@@ -133,11 +132,11 @@ module riscv_if_stage
   end
 
   // fetch address selection
-  always_comb
+  always @*
   begin
     fetch_addr_n = 'x;
 
-    unique case (pc_mux_i)
+    case (pc_mux_i)
       PC_BOOT:      fetch_addr_n = {boot_addr_i[31:8], EXC_OFF_RST};
       PC_JUMP:      fetch_addr_n = jump_target_id_i;
       PC_BRANCH:    fetch_addr_n = jump_target_ex_i;
@@ -217,7 +216,7 @@ module riscv_if_stage
 
 
   // offset FSM state
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if (rst_n == 1'b0) begin
       offset_fsm_cs     <= IDLE;
@@ -227,7 +226,7 @@ module riscv_if_stage
   end
 
   // offset FSM state transition logic
-  always_comb
+  always @*
   begin
     offset_fsm_ns = offset_fsm_cs;
 
@@ -235,7 +234,7 @@ module riscv_if_stage
     branch_req    = 1'b0;
     valid         = 1'b0;
 
-    unique case (offset_fsm_cs)
+    case (offset_fsm_cs)
       // no valid instruction data for ID stage
       // assume aligned
       IDLE: begin
@@ -321,7 +320,7 @@ module riscv_if_stage
   );
 
   // prefetch -> IF registers
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if (rst_n == 1'b0)
     begin
@@ -335,7 +334,7 @@ module riscv_if_stage
   end
 
   // IF-ID pipeline registers, frozen when the ID stage is stalled
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin : IF_ID_PIPE_REGISTERS
     if (rst_n == 1'b0)
     begin

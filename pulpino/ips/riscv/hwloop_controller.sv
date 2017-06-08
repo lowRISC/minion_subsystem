@@ -44,7 +44,7 @@ module riscv_hwloop_controller
   // to id stage
   output logic                     hwlp_jump_o,
   output logic [31:0]              hwlp_targ_addr_o
-);
+); `include "riscv_defines.sv"
 
 
   logic [N_REGS-1:0] pc_is_end_addr;
@@ -78,7 +78,7 @@ module riscv_hwloop_controller
   endgenerate
 
   // select corresponding start address and decrement counter
-  always_comb
+  always @*
   begin
     hwlp_targ_addr_o = 'x;
     hwlp_dec_cnt_o   = '0;

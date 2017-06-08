@@ -45,7 +45,7 @@ module riscv_alu_div
     input  logic                    OutRdy_SI,
     output logic                    OutVld_SO,
     output logic [C_WIDTH-1:0]      Res_DO
-  );
+  ); `include "riscv_defines.sv"
 
   ///////////////////////////////////////////////////////////////////////////////
   // signal declarations
@@ -119,7 +119,7 @@ module riscv_alu_div
   // FSM
   ///////////////////////////////////////////////////////////////////////////////
 
-  always_comb
+  always @*
   begin : p_fsm
     // default
     State_SN       = State_SP;
@@ -187,7 +187,7 @@ module riscv_alu_div
   assign ResReg_DN = (LoadEn_S)   ? '0       :
                      (ResRegEn_S) ? {ABComp_S, ResReg_DP[$high(ResReg_DP):1]} : ResReg_DP;
 
-  always_ff @(posedge Clk_CI or negedge Rst_RBI) begin : p_regs
+  always @(posedge Clk_CI or negedge Rst_RBI) begin : p_regs
     if(~Rst_RBI) begin
        State_SP   <= IDLE;
        AReg_DP    <= '0;

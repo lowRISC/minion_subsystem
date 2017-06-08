@@ -25,13 +25,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 `include "riscv_config.sv"
-
-import riscv_defines::*;
+// import riscv_defines::*;
 
 module riscv_core
 #(
   parameter N_EXT_PERF_COUNTERS = 0,
-  parameter INSTR_RDATA_WIDTH   = 32
+  parameter INSTR_RDATA_WIDTH   = 32,
+  `include "riscv_widths.sv"
 )
 (
   // Clock and Reset
@@ -84,7 +84,7 @@ module riscv_core
   output logic        core_busy_o,
 
   input  logic [N_EXT_PERF_COUNTERS-1:0] ext_perf_counters_i
-);
+); `include "riscv_defines.sv"
 
   localparam N_HWLP      = 2;
   localparam N_HWLP_BITS = $clog2(N_HWLP);

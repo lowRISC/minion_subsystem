@@ -23,10 +23,9 @@
 // Description:    Decoder                                                    //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+// import riscv_defines::*;
 
-import riscv_defines::*;
-
-module riscv_decoder
+module riscv_decoder#(`include "riscv_widths.sv")
 (
   // singals running to/from controller
   input  logic        deassert_we_i,           // deassert we, we are stalled or not active
@@ -99,7 +98,7 @@ module riscv_decoder
   output logic [1:0]  jump_in_dec_o,           // jump_in_id without deassert
   output logic [1:0]  jump_in_id_o,            // jump is being calculated in ALU
   output logic [1:0]  jump_target_mux_sel_o    // jump target selection
-);
+); `include "riscv_defines.sv"
 
   // write enable/request control
   logic       regfile_mem_we;
@@ -125,7 +124,7 @@ module riscv_decoder
   //                                         //
   /////////////////////////////////////////////
 
-  always_comb
+  always @*
   begin
     jump_in_id                  = BRANCH_NONE;
     jump_target_mux_sel_o       = JT_JAL;
@@ -183,7 +182,7 @@ module riscv_decoder
     bmask_b_mux_o               = BMASK_B_ZERO;
 
 
-    unique case (instr_rdata_i[6:0])
+    case (instr_rdata_i[6:0])
 
       //////////////////////////////////////
       //      _ _   _ __  __ ____  ____   //
@@ -232,7 +231,7 @@ module riscv_decoder
         rega_used_o           = 1'b1;
         regb_used_o           = 1'b1;
 
-        unique case (instr_rdata_i[14:12])
+        case (instr_rdata_i[14:12])
           3'b000: alu_operator_o = ALU_EQ;
           3'b001: alu_operator_o = ALU_NE;
           3'b100: alu_operator_o = ALU_LTS;
@@ -297,7 +296,7 @@ module riscv_decoder
         end
 
         // store size
-        unique case (instr_rdata_i[13:12])
+        case (instr_rdata_i[13:12])
           2'b00: data_type_o = 2'b10; // SB
           2'b01: data_type_o = 2'b01; // SH
           2'b10: data_type_o = 2'b00; // SW
@@ -332,7 +331,7 @@ module riscv_decoder
         data_sign_extension_o = ~instr_rdata_i[14];
 
         // load size
-        unique case (instr_rdata_i[13:12])
+        case (instr_rdata_i[13:12])
           2'b00:   data_type_o = 2'b10; // LB
           2'b01:   data_type_o = 2'b01; // LH
           2'b10:   data_type_o = 2'b00; // LW
@@ -349,7 +348,7 @@ module riscv_decoder
           data_sign_extension_o = ~instr_rdata_i[30];
 
           // load size
-          unique case (instr_rdata_i[31:25])
+          case (instr_rdata_i[31:25])
             7'b0000_000,
             7'b0100_000: data_type_o = 2'b10; // LB, LBU
             7'b0001_000,
@@ -404,7 +403,7 @@ module riscv_decoder
         regfile_alu_we      = 1'b1;
         rega_used_o         = 1'b1;
 
-        unique case (instr_rdata_i[14:12])
+        case (instr_rdata_i[14:12])
           3'b000: alu_operator_o = ALU_ADD;  // Add Immediate
           3'b010: alu_operator_o = ALU_SLTS; // Set to one if Lower Than Immediate
           3'b011: alu_operator_o = ALU_SLTU; // Set to one if Lower Than Immediate Unsigned
@@ -442,7 +441,7 @@ module riscv_decoder
           bmask_a_mux_o       = BMASK_A_S3;
           bmask_b_mux_o       = BMASK_B_S2;
 
-          unique case (instr_rdata_i[14:12])
+          case (instr_rdata_i[14:12])
             3'b000: begin
               alu_operator_o  = ALU_BEXT;
               imm_b_mux_sel_o = IMMB_S2;
@@ -473,7 +472,7 @@ module riscv_decoder
           if (~instr_rdata_i[28])
             regb_used_o = 1'b1;
 
-          unique case ({instr_rdata_i[30:25], instr_rdata_i[14:12]})
+          case ({instr_rdata_i[30:25], instr_rdata_i[14:12]})
             // RV32I ALU operations
             {6'b00_0000, 3'b000}: alu_operator_o = ALU_ADD;   // Add
             {6'b10_0000, 3'b000}: alu_operator_o = ALU_SUB;   // Sub
@@ -705,7 +704,7 @@ module riscv_decoder
         end
 
         // now decode the instruction
-        unique case (instr_rdata_i[31:26])
+        case (instr_rdata_i[31:26])
           6'b00000_0: begin alu_operator_o = ALU_ADD;  imm_b_mux_sel_o = IMMB_VS; end // pv.add
           6'b00001_0: begin alu_operator_o = ALU_SUB;  imm_b_mux_sel_o = IMMB_VS; end // pv.sub
           6'b00010_0: begin alu_operator_o = ALU_ADD;  imm_b_mux_sel_o = IMMB_VS; bmask_b_mux_o = BMASK_B_ONE; end // pv.avg
@@ -832,7 +831,7 @@ module riscv_decoder
         if (instr_rdata_i[14:12] == 3'b000)
         begin
           // non CSR related SYSTEM instructions
-          unique case (instr_rdata_i[31:0])
+          case (instr_rdata_i[31:0])
             32'h00_00_00_73:  // ECALL
             begin
               // environment (system) call
@@ -879,7 +878,7 @@ module riscv_decoder
             alu_op_a_mux_sel_o = OP_A_REGA_OR_FWD;
           end
 
-          unique case (instr_rdata_i[13:12])
+          case (instr_rdata_i[13:12])
             2'b01:   csr_op   = CSR_OP_WRITE;
             2'b10:   csr_op   = CSR_OP_SET;
             2'b11:   csr_op   = CSR_OP_CLEAR;
@@ -902,7 +901,7 @@ module riscv_decoder
       OPCODE_HWLOOP: begin
         hwloop_target_mux_sel_o = 1'b0;
 
-        unique case (instr_rdata_i[14:12])
+        case (instr_rdata_i[14:12])
           3'b000: begin
             // lp.starti: set start address to PC + I-type immediate
             hwloop_we[0]           = 1'b1;

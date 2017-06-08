@@ -77,7 +77,7 @@ module ps2_translation_table
    rx_read_i,
    rx_read_o,
    rx_released_i
-   ) ;
+   ) ; `include "riscv_defines.sv"
 
    input reset_i,
          clock_i,

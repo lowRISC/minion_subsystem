@@ -22,8 +22,7 @@
 //                 RiscV draft priviledged instruction set spec (v1.7)        //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-
-import riscv_defines::*;
+// import riscv_defines::*;
 
 `ifndef PULP_FPGA_EMUL
  `ifdef SYNTHESIS
@@ -94,7 +93,7 @@ module riscv_cs_registers
   input  logic                 mem_store_i,       // store to memory in this cycle
 
   input  logic [N_EXT_CNT-1:0] ext_counters_i
-);
+); `include "riscv_defines.sv"
 
   localparam N_PERF_COUNTERS = 11 + N_EXT_CNT;
 
@@ -142,7 +141,7 @@ module riscv_cs_registers
   ////////////////////////////////////////////
 
   // read logic
-  always_comb
+  always @*
   begin
     csr_rdata_int = 'x;
 
@@ -176,7 +175,7 @@ module riscv_cs_registers
 
 
   // write logic
-  always_comb
+  always @*
   begin
     mepc_n       = mepc_q;
     mestatus_n   = mestatus_q;
@@ -233,12 +232,12 @@ module riscv_cs_registers
 
 
   // CSR operation logic
-  always_comb
+  always @*
   begin
     csr_wdata_int = csr_wdata_i;
     csr_we_int    = 1'b1;
 
-    unique case (csr_op_i)
+    case (csr_op_i)
       CSR_OP_WRITE: csr_wdata_int = csr_wdata_i;
       CSR_OP_SET:   csr_wdata_int = csr_wdata_i | csr_rdata_o;
       CSR_OP_CLEAR: csr_wdata_int = (~csr_wdata_i) & csr_rdata_o;
@@ -254,7 +253,7 @@ module riscv_cs_registers
 
 
   // output mux
-  always_comb
+  always @*
   begin
     csr_rdata_o = csr_rdata_int;
 
@@ -270,7 +269,7 @@ module riscv_cs_registers
 
 
   // actual registers
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if (rst_n == 1'b0)
     begin
@@ -322,7 +321,7 @@ module riscv_cs_registers
   endgenerate
 
   // address decoder for performance counter registers
-  always_comb
+  always @*
   begin
     is_pccr      = 1'b0;
     is_pcmr      = 1'b0;
@@ -333,7 +332,7 @@ module riscv_cs_registers
 
     // only perform csr access if we actually care about the read data
     if (csr_access_i) begin
-      unique case (csr_addr_i)
+      case (csr_addr_i)
         12'h7A0: begin
           is_pcer = 1'b1;
           perf_rdata[N_PERF_COUNTERS-1:0] = PCER_q;
@@ -369,7 +368,7 @@ module riscv_cs_registers
   // for synthesis we just have one performance counter register
   assign PCCR_inc[0] = (|(PCCR_in & PCER_q)) & PCMR_q[0];
 
-  always_comb
+  always @*
   begin
     PCCR_n[0]   = PCCR_q[0];
 
@@ -377,7 +376,7 @@ module riscv_cs_registers
       PCCR_n[0] = PCCR_q[0] + 1;
 
     if (is_pccr == 1'b1) begin
-      unique case (csr_op_i)
+      case (csr_op_i)
         CSR_OP_NONE:   ;
         CSR_OP_WRITE:  PCCR_n[0] = csr_wdata_i;
         CSR_OP_SET:    PCCR_n[0] = csr_wdata_i | PCCR_q[0];
@@ -386,7 +385,7 @@ module riscv_cs_registers
     end
   end
 `else
-  always_comb
+  always @*
   begin
     for(int i = 0; i < N_PERF_COUNTERS; i++)
     begin : PERF_CNT_INC
@@ -398,7 +397,7 @@ module riscv_cs_registers
         PCCR_n[i] = PCCR_q[i] + 1;
 
       if (is_pccr == 1'b1 && (pccr_all_sel == 1'b1 || pccr_index == i)) begin
-        unique case (csr_op_i)
+        case (csr_op_i)
           CSR_OP_NONE:   ;
           CSR_OP_WRITE:  PCCR_n[i] = csr_wdata_i;
           CSR_OP_SET:    PCCR_n[i] = csr_wdata_i | PCCR_q[i];
@@ -410,13 +409,13 @@ module riscv_cs_registers
 `endif
 
   // update PCMR and PCER
-  always_comb
+  always @*
   begin
     PCMR_n = PCMR_q;
     PCER_n = PCER_q;
 
     if (is_pcmr) begin
-      unique case (csr_op_i)
+      case (csr_op_i)
         CSR_OP_NONE:   ;
         CSR_OP_WRITE:  PCMR_n = csr_wdata_i[1:0];
         CSR_OP_SET:    PCMR_n = csr_wdata_i[1:0] | PCMR_q;
@@ -425,7 +424,7 @@ module riscv_cs_registers
     end
 
     if (is_pcer) begin
-      unique case (csr_op_i)
+      case (csr_op_i)
         CSR_OP_NONE:   ;
         CSR_OP_WRITE:  PCER_n = csr_wdata_i[N_PERF_COUNTERS-1:0];
         CSR_OP_SET:    PCER_n = csr_wdata_i[N_PERF_COUNTERS-1:0] | PCER_q;
@@ -435,7 +434,7 @@ module riscv_cs_registers
   end
 
   // Performance Counter Registers
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if (rst_n == 1'b0)
     begin

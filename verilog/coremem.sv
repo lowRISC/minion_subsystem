@@ -24,7 +24,7 @@ module coremem
    output logic data_rvalid_o,
    input logic  data_we_i,
    output logic CE, WE
-   );
+   ); `include "riscv_defines.sv"
    
    logic        aw_valid_o;
    logic        aw_ready_i;
@@ -46,7 +46,7 @@ module coremem
    assign w_ready_i = 1'b1;
    
    // main FSM
-   always_comb
+   always @*
      begin
         NS         = CS;
         data_gnt_o    = 1'b0;
@@ -157,7 +157,7 @@ module coremem
      end
 
    // registers
-   always_ff @(posedge clk_i, negedge rst_ni)
+   always @(posedge clk_i, negedge rst_ni)
      begin
         if (~rst_ni)
           begin

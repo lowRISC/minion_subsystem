@@ -23,8 +23,7 @@
 // Description:    Main CPU controller of the processor                       //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-
-import riscv_defines::*;
+// import riscv_defines::*;
 
 module riscv_controller
 (
@@ -127,7 +126,7 @@ module riscv_controller
   output logic        perf_jump_o,                // we are executing a jump instruction   (j, jr, jal, jalr)
   output logic        perf_jr_stall_o,            // stall due to jump-register-hazard
   output logic        perf_ld_stall_o             // stall due to load-use-hazard
-);
+); `include "riscv_defines.sv"
 
   // FSM state encoding
   enum  logic [3:0] { RESET, BOOT_SET, SLEEP, FIRST_FETCH,
@@ -142,7 +141,7 @@ module riscv_controller
   // synopsys translate_off
   // make sure we are called later so that we do not generate messages for
   // glitches
-  always_ff @(negedge clk)
+  always @(negedge clk)
   begin
     // print warning in case of decoding errors
     if (is_decoding_o && illegal_insn_i) begin
@@ -162,7 +161,7 @@ module riscv_controller
   //  \____\___/|_| \_\_____|  \____\___/|_| \_| |_| |_| \_\\___/|_____|_____|_____|_| \_\  //
   //                                                                                        //
   ////////////////////////////////////////////////////////////////////////////////////////////
-  always_comb
+  always @*
   begin
     // Default values
     instr_req_o      = 1'b1;
@@ -185,7 +184,7 @@ module riscv_controller
     halt_id_o        = 1'b0;
     dbg_ack_o        = 1'b0;
 
-    unique case (ctrl_fsm_cs)
+    case (ctrl_fsm_cs)
       // We were just reset, wait for fetch_enable
       RESET:
       begin
@@ -480,7 +479,7 @@ module riscv_controller
   // |____/ \__\__,_|_|_|  \____\___/|_| |_|\__|_|  \___/|_| //
   //                                                         //
   /////////////////////////////////////////////////////////////
-  always_comb
+  always @*
   begin
     load_stall_o   = 1'b0;
     jr_stall_o     = 1'b0;
@@ -521,7 +520,7 @@ module riscv_controller
 
 
   // Forwarding control unit
-  always_comb
+  always @*
   begin
     // default assignements
     operand_a_fw_mux_sel_o = SEL_REGFILE;
@@ -561,7 +560,7 @@ module riscv_controller
   end
 
   // update registers
-  always_ff @(posedge clk , negedge rst_n)
+  always @(posedge clk , negedge rst_n)
   begin : UPDATE_REGS
     if ( rst_n == 1'b0 )
     begin

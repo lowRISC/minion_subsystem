@@ -21,8 +21,7 @@
 // Description:    Advanced MAC unit for PULP.                                //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-
-import riscv_defines::*;
+// import riscv_defines::*;
 
 
 module riscv_mult
@@ -55,7 +54,7 @@ module riscv_mult
   output logic        multicycle_o,
   output logic        ready_o,
   input  logic        ex_ready_i
-);
+); `include "riscv_defines.sv"
 
   ///////////////////////////////////////////////////////////////
   //  ___ _  _ _____ ___ ___ ___ ___   __  __ _   _ _  _____   //
@@ -113,7 +112,7 @@ module riscv_mult
   assign short_shift_arith = mulh_active ? mulh_shift_arith : short_signed_i[0];
   assign short_shift_ext   = mulh_active ? 1'b1             : short_signed_i[0];
 
-  always_comb
+  always @*
   begin
     mulh_NS          = mulh_CS;
     mulh_imm         = 5'd0;
@@ -173,7 +172,7 @@ module riscv_mult
     endcase
   end
 
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if (~rst_n)
     begin
@@ -263,11 +262,11 @@ module riscv_mult
   //                                                    //
   ////////////////////////////////////////////////////////
 
-  always_comb
+  always @*
   begin
     result_o   = 'x;
 
-    unique case (operator_i)
+    case (operator_i)
       MUL_MAC32, MUL_MSU32: result_o = int_result[31:0];
 
       MUL_I, MUL_IR, MUL_H: result_o = short_result[31:0];

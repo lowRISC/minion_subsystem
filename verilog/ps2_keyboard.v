@@ -173,7 +173,7 @@ module ps2_keyboard (
                      tx_error_no_keyboard_ack,
                      translate,
                      divide_reg_i
-                     );
+                     ); `include "riscv_defines.sv"
 
    // Parameters
 

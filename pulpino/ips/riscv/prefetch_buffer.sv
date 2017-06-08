@@ -48,7 +48,7 @@ module riscv_fetch_fifo
 
     output logic        out_valid_stored_o, // same as out_valid_o, except that if something is incoming now it is not included. This signal is available immediately as it comes directly out of FFs
     output logic        out_is_hwlp_o
-  );
+  ); `include "riscv_defines.sv"
 
   localparam DEPTH = 4; // must be 3 or greater
 
@@ -86,7 +86,7 @@ module riscv_fetch_fifo
   // instruction aligner (if unaligned)
   //////////////////////////////////////////////////////////////////////////////
 
-  always_comb
+  always @*
   begin
     // serve the aligned case even though the output address is unaligned when
     // the next instruction will be from a hardware loop target
@@ -110,7 +110,7 @@ module riscv_fetch_fifo
   assign out_is_hwlp_o = (valid_Q[0]) ? is_hwlp_Q[0] : in_is_hwlp_i;
 
   // this valid signal must not depend on signals from outside!
-  always_comb
+  always @*
   begin
     out_valid_stored_o = 1'b1;
 
@@ -140,7 +140,7 @@ module riscv_fetch_fifo
   //////////////////////////////////////////////////////////////////////////////
 
   int j;
-  always_comb
+  always @*
   begin
     addr_int    = addr_Q;
     rdata_int   = rdata_Q;
@@ -182,7 +182,7 @@ module riscv_fetch_fifo
   assign addr_next = {addr_int[0][31:2], 2'b00} + 32'h4;
 
   // move everything by one step
-  always_comb
+  always @*
   begin
     addr_n     = addr_int;
     rdata_n    = rdata_int;
@@ -230,7 +230,7 @@ module riscv_fetch_fifo
   // registers
   //////////////////////////////////////////////////////////////////////////////
 
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if(rst_n == 1'b0)
     begin
@@ -298,7 +298,7 @@ module riscv_prefetch_buffer
 
   // Prefetch Buffer Status
   output logic        busy_o
-);
+); `include "riscv_defines.sv"
 
   enum logic [1:0] {IDLE, WAIT_GNT, WAIT_RVALID, WAIT_ABORTED } CS, NS;
   enum logic [1:0] {HWLP_NONE, HWLP_IN, HWLP_FETCHING, HWLP_DONE } hwlp_CS, hwlp_NS;
@@ -358,14 +358,14 @@ module riscv_prefetch_buffer
 
   assign fetch_addr = {instr_addr_q[31:2], 2'b00} + 32'd4;
 
-  always_comb
+  always @*
   begin
     hwlp_NS     = hwlp_CS;
     fifo_hwlp   = 1'b0;
     hwlp_masked = 1'b0;
     fifo_clear  = 1'b0;
 
-    unique case (hwlp_CS)
+    case (hwlp_CS)
       HWLP_NONE: begin
         if (hwloop_i) begin
           hwlp_masked = 1'b1;
@@ -426,7 +426,7 @@ module riscv_prefetch_buffer
   // deals with instruction memory / instruction cache
   //////////////////////////////////////////////////////////////////////////////
 
-  always_comb
+  always @*
   begin
     instr_req_o   = 1'b0;
     instr_addr_o  = fetch_addr;
@@ -435,7 +435,7 @@ module riscv_prefetch_buffer
     fetch_is_hwlp = 1'b0;
     NS            = CS;
 
-    unique case(CS)
+    case(CS)
       // default state, not waiting for requested data
       IDLE:
       begin
@@ -567,7 +567,7 @@ module riscv_prefetch_buffer
   // registers
   //////////////////////////////////////////////////////////////////////////////
 
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if(rst_n == 1'b0)
     begin

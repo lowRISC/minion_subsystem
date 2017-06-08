@@ -22,10 +22,9 @@
 // Description:    Arithmetic logic unit of the pipelined processor           //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+// import riscv_defines::*;
 
-import riscv_defines::*;
-
-module riscv_alu
+module riscv_alu#(`include "riscv_widths.sv")
 (
   input  logic                     clk,
   input  logic                     rst_n,
@@ -45,7 +44,7 @@ module riscv_alu
 
   output logic                     ready_o,
   input  logic                     ex_ready_i
-);
+); `include "riscv_defines.sv"
 
 
   logic [31:0] operand_a_rev;
@@ -106,7 +105,7 @@ module riscv_alu
   assign adder_op_b = adder_op_b_negate ? operand_b_neg : operand_b_i;
 
   // prepare carry
-  always_comb
+  always @*
   begin
     adder_in_a[    0] = 1'b1;
     adder_in_a[ 8: 1] = adder_op_a[ 7: 0];
@@ -202,7 +201,7 @@ module riscv_alu
   assign shift_amt = div_valid ? div_shift : operand_b_i;
 
   // by reversing the bits of the input, we also have to reverse the order of shift amounts
-  always_comb
+  always @*
   begin
     case(vector_mode_i)
       VEC_MODE16:
@@ -251,7 +250,7 @@ module riscv_alu
 
 
   // right shifts, we let the synthesizer optimize this
-  always_comb
+  always @*
   begin
     case(vector_mode_i)
       VEC_MODE16:
@@ -327,11 +326,11 @@ module riscv_alu
   logic [3:0] is_equal_vec;
   logic [3:0] is_greater_vec;
 
-  always_comb
+  always @*
   begin
     cmp_signed = 4'b0;
 
-    unique case (operator_i)
+    case (operator_i)
       ALU_GTS,
       ALU_GES,
       ALU_LTS,
@@ -369,7 +368,7 @@ module riscv_alu
 
   // generate the real equal and greater than signals that take the vector
   // mode into account
-  always_comb
+  always @*
   begin
     // 32-bit mode
     is_equal[3:0]   = {4{is_equal_vec[3] & is_equal_vec[2] & is_equal_vec[1] & is_equal_vec[0]}};
@@ -399,11 +398,11 @@ module riscv_alu
   // generate comparison result
   logic [3:0] cmp_result;
 
-  always_comb
+  always @*
   begin
     cmp_result = is_equal;
 
-    unique case (operator_i)
+    case (operator_i)
       ALU_EQ:            cmp_result = is_equal;
       ALU_NE:            cmp_result = ~is_equal;
       ALU_GTS, ALU_GTU:  cmp_result = is_greater;
@@ -471,14 +470,14 @@ module riscv_alu
   logic [31: 0]      pack_result;
 
 
-  always_comb
+  always @*
   begin
     shuffle_reg_sel  = '0;
     shuffle_reg1_sel = 2'b01;
     shuffle_reg0_sel = 2'b10;
     shuffle_through  = '1;
 
-    unique case(operator_i)
+    case(operator_i)
       ALU_EXT, ALU_EXTS: begin
         if (operator_i == ALU_EXTS)
           shuffle_reg1_sel = 2'b11;
@@ -511,7 +510,7 @@ module riscv_alu
       end
 
       ALU_SHUF2: begin
-        unique case (vector_mode_i)
+        case (vector_mode_i)
           VEC_MODE8: begin
             shuffle_reg_sel[3] = ~operand_b_i[26];
             shuffle_reg_sel[2] = ~operand_b_i[18];
@@ -530,10 +529,10 @@ module riscv_alu
       end
 
       ALU_INS: begin
-        unique case (vector_mode_i)
+        case (vector_mode_i)
           VEC_MODE8: begin
             shuffle_reg0_sel = 2'b00;
-            unique case (imm_vec_ext_i)
+            case (imm_vec_ext_i)
               2'b00: begin
                 shuffle_reg_sel[3:0] = 4'b1110;
               end
@@ -564,15 +563,15 @@ module riscv_alu
     endcase
   end
 
-  always_comb
+  always @*
   begin
     shuffle_byte_sel = 'x;
 
     // byte selector
-    unique case (operator_i)
+    case (operator_i)
       ALU_EXTS,
       ALU_EXT: begin
-        unique case (vector_mode_i)
+        case (vector_mode_i)
           VEC_MODE8: begin
             shuffle_byte_sel[3] = imm_vec_ext_i[1:0];
             shuffle_byte_sel[2] = imm_vec_ext_i[1:0];
@@ -593,7 +592,7 @@ module riscv_alu
 
       ALU_PCKLO,
       ALU_PCKHI: begin
-        unique case (vector_mode_i)
+        case (vector_mode_i)
           VEC_MODE8: begin
             shuffle_byte_sel[3] = 2'b00;
             shuffle_byte_sel[2] = 2'b00;
@@ -614,7 +613,7 @@ module riscv_alu
 
       ALU_SHUF2,
       ALU_SHUF: begin
-        unique case (vector_mode_i)
+        case (vector_mode_i)
           VEC_MODE8: begin
             shuffle_byte_sel[3] = operand_b_i[25:24];
             shuffle_byte_sel[2] = operand_b_i[17:16];
@@ -711,7 +710,7 @@ module riscv_alu
     .result_o    ( cnt_result  )
   );
 
-  always_comb
+  always @*
   begin
     ff_input = 'x;
 
@@ -745,7 +744,7 @@ module riscv_alu
   assign fl1_result  = 5'd31 - ff1_result;
   assign clb_result  = ff1_result - 5'd1;
 
-  always_comb
+  always @*
   begin
     bitop_result = 'x;
     case (operator_i)
@@ -860,11 +859,11 @@ module riscv_alu
   //                                                    //
   ////////////////////////////////////////////////////////
 
-  always_comb
+  always @*
   begin
     result_o   = 'x;
 
-    unique case (operator_i)
+    case (operator_i)
       // Standard Operations
       ALU_AND:  result_o = operand_a_i & operand_b_i;
       ALU_OR:   result_o = operand_a_i | operand_b_i;

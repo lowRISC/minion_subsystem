@@ -48,7 +48,7 @@ module riscv_hwloop_regs
   output logic [N_REGS-1:0] [31:0] hwlp_start_addr_o,
   output logic [N_REGS-1:0] [31:0] hwlp_end_addr_o,
   output logic [N_REGS-1:0] [31:0] hwlp_counter_o
-);
+); `include "riscv_defines.sv"
 
 
   logic [N_REGS-1:0] [31:0] hwlp_start_q;
@@ -66,7 +66,7 @@ module riscv_hwloop_regs
   /////////////////////////////////////////////////////////////////////////////////
   // HWLOOP start-address register                                               //
   /////////////////////////////////////////////////////////////////////////////////
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin : HWLOOP_REGS_START
     if (rst_n == 1'b0)
     begin
@@ -82,7 +82,7 @@ module riscv_hwloop_regs
   /////////////////////////////////////////////////////////////////////////////////
   // HWLOOP end-address register                                                 //
   /////////////////////////////////////////////////////////////////////////////////
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin : HWLOOP_REGS_END
     if (rst_n == 1'b0)
     begin
@@ -103,7 +103,7 @@ module riscv_hwloop_regs
     assign hwlp_counter_n[k] = hwlp_counter_q[k] - 1;
   end
 
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin : HWLOOP_REGS_COUNTER
     if (rst_n == 1'b0)
     begin

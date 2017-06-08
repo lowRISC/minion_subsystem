@@ -74,7 +74,7 @@ module sd_data_serial_host(
            output reg 			 finish_o,
 	   output reg [31:0] 		 wait_reg_o,
 	   output reg [`BLKSIZE_W-1+4:0] transf_cnt_o
-       );
+       ); `include "riscv_defines.sv"
 
 reg [4:0] crc_s;
 reg [3:0] crc_lane_ok;

@@ -54,7 +54,7 @@ module riscv_prefetch_L0_buffer
 
   // Prefetch Buffer Status
   output logic                                busy_o
-);
+); `include "riscv_defines.sv"
 
   logic                               busy_L0;
 
@@ -138,7 +138,7 @@ module riscv_prefetch_L0_buffer
   // the lower part of rdata_unaligned is always the higher part of rdata
   assign rdata_unaligned[15:0] = rdata[31:16];
 
-  always_comb
+  always @*
   begin
     rdata_unaligned[31:16] = 'x;
 
@@ -169,7 +169,7 @@ module riscv_prefetch_L0_buffer
   assign hwlp_aligned_is_compressed   = rdata_L0[3][1:0] != 2'b11;
   assign hwlp_is_crossword            = (hwloop_target_i[3:1] == 3'b111) && (~upper_is_compressed);
 
-  always_comb
+  always @*
   begin
     addr_int    = addr_o;
 
@@ -201,7 +201,7 @@ module riscv_prefetch_L0_buffer
     end
   end
 
-  always_comb
+  always @*
   begin
     NS              = CS;
     do_fetch        = 1'b0;
@@ -514,7 +514,7 @@ module riscv_prefetch_L0_buffer
   // registers
   //////////////////////////////////////////////////////////////////////////////
 
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if (~rst_n)
     begin
@@ -616,7 +616,7 @@ module prefetch_L0_buffer_L0
   input  logic [RDATA_IN_WIDTH/32-1:0][31:0]  instr_rdata_i,
 
   output logic                                busy_o
-);
+); `include "riscv_defines.sv"
 
   enum logic [2:0] { EMPTY, VALID_L0, WAIT_GNT, WAIT_RVALID, ABORTED_BRANCH, WAIT_HWLOOP } CS, NS;
 
@@ -629,7 +629,7 @@ module prefetch_L0_buffer_L0
   // FSM
   //////////////////////////////////////////////////////////////////////////////
 
-  always_comb
+  always @*
   begin
     NS             = CS;
     valid          = 1'b0;
@@ -796,7 +796,7 @@ module prefetch_L0_buffer_L0
   // registers
   //////////////////////////////////////////////////////////////////////////////
 
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if (~rst_n)
     begin

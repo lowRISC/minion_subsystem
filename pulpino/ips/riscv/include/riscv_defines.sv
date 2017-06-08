@@ -23,8 +23,6 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-package riscv_defines;
-
 ////////////////////////////////////////////////
 //    ___         ____          _             //
 //   / _ \ _ __  / ___|___   __| | ___  ___   //
@@ -70,8 +68,6 @@ parameter REGC_ZERO = 2'b11;
 //  /_/   \_\_____\___/   \___/| .__/ \___|_|  \__,_|\__|_|\___/|_| |_|___/ //
 //                             |_|                                          //
 //////////////////////////////////////////////////////////////////////////////
-
-parameter ALU_OP_WIDTH = 6;
 
 parameter ALU_ADD   = 6'b011000;
 parameter ALU_SUB   = 6'b011001;
@@ -301,7 +297,6 @@ parameter EXC_OFF_LSUERR   = 8'h8c;
 
 
 // Debug module
-parameter DBG_SETS_W = 6;
 
 parameter DBG_SETS_IRQ    = 5;
 parameter DBG_SETS_ECALL  = 4;
@@ -311,5 +306,3 @@ parameter DBG_SETS_EBRK   = 1;
 parameter DBG_SETS_SSTE   = 0;
 
 parameter DBG_CAUSE_HALT   = 6'h1F;
-
-endpackage

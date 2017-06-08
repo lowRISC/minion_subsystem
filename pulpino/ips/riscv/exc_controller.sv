@@ -21,10 +21,9 @@
 // Description:    Exception Controller of the pipelined processor            //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
+// import riscv_defines::*;
 
-import riscv_defines::*;
-
-module riscv_exc_controller
+module riscv_exc_controller#(`include "riscv_widths.sv")
 (
   input  logic        clk,
   input  logic        rst_n,
@@ -58,7 +57,7 @@ module riscv_exc_controller
 
   // from debug unit
   input  logic [DBG_SETS_W-1:0] dbg_settings_i
-);
+); `include "riscv_defines.sv"
 
 
   enum logic [0:0] { IDLE, WAIT_CONTROLLER } exc_ctrl_cs, exc_ctrl_ns;
@@ -94,7 +93,7 @@ module riscv_exc_controller
 
 
   // Exception cause and ISR address selection
-  always_comb
+  always @*
   begin
     cause_int  = 6'b0;
     pc_mux_int = 'x;
@@ -138,7 +137,7 @@ module riscv_exc_controller
     end
   end
 
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if (rst_n == 1'b0) begin
       cause_int_q  <= '0;
@@ -160,13 +159,13 @@ module riscv_exc_controller
 
 
   // Exception controller FSM
-  always_comb
+  always @*
   begin
     exc_ctrl_ns  = exc_ctrl_cs;
     req_o        = 1'b0;
     save_cause_o = 1'b0;
 
-    unique case (exc_ctrl_cs)
+    case (exc_ctrl_cs)
       IDLE:
       begin
         req_o = req_int;
@@ -198,7 +197,7 @@ module riscv_exc_controller
     endcase
   end
 
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if (rst_n == 1'b0)
       exc_ctrl_cs <= IDLE;
@@ -210,7 +209,7 @@ module riscv_exc_controller
 `ifndef SYNTHESIS
   // synopsys translate_off
   // evaluate at falling edge to avoid duplicates during glitches
-  always_ff @(negedge clk)
+  always @(negedge clk)
   begin
     if (rst_n && req_o && ack_i)
       $display("%t: Entering exception routine.", $time);

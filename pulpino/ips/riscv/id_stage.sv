@@ -25,8 +25,7 @@
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 
-
-import riscv_defines::*;
+// import riscv_defines::*;
 
 // Source/Destination register instruction index
 `define REG_S1 19:15
@@ -37,7 +36,8 @@ import riscv_defines::*;
 module riscv_id_stage
 #(
   parameter N_HWLP      = 2,
-  parameter N_HWLP_BITS = $clog2(N_HWLP)
+  parameter N_HWLP_BITS = $clog2(N_HWLP),
+  `include "riscv_widths.sv"
 )
 (
     input  logic        clk,
@@ -197,7 +197,7 @@ module riscv_id_stage
     output logic        perf_jump_o,          // we are executing a jump instruction
     output logic        perf_jr_stall_o,      // jump-register-hazard
     output logic        perf_ld_stall_o       // load-use-hazard
-);
+); `include "riscv_defines.sv"
 
   logic [31:0] instr;
 
@@ -394,9 +394,9 @@ module riscv_id_stage
   assign regfile_addr_rb_id = instr[`REG_S2];
 
   // register C mux
-  always_comb
+  always @*
   begin
-    unique case (regc_mux)
+    case (regc_mux)
       REGC_ZERO:  regfile_addr_rc_id = '0;
       REGC_RD:    regfile_addr_rc_id = instr[`REG_D];
       REGC_S1:    regfile_addr_rc_id = instr[`REG_S1];
@@ -449,7 +449,7 @@ module riscv_id_stage
   assign hwloop_regid_int = instr[7];   // rd contains hwloop register id
 
   // hwloop target mux
-  always_comb
+  always @*
   begin
     case (hwloop_target_mux_sel)
       1'b0: hwloop_target = pc_id_i + {imm_iz_type[30:0], 1'b0};
@@ -458,7 +458,7 @@ module riscv_id_stage
   end
 
   // hwloop start mux
-  always_comb
+  always @*
   begin
     case (hwloop_start_mux_sel)
       1'b0: hwloop_start_int = hwloop_target;   // for PC + I imm
@@ -468,7 +468,7 @@ module riscv_id_stage
 
 
   // hwloop cnt mux
-  always_comb
+  always @*
   begin : hwloop_cnt_mux
     case (hwloop_cnt_mux_sel)
       1'b0: hwloop_cnt_int = imm_iz_type;
@@ -493,9 +493,9 @@ module riscv_id_stage
   //                       |_|                    |___/           //
   //////////////////////////////////////////////////////////////////
 
-  always_comb
+  always @*
   begin : jump_target_mux
-    unique case (jump_target_mux_sel)
+    case (jump_target_mux_sel)
       JT_JAL:  jump_target = pc_id_i + imm_uj_type;
       JT_COND: jump_target = pc_id_i + imm_sb_type;
 
@@ -518,7 +518,7 @@ module riscv_id_stage
   ////////////////////////////////////////////////////////
 
   // ALU_Op_a Mux
-  always_comb
+  always @*
   begin : alu_operand_a_mux
     case (alu_op_a_mux_sel)
       OP_A_REGA_OR_FWD:  alu_operand_a = operand_a_fw_id;
@@ -529,9 +529,9 @@ module riscv_id_stage
     endcase; // case (alu_op_a_mux_sel)
   end
 
-  always_comb
+  always @*
   begin : immediate_a_mux
-    unique case (imm_a_mux_sel)
+    case (imm_a_mux_sel)
       IMMA_Z:      imm_a = imm_z_type;
       IMMA_ZERO:   imm_a = '0;
       default:      imm_a = '0;
@@ -539,7 +539,7 @@ module riscv_id_stage
   end
 
   // Operand a forwarding mux
-  always_comb
+  always @*
   begin : operand_a_fw_mux
     case (operand_a_fw_mux_sel)
       SEL_FW_EX:    operand_a_fw_id = regfile_alu_wdata_fw_i;
@@ -561,9 +561,9 @@ module riscv_id_stage
   // Immediate Mux for operand B
   // TODO: check if sign-extension stuff works well here, maybe able to save
   // some area here
-  always_comb
+  always @*
   begin : immediate_b_mux
-    unique case (imm_b_mux_sel)
+    case (imm_b_mux_sel)
       IMMB_I:      imm_b = imm_i_type;
       IMMB_S:      imm_b = imm_s_type;
       IMMB_U:      imm_b = imm_u_type;
@@ -580,7 +580,7 @@ module riscv_id_stage
   end
 
   // ALU_Op_b Mux
-  always_comb
+  always @*
   begin : alu_operand_b_mux
     case (alu_op_b_mux_sel)
       OP_B_REGB_OR_FWD:  operand_b = operand_b_fw_id;
@@ -592,7 +592,7 @@ module riscv_id_stage
 
 
   // scalar replication for operand B and shuffle type
-  always_comb
+  always @*
   begin
     if (alu_vec_mode == VEC_MODE8) begin
       operand_b_vec    = {4{operand_b[7:0]}};
@@ -608,7 +608,7 @@ module riscv_id_stage
 
 
   // Operand b forwarding mux
-  always_comb
+  always @*
   begin : operand_b_fw_mux
     case (operand_b_fw_mux_sel)
       SEL_FW_EX:    operand_b_fw_id = regfile_alu_wdata_fw_i;
@@ -629,7 +629,7 @@ module riscv_id_stage
   //////////////////////////////////////////////////////
 
   // ALU OP C Mux
-  always_comb
+  always @*
   begin : alu_operand_c_mux
     case (alu_op_c_mux_sel)
       OP_C_REGC_OR_FWD:  alu_operand_c = operand_c_fw_id;
@@ -640,7 +640,7 @@ module riscv_id_stage
   end
 
   // Operand c forwarding mux
-  always_comb
+  always @*
   begin : operand_c_fw_mux
     case (operand_c_fw_mux_sel)
       SEL_FW_EX:    operand_c_fw_id = regfile_alu_wdata_fw_i;
@@ -660,17 +660,17 @@ module riscv_id_stage
   //                                                                       //
   ///////////////////////////////////////////////////////////////////////////
 
-  always_comb
+  always @*
   begin
-    unique case (bmask_a_mux)
+    case (bmask_a_mux)
       BMASK_A_ZERO: bmask_a_id = '0;
       BMASK_A_S3:   bmask_a_id = imm_s3_type[4:0];
       default:       bmask_a_id = '0;
     endcase
   end
-  always_comb
+  always @*
   begin
-    unique case (bmask_b_mux)
+    case (bmask_b_mux)
       BMASK_B_ZERO: bmask_b_id = '0;
       BMASK_B_ONE:  bmask_b_id = 5'd1;
       BMASK_B_S2:   bmask_b_id = imm_s2_type[4:0];
@@ -682,9 +682,9 @@ module riscv_id_stage
   assign imm_vec_ext_id = imm_vu_type[1:0];
 
 
-  always_comb
+  always @*
   begin
-    unique case (mult_imm_mux)
+    case (mult_imm_mux)
       MIMM_ZERO: mult_imm_id = '0;
       MIMM_S3:   mult_imm_id = imm_s3_type[4:0];
       default:    mult_imm_id = '0;
@@ -1021,7 +1021,7 @@ module riscv_id_stage
   //                                                                             //
   /////////////////////////////////////////////////////////////////////////////////
 
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin : ID_EX_PIPE_REGISTERS
     if (rst_n == 1'b0)
     begin

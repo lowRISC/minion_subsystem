@@ -67,7 +67,7 @@ module riscv_load_store_unit
 
     input  logic         ex_valid_i,
     output logic         busy_o
-);
+); `include "riscv_defines.sv"
 
   logic [31:0]  data_addr_int;
 
@@ -90,7 +90,7 @@ module riscv_load_store_unit
   logic [31:0]  rdata_q;
 
   ///////////////////////////////// BE generation ////////////////////////////////
-  always_comb
+  always @*
   begin
     case (data_type_ex_i) // Data type 00 Word, 01 Half word, 11,10 byte
       2'b00:
@@ -148,7 +148,7 @@ module riscv_load_store_unit
   // we handle misaligned accesses, half word and byte accesses and
   // register offsets here
   assign wdata_offset = data_addr_int[1:0] - data_reg_offset_ex_i[1:0];
-  always_comb
+  always @*
   begin
     case (wdata_offset)
       2'b00: data_wdata = data_wdata_ex_i[31:0];
@@ -160,7 +160,7 @@ module riscv_load_store_unit
 
 
   // FF for rdata alignment and sign-extension
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if(rst_n == 1'b0)
     begin
@@ -195,7 +195,7 @@ module riscv_load_store_unit
   logic [31:0] rdata_b_ext; // sign extension for bytes
 
   // take care of misaligned words
-  always_comb
+  always @*
   begin
     case (rdata_offset_q)
       2'b00: rdata_w_ext = data_rdata_i[31:0];
@@ -206,7 +206,7 @@ module riscv_load_store_unit
   end
 
   // sign extension for half words
-  always_comb
+  always @*
   begin
     case (rdata_offset_q)
       2'b00:
@@ -244,7 +244,7 @@ module riscv_load_store_unit
   end
 
   // sign extension for bytes
-  always_comb
+  always @*
   begin
     case (rdata_offset_q)
       2'b00:
@@ -281,7 +281,7 @@ module riscv_load_store_unit
   end
 
   // select word, half word or byte sign extended version
-  always_comb
+  always @*
   begin
     case (data_type_q)
       2'b00:       data_rdata_ext = rdata_w_ext;
@@ -292,7 +292,7 @@ module riscv_load_store_unit
 
 
 
-  always_ff @(posedge clk, negedge rst_n)
+  always @(posedge clk, negedge rst_n)
   begin
     if(rst_n == 1'b0)
     begin
@@ -333,7 +333,7 @@ module riscv_load_store_unit
   assign store_err_o   = data_gnt_i && data_err_i && data_we_o;
 
   // FSM
-  always_comb
+  always @*
   begin
     NS             = CS;
 
@@ -438,7 +438,7 @@ module riscv_load_store_unit
   // check for misaligned accesses that need a second memory access
   // If one is detected, this is signaled with data_misaligned_o to
   // the controller which selectively stalls the pipeline
-  always_comb
+  always @*
   begin
     data_misaligned_o = 1'b0;
 

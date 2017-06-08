@@ -98,7 +98,7 @@ module sd_top(
  output wire [3:0] 	 sd_dat_to_mem,
  output wire 	 sd_cmd_to_mem,
  output wire 	 sd_cmd_oe,
- output wire 	 sd_dat_oe);
+ output wire 	 sd_dat_oe); `include "riscv_defines.sv"
 
 
    reg 		    sd_cmd_to_host_dly;
