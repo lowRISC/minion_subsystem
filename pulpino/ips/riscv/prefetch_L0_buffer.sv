@@ -54,7 +54,8 @@ module riscv_prefetch_L0_buffer
 
   // Prefetch Buffer Status
   output logic                                busy_o
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
   logic                               busy_L0;
 
@@ -561,7 +562,6 @@ module riscv_prefetch_L0_buffer
   assign busy_o = busy_L0;
 
 // synopsys translate_off   
-`ifndef verilator
 
   //----------------------------------------------------------------------------
   // Assertions
@@ -577,7 +577,6 @@ module riscv_prefetch_L0_buffer
   assert property (
     @(posedge clk) (is_crossword) |-> (~next_is_crossword) ) else $warning("Cannot have two crossword accesses back-to-back");
 
-`endif
 // synopsys translate_on
 
 endmodule // prefetch_L0_buffer
@@ -616,7 +615,8 @@ module prefetch_L0_buffer_L0
   input  logic [RDATA_IN_WIDTH/32-1:0][31:0]  instr_rdata_i,
 
   output logic                                busy_o
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
   enum logic [2:0] { EMPTY, VALID_L0, WAIT_GNT, WAIT_RVALID, ABORTED_BRANCH, WAIT_HWLOOP } CS, NS;
 

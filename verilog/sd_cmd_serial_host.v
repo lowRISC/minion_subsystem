@@ -65,7 +65,7 @@ module sd_cmd_serial_host (
            cmd_dat_i,
            cmd_out_o,
            cmd_oe_o
-       ); `include "riscv_defines.sv"
+       );
 
 //-------------Internal Constant-------------
 parameter INIT_DELAY = 74;

@@ -45,7 +45,8 @@ module riscv_alu_div
     input  logic                    OutRdy_SI,
     output logic                    OutVld_SO,
     output logic [C_WIDTH-1:0]      Res_DO
-  ); `include "riscv_defines.sv"
+  );
+`include "riscv_defines.sv"
 
   ///////////////////////////////////////////////////////////////////////////////
   // signal declarations

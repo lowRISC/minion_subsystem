@@ -2,7 +2,7 @@
 
 `ifdef datamem_tb
 
-module tb(); `include "riscv_defines.sv"
+module tb();
 
 parameter topa = 13;
 parameter rwidth = 14;

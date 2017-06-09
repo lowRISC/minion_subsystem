@@ -53,7 +53,8 @@ module riscv_register_file
     input logic [ADDR_WIDTH-1:0]   waddr_b_i,
     input logic [DATA_WIDTH-1:0]   wdata_b_i,
     input logic                    we_b_i
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
   localparam    NUM_WORDS = 2**ADDR_WIDTH;
 
@@ -91,12 +92,12 @@ module riscv_register_file
       always @(posedge clk, negedge rst_n)
       begin : register_write_behavioral
         if (rst_n==1'b0) begin
-          rf_reg[i] = 'b0;
+          rf_reg[i] <= 'b0;
         end else begin
           if(we_b_dec[i] == 1'b1)
-            rf_reg[i] = wdata_b_i;
+            rf_reg[i] <= wdata_b_i;
           else if(we_a_dec[i] == 1'b1)
-            rf_reg[i] = wdata_a_i;
+            rf_reg[i] <= wdata_a_i;
         end
       end
 

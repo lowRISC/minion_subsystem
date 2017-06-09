@@ -29,10 +29,8 @@
 
 module riscv_core
 #(
-  parameter N_EXT_PERF_COUNTERS = 0,
-  parameter INSTR_RDATA_WIDTH   = 32,
-  `include "riscv_widths.sv"
-)
+`include "riscv_widths.sv"
+  )
 (
   // Clock and Reset
   input  logic        clk_i,
@@ -84,14 +82,12 @@ module riscv_core
   output logic        core_busy_o,
 
   input  logic [N_EXT_PERF_COUNTERS-1:0] ext_perf_counters_i
-); `include "riscv_defines.sv"
-
-  localparam N_HWLP      = 2;
-  localparam N_HWLP_BITS = $clog2(N_HWLP);
+);
+`include "riscv_defines.sv"
 
   // IF/ID signals
   logic              is_hwlp_id;
-  logic [N_HWLP-1:0] hwlp_dec_cnt_id;
+  logic  hwlp_dec_cnt_id;
   logic              instr_valid_id;
   logic [31:0]       instr_rdata_id;    // Instruction sampled inside IF stage
   logic              is_compressed_id;
@@ -216,9 +212,9 @@ module riscv_core
 
 
   // Hardware loop controller signals
-  logic [N_HWLP-1:0] [31:0] hwlp_start;
-  logic [N_HWLP-1:0] [31:0] hwlp_end;
-  logic [N_HWLP-1:0] [31:0] hwlp_cnt;
+  logic  [31:0] hwlp_start;
+  logic  [31:0] hwlp_end;
+  logic  [31:0] hwlp_cnt;
 
   // used to write from CS registers to hardware loop registers
   logic   [N_HWLP_BITS-1:0] csr_hwlp_regid;
@@ -306,10 +302,6 @@ module riscv_core
   //                                              //
   //////////////////////////////////////////////////
   riscv_if_stage
-  #(
-    .N_HWLP              ( N_HWLP            ),
-    .RDATA_WIDTH         ( INSTR_RDATA_WIDTH )
-  )
   if_stage_i
   (
     .clk                 ( clk               ),
@@ -379,9 +371,6 @@ module riscv_core
   //                                             //
   /////////////////////////////////////////////////
   riscv_id_stage
-  #(
-    .N_HWLP                       ( N_HWLP               )
-  )
   id_stage_i
   (
     .clk                          ( clk                  ),

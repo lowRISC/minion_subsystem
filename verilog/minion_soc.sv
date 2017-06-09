@@ -53,7 +53,7 @@ module minion_soc
  output wire  [3:0]    VGA_RED_O,
  output wire  [3:0]    VGA_BLUE_O,
  output wire  [3:0]    VGA_GREEN_O
- ); `include "riscv_defines.sv"
+ );
  
  wire [19:0] dummy;
  wire        irst, ascii_ready;

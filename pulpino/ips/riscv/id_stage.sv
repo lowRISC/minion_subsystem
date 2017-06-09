@@ -35,9 +35,7 @@
 
 module riscv_id_stage
 #(
-  parameter N_HWLP      = 2,
-  parameter N_HWLP_BITS = $clog2(N_HWLP),
-  `include "riscv_widths.sv"
+`include "riscv_widths.sv"
 )
 (
     input  logic        clk,
@@ -50,7 +48,7 @@ module riscv_id_stage
     output logic        is_decoding_o,
 
     // Interface to IF stage
-    input  logic [N_HWLP-1:0] hwlp_dec_cnt_i,
+    input  logic  hwlp_dec_cnt_i,
     input  logic              is_hwlp_i,
     input  logic              instr_valid_i,
     input  logic       [31:0] instr_rdata_i,      // comes from pipeline of IF stage
@@ -128,9 +126,9 @@ module riscv_id_stage
     output logic [1:0]  csr_op_ex_o,
 
     // hwloop signals
-    output logic [N_HWLP-1:0] [31:0] hwlp_start_o,
-    output logic [N_HWLP-1:0] [31:0] hwlp_end_o,
-    output logic [N_HWLP-1:0] [31:0] hwlp_cnt_o,
+    output logic  [31:0] hwlp_start_o,
+    output logic  [31:0] hwlp_end_o,
+    output logic  [31:0] hwlp_cnt_o,
 
     // hwloop signals from CS register
     input  logic   [N_HWLP_BITS-1:0] csr_hwlp_regid_i,
@@ -197,7 +195,8 @@ module riscv_id_stage
     output logic        perf_jump_o,          // we are executing a jump instruction
     output logic        perf_jr_stall_o,      // jump-register-hazard
     output logic        perf_ld_stall_o       // load-use-hazard
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
   logic [31:0] instr;
 
@@ -982,9 +981,6 @@ module riscv_id_stage
   //////////////////////////////////////////////////////////////////////////
 
   riscv_hwloop_regs
-  #(
-    .N_REGS ( N_HWLP )
-  )
   hwloop_regs_i
   (
     .clk                   ( clk                       ),
@@ -1189,7 +1185,7 @@ module riscv_id_stage
   assign id_valid_o = (~halt_id) & id_ready_o;
 
 // synopsys translate_off
-`ifndef verilator
+`ifndef SKIP_ASSERT
 
   //----------------------------------------------------------------------------
   // Assertions
@@ -1202,7 +1198,8 @@ module riscv_id_stage
   // the instruction delivered to the ID stage should always be valid
   assert property (
     @(posedge clk) (instr_valid_i & (~illegal_c_insn_i)) |-> (!$isunknown(instr_rdata_i)) ) else begin $display("Instruction is valid, but has at least one X"); $stop; end
-`endif   
+
+`endif
 // synopsys translate_on
 
 endmodule

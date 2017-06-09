@@ -23,7 +23,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 // import riscv_defines::*;
 
-module riscv_exc_controller#(`include "riscv_widths.sv")
+module riscv_exc_controller
+#(
+`include "riscv_widths.sv"
+)
 (
   input  logic        clk,
   input  logic        rst_n,
@@ -57,10 +60,11 @@ module riscv_exc_controller#(`include "riscv_widths.sv")
 
   // from debug unit
   input  logic [DBG_SETS_W-1:0] dbg_settings_i
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
 
-  enum logic [0:0] { IDLE, WAIT_CONTROLLER } exc_ctrl_cs, exc_ctrl_ns;
+  logic [0:0] IDLE=0, WAIT_CONTROLLER=1, exc_ctrl_cs, exc_ctrl_ns;
 
   logic req_int;
   logic [1:0] pc_mux_int, pc_mux_int_q;

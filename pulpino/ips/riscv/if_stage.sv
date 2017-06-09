@@ -29,8 +29,7 @@
 
 module riscv_if_stage
 #(
-  parameter N_HWLP      = 2,
-  parameter RDATA_WIDTH = 32
+`include "riscv_widths.sv"
 )
 (
     input  logic        clk,
@@ -47,10 +46,10 @@ module riscv_if_stage
     output logic            [31:0] instr_addr_o,
     input  logic                   instr_gnt_i,
     input  logic                   instr_rvalid_i,
-    input  logic [RDATA_WIDTH-1:0] instr_rdata_i,
+    input  logic [INSTR_RDATA_WIDTH-1:0] instr_rdata_i,
 
     // Output of IF Pipeline stage
-    output logic [N_HWLP-1:0] hwlp_dec_cnt_id_o,     // currently served instruction was the target of a hwlp
+    output logic  hwlp_dec_cnt_id_o,     // currently served instruction was the target of a hwlp
     output logic              is_hwlp_id_o,          // currently served instruction was the target of a hwlp
     output logic              instr_valid_id_o,      // instruction in IF/ID pipeline is valid
     output logic       [31:0] instr_rdata_id_o,      // read instruction is sampled and sent to ID stage for decoding
@@ -72,9 +71,9 @@ module riscv_if_stage
     input  logic [31:0] jump_target_ex_i,      // jump target address
 
     // from hwloop controller
-    input  logic [N_HWLP-1:0] [31:0] hwlp_start_i,          // hardware loop start addresses
-    input  logic [N_HWLP-1:0] [31:0] hwlp_end_i,            // hardware loop end addresses
-    input  logic [N_HWLP-1:0] [31:0] hwlp_cnt_i,            // hardware loop counters
+    input  logic  [31:0] hwlp_start_i,          // hardware loop start addresses
+    input  logic  [31:0] hwlp_end_i,            // hardware loop end addresses
+    input  logic  [31:0] hwlp_cnt_i,            // hardware loop counters
 
     // from debug unit
     input  logic [31:0] dbg_jump_addr_i,
@@ -89,10 +88,11 @@ module riscv_if_stage
     // misc signals
     output logic        if_busy_o,             // is the IF stage busy fetching instructions?
     output logic        perf_imiss_o           // Instruction Fetch Miss
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
   // offset FSM
-  enum logic[0:0] {WAIT, IDLE } offset_fsm_cs, offset_fsm_ns;
+  logic[0:0] WAIT=0, IDLE=1, offset_fsm_cs, offset_fsm_ns;
 
   logic              valid;
 
@@ -112,7 +112,7 @@ module riscv_if_stage
   // hardware loop related signals
   logic              hwlp_jump;
   logic       [31:0] hwlp_target;
-  logic [N_HWLP-1:0] hwlp_dec_cnt, hwlp_dec_cnt_if;
+  logic  hwlp_dec_cnt, hwlp_dec_cnt_if;
 
 
   // exception PC selection mux
@@ -149,7 +149,7 @@ module riscv_if_stage
   end
 
   generate
-    if (RDATA_WIDTH == 32) begin : prefetch_32
+    if (INSTR_RDATA_WIDTH == 32) begin : prefetch_32
       // prefetch buffer, caches a fixed number of instructions
       riscv_prefetch_buffer prefetch_buffer_i
       (
@@ -180,7 +180,7 @@ module riscv_if_stage
         // Prefetch Buffer Status
         .busy_o            ( prefetch_busy               )
       );
-    end else if (RDATA_WIDTH == 128) begin : prefetch_128
+    end else if (INSTR_RDATA_WIDTH == 128) begin : prefetch_128
       // prefetch buffer, caches a fixed number of instructions
       riscv_prefetch_L0_buffer prefetch_buffer_i
       (
@@ -274,9 +274,6 @@ module riscv_if_stage
 
   // Hardware Loops
   riscv_hwloop_controller
-  #(
-    .N_REGS ( N_HWLP )
-  )
   hwloop_controller_i
   (
     .current_pc_i          ( fetch_addr        ),
@@ -291,7 +288,7 @@ module riscv_if_stage
 
     // to hwloop_regs
     .hwlp_dec_cnt_o        ( hwlp_dec_cnt      ),
-    .hwlp_dec_cnt_id_i     ( hwlp_dec_cnt_id_o & {N_HWLP{is_hwlp_id_o}} )
+    .hwlp_dec_cnt_id_i     ( hwlp_dec_cnt_id_o & is_hwlp_id_o )
   );
 
 
@@ -374,7 +371,6 @@ module riscv_if_stage
   assign if_valid_o = (~halt_if_i) & if_ready_o;
 
 // synopsys translate_off
-`ifndef verilator
   //----------------------------------------------------------------------------
   // Assertions
   //----------------------------------------------------------------------------
@@ -388,7 +384,6 @@ module riscv_if_stage
   assert property (
     @(posedge clk) (req_i) |-> (~fetch_addr_n[0]) )
     else $warning("There was a request while the fetch_addr_n LSB is set");
-`endif
 // synopsys translate_on
 
 endmodule

@@ -3,7 +3,7 @@
 ////  ps2_translation_table.v                                     ////
 ////                                                              ////
 ////  This file is part of the "ps2" project                      ////
-////  https://github.com/freecores/ps2/verilog                    ////
+////  http://www.opencores.org/cores/ps2/                         ////
 ////                                                              ////
 ////  Author(s):                                                  ////
 ////      - mihad@opencores.org                                   ////
@@ -77,7 +77,8 @@ module ps2_translation_table
    rx_read_i,
    rx_read_o,
    rx_released_i
-   ) ; `include "riscv_defines.sv"
+   ) ;
+`include "riscv_defines.sv"
 
    input reset_i,
          clock_i,

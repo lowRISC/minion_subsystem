@@ -42,4 +42,9 @@ vivado/vivado_pid*
 romgen/bigromgen
 romgen/bigromtest
 romgen/romgen
-
+verilog/DVEfiles
+verilog/csrc
+verilog/inter.vpd
+verilog/simv
+verilog/simv.daidir
+verilog/ucli.key

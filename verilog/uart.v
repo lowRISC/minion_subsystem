@@ -1,4 +1,3 @@
-`timescale 1ns / 1ps
 // Documented Verilog UART
 // Copyright (C) 2010 Timothy Goddard (tim@goddard.net.nz)
 // Distributed under the MIT licence.
@@ -36,7 +35,7 @@ module uart(
             input [15:0]     baud,
             input            brk,
             input            recv_ack
-            ); `include "riscv_defines.sv"
+            );
 
    // parameter CLOCK_DIVIDE = 1302; // clock rate (50Mhz) / (baud rate (9600) * 4)
 

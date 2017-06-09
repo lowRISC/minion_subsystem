@@ -1,5 +1,5 @@
 
-default: verilog
+default: verilator
 
 base_dir = ..
 
@@ -54,14 +54,47 @@ verilog_headers = \
 # Build Verilog
 #--------------------------------------------------------------------
 
-verilog: $(verilog_srcs) $(verilog_headers)
-	iverilog -g2012 -Dverilator \
+verilator: $(verilog_srcs) $(verilog_headers)
+	verilator -cc -DSKIP_ASSERT \
+        +incdir+../pulpino/rtl/includes \
+        +incdir+../pulpino/ips/riscv/include \
+	$(XILINX_VIVADO)/data/verilog/src/glbl.v \
+	$(XILINX_VIVADO)/data/verilog/src/retarget/RAMB16_S1_S1.v \
+	$(XILINX_VIVADO)/data/verilog/src/retarget/RAMB16_S2_S2.v \
+	$(XILINX_VIVADO)/data/verilog/src/retarget/RAMB16_S9.v \
+	$(XILINX_VIVADO)/data/verilog/src/unisims/FIFO18E1.v \
+	$(XILINX_VIVADO)/data/verilog/src/unisims/IOBUF.v \
+	$(XILINX_VIVADO)/data/verilog/src/unisims/RAMB18E1.v \
+	$(verilog_srcs) 2>&1 | tee $@.log
+
+cvc: $(verilog_srcs) $(verilog_headers) $(XILINX_VIVADO)/data/verilog/src/glbl.v
+	cvc64 -sv +libext+.v +lint=TFIPC-L \
+	+define+BYPASS_CLK_DIV +define+SKIP_ASSERT \
+        +incdir+../pulpino/rtl/includes \
+        +incdir+../pulpino/ips/riscv/include \
+	$(XILINX_VIVADO)/data/verilog/src/glbl.v \
+	-y $(XILINX_VIVADO)/data/verilog/src/retarget \
+	-y $(XILINX_VIVADO)/data/verilog/src/unisims \
+	$(verilog_srcs) 2>&1 | tee $@.log
+
+iverilog: $(verilog_srcs) $(verilog_headers)
+	iverilog -g2012 -DSKIP_ASSERT \
         -I ../pulpino/rtl/includes \
         -I ../pulpino/ips/riscv/include \
 	$(verilog_srcs) 2>&1 | tee $@.log
 
 simv: $(verilog_srcs) $(verilog_headers) $(XILINX_VIVADO)/data/verilog/src/glbl.v
 	vcs -full64 +systemverilogext+sv +libext+.v +lint=TFIPC-L -gui \
+	+define+BYPASS_CLK_DIV \
+        +incdir+../pulpino/rtl/includes \
+        +incdir+../pulpino/ips/riscv/include \
+	$(XILINX_VIVADO)/data/verilog/src/glbl.v \
+	-y $(XILINX_VIVADO)/data/verilog/src/retarget \
+	-y $(XILINX_VIVADO)/data/verilog/src/unisims \
+	$(verilog_srcs) 2>&1 | tee $@.log
+
+tokens.v: $(verilog_srcs) $(verilog_headers) $(XILINX_VIVADO)/data/verilog/src/glbl.v
+	vcs -full64 -Xmangle=4 +systemverilogext+sv +libext+.v +lint=TFIPC-L -gui \
 	+define+BYPASS_CLK_DIV \
         +incdir+../pulpino/rtl/includes \
         +incdir+../pulpino/ips/riscv/include \

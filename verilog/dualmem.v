@@ -1,5 +1,6 @@
 
-module dualmem(clka, clkb, dina, dinb, addra, addrb, wea, web, douta, doutb, ena, enb); `include "riscv_defines.sv"
+module dualmem(clka, clkb, dina, dinb, addra, addrb, wea, web, douta, doutb, ena, enb);
+`include "riscv_defines.sv"
 
    parameter rwidth = 13;
 

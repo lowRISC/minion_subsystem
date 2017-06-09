@@ -28,7 +28,10 @@
 // import riscv_defines::*;
 
 
-module riscv_ex_stage#(`include "riscv_widths.sv")
+module riscv_ex_stage
+#(
+`include "riscv_widths.sv"
+)
 (
   input  logic        clk,
   input  logic        rst_n,
@@ -92,7 +95,8 @@ module riscv_ex_stage#(`include "riscv_widths.sv")
   output logic        ex_ready_o, // EX stage ready for new data
   output logic        ex_valid_o, // EX stage gets new data
   input  logic        wb_ready_i  // WB stage ready for new data
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
 
   logic [31:0] alu_result;

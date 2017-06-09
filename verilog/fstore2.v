@@ -41,7 +41,7 @@ module fstore2(
                input             GPIO_SW_S,
                input             GPIO_SW_E,
                input             GPIO_SW_W
-               ); `include "riscv_defines.sv"
+               );
 
    wire                          clear = GPIO_SW_S & GPIO_SW_N; 
    

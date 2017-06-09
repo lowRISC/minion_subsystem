@@ -126,13 +126,15 @@ module riscv_controller
   output logic        perf_jump_o,                // we are executing a jump instruction   (j, jr, jal, jalr)
   output logic        perf_jr_stall_o,            // stall due to jump-register-hazard
   output logic        perf_ld_stall_o             // stall due to load-use-hazard
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
   // FSM state encoding
-  enum  logic [3:0] { RESET, BOOT_SET, SLEEP, FIRST_FETCH,
-                      DECODE,
-                      FLUSH_EX, FLUSH_WB,
-                      DBG_SIGNAL, DBG_SIGNAL_SLEEP, DBG_WAIT, DBG_WAIT_BRANCH, DBG_WAIT_SLEEP } ctrl_fsm_cs, ctrl_fsm_ns;
+   logic [3:0] 	      RESET=0, BOOT_SET=1, SLEEP=2, FIRST_FETCH=3,
+                      DECODE=4,
+                      FLUSH_EX=5, FLUSH_WB=6,
+                      DBG_SIGNAL=7, DBG_SIGNAL_SLEEP=8, DBG_WAIT=9, DBG_WAIT_BRANCH=10, DBG_WAIT_SLEEP=11,
+  ctrl_fsm_cs, ctrl_fsm_ns;
 
   logic jump_done, jump_done_q;
 
@@ -582,7 +584,7 @@ module riscv_controller
   assign perf_ld_stall_o  = load_stall_o;
 
 // synopsys translate_off
-`ifndef verilator
+`ifndef SKIP_ASSERT
 
   //----------------------------------------------------------------------------
   // Assertions

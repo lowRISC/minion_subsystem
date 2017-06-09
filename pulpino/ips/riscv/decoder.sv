@@ -25,7 +25,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 // import riscv_defines::*;
 
-module riscv_decoder#(`include "riscv_widths.sv")
+module riscv_decoder
+#(
+`include "riscv_widths.sv"
+)
 (
   // singals running to/from controller
   input  logic        deassert_we_i,           // deassert we, we are stalled or not active
@@ -98,7 +101,8 @@ module riscv_decoder#(`include "riscv_widths.sv")
   output logic [1:0]  jump_in_dec_o,           // jump_in_id without deassert
   output logic [1:0]  jump_in_id_o,            // jump is being calculated in ALU
   output logic [1:0]  jump_target_mux_sel_o    // jump target selection
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
   // write enable/request control
   logic       regfile_mem_we;

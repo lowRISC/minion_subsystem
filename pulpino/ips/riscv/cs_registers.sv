@@ -32,9 +32,7 @@
 
 module riscv_cs_registers
 #(
-  parameter N_HWLP       = 2,
-  parameter N_HWLP_BITS  = $clog2(N_HWLP),
-  parameter N_EXT_CNT    = 0
+`include "riscv_widths.sv"
 )
 (
   // Clock and Reset
@@ -68,9 +66,9 @@ module riscv_cs_registers
   input  logic        save_exc_cause_i,
 
   // Hardware loops
-  input  logic [N_HWLP-1:0] [31:0] hwlp_start_i,
-  input  logic [N_HWLP-1:0] [31:0] hwlp_end_i,
-  input  logic [N_HWLP-1:0] [31:0] hwlp_cnt_i,
+  input  logic  [31:0] hwlp_start_i,
+  input  logic  [31:0] hwlp_end_i,
+  input  logic  [31:0] hwlp_cnt_i,
 
   output logic [31:0]              hwlp_data_o,
   output logic [N_HWLP_BITS-1:0]   hwlp_regid_o,
@@ -93,7 +91,8 @@ module riscv_cs_registers
   input  logic                 mem_store_i,       // store to memory in this cycle
 
   input  logic [N_EXT_CNT-1:0] ext_counters_i
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
   localparam N_PERF_COUNTERS = 11 + N_EXT_CNT;
 

@@ -24,7 +24,8 @@ module coremem
    output logic data_rvalid_o,
    input logic  data_we_i,
    output logic CE, WE
-   ); `include "riscv_defines.sv"
+   );
+`include "riscv_defines.sv"
    
    logic        aw_valid_o;
    logic        aw_ready_i;
@@ -37,7 +38,7 @@ module coremem
    logic        r_valid_i;
    logic        r_ready_o;
 
-   enum         logic [2:0] { IDLE, READ_WAIT, WRITE_DATA, WRITE_ADDR, WRITE_WAIT } CS, NS;
+   logic [2:0] 	IDLE=0, READ_WAIT=1, WRITE_DATA=2, WRITE_ADDR=3, WRITE_WAIT=4, CS, NS;
 
    assign CE = aw_valid_o | ar_valid_o;
    assign WE = aw_valid_o;

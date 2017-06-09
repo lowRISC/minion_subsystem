@@ -21,7 +21,10 @@
 
 // import riscv_defines::*;
 
-module riscv_debug_unit#(`include "riscv_widths.sv")
+module riscv_debug_unit
+#(
+`include "riscv_widths.sv"
+)
 (
   input logic         clk,
   input logic         rst_n,
@@ -80,11 +83,12 @@ module riscv_debug_unit#(`include "riscv_widths.sv")
 
   output logic        jump_req_o,
   output logic [31:0] jump_addr_o
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
-  enum logic [2:0] {RD_NONE, RD_CSR, RD_GPR, RD_DBGA, RD_DBGS} rdata_sel_q, rdata_sel_n;
+  logic [2:0] RD_NONE=0, RD_CSR=1, RD_GPR=2, RD_DBGA=3, RD_DBGS=4, rdata_sel_q, rdata_sel_n;
 
-  enum logic [0:0] {FIRST, SECOND} state_q, state_n;
+  logic [0:0] FIRST=0, SECOND=1, state_q, state_n;
 
   logic [DBG_SETS_W-1:0] settings_q, settings_n;
 
@@ -99,7 +103,7 @@ module riscv_debug_unit#(`include "riscv_widths.sv")
   logic        regfile_wreq;
 
 
-  enum logic [1:0] {RUNNING, HALT_REQ, HALT} stall_cs, stall_ns;
+  logic [1:0]  RUNNING=0, HALT_REQ=1, HALT=2, stall_cs, stall_ns;
   logic [31:0] dbg_rdata;
   logic        dbg_resume;
   logic        dbg_halt;
@@ -110,7 +114,7 @@ module riscv_debug_unit#(`include "riscv_widths.sv")
 
 
   // ppc/npc tracking
-  enum logic [1:0] {IFID, IFEX, IDEX} pc_tracking_fsm_cs, pc_tracking_fsm_ns;
+  logic [1:0] IFID=0, IFEX=1, IDEX=2, pc_tracking_fsm_cs, pc_tracking_fsm_ns;
   logic [31:0] ppc_int, npc_int;
 
 
@@ -517,7 +521,6 @@ module riscv_debug_unit#(`include "riscv_widths.sv")
   assign settings_o      = settings_q;
 
 // synopsys translate_off   
-`ifndef verilator
   //----------------------------------------------------------------------------
   // Assertions
   //----------------------------------------------------------------------------
@@ -534,7 +537,6 @@ module riscv_debug_unit#(`include "riscv_widths.sv")
   assert property (
     @(posedge clk) (debug_req_i) |-> (debug_addr_i[1:0] == 2'b00) );
 
-`endif
 // synopsys translate_on
 
 endmodule // debug_unit

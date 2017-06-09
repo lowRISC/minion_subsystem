@@ -28,7 +28,8 @@ module riscv_compressed_decoder
   output logic [31:0] instr_o,
   output logic        is_compressed_o,
   output logic        illegal_instr_o
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////
   //   ____                                                 _   ____                     _            //

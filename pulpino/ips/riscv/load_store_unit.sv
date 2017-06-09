@@ -67,7 +67,8 @@ module riscv_load_store_unit
 
     input  logic         ex_valid_i,
     output logic         busy_o
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
   logic [31:0]  data_addr_int;
 
@@ -85,7 +86,7 @@ module riscv_load_store_unit
   logic         misaligned_st;   // high if we are currently performing the second part of a misaligned store
 
 
-  enum logic [1:0]  { IDLE, WAIT_RVALID, WAIT_RVALID_EX_STALL, IDLE_EX_STALL } CS, NS;
+  logic [1:0]  IDLE=0, WAIT_RVALID=1, WAIT_RVALID_EX_STALL=2, IDLE_EX_STALL=3, CS, NS;
 
   logic [31:0]  rdata_q;
 
@@ -465,8 +466,8 @@ module riscv_load_store_unit
   assign busy_o = (CS == WAIT_RVALID) || (CS == WAIT_RVALID_EX_STALL) || (CS == IDLE_EX_STALL) || (data_req_o == 1'b1);
 
 // synopsys translate_off
-`ifndef verilator
-
+`ifndef SKIP_ASSERT
+   
   //////////////////////////////////////////////////////////////////////////////
   // Assertions
   //////////////////////////////////////////////////////////////////////////////

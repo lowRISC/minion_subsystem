@@ -2,7 +2,8 @@
 // CRC Generation Unit - Linear Feedback Shift Register implementation
 // (c) Kay Gorontzi, GHSi.de, distributed under the terms of LGPL
 // ==========================================================================
-module sd_crc_16(BITVAL, ENABLE, BITSTRB, CLEAR, CRC); `include "riscv_defines.sv"
+module sd_crc_16(BITVAL, ENABLE, BITSTRB, CLEAR, CRC);
+`include "riscv_defines.sv"
    input        BITVAL;                            // Next input bit
    input        ENABLE;                            // Enable calculation
    input        BITSTRB;                           // Current bit valid (Clock)

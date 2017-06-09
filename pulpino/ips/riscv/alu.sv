@@ -44,7 +44,8 @@ module riscv_alu#(`include "riscv_widths.sv")
 
   output logic                     ready_o,
   input  logic                     ex_ready_i
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
 
   logic [31:0] operand_a_rev;

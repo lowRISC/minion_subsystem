@@ -48,7 +48,8 @@ module riscv_fetch_fifo
 
     output logic        out_valid_stored_o, // same as out_valid_o, except that if something is incoming now it is not included. This signal is available immediately as it comes directly out of FFs
     output logic        out_is_hwlp_o
-  ); `include "riscv_defines.sv"
+  );
+`include "riscv_defines.sv"
 
   localparam DEPTH = 4; // must be 3 or greater
 
@@ -194,8 +195,7 @@ module riscv_fetch_fifo
 
       if (is_hwlp_int[1]) begin
         addr_n[0] = addr_int[1][31:0];
-	rdata_n[DEPTH-1] = 32'b0;
-        for (int i = 1; i < DEPTH; i=i+1) rdata_n[i-1] = rdata_int[i];
+        rdata_n   = {rdata_int[1:DEPTH-1], 32'b0};
         valid_n   = {valid_int[1:DEPTH-1], 1'b0};
       end else begin
         if (addr_int[0][1]) begin
@@ -206,8 +206,7 @@ module riscv_fetch_fifo
             addr_n[0] = {addr_next[31:2], 2'b10};
           end
 
-	rdata_n[DEPTH-1] = 32'b0;
-        for (int i = 1; i < DEPTH; i=i+1) rdata_n[i-1] = rdata_int[i];
+          rdata_n  = {rdata_int[1:DEPTH-1], 32'b0};
           valid_n  = {valid_int[1:DEPTH-1], 1'b0};
         end else begin
           // aligned case
@@ -217,8 +216,7 @@ module riscv_fetch_fifo
           end else begin
             // move to next entry in FIFO
             addr_n[0] = {addr_next[31:2], 2'b00};
-	rdata_n[DEPTH-1] = 32'b0;
-        for (int i = 1; i < DEPTH; i=i+1) rdata_n[i-1] = rdata_int[i];
+            rdata_n   = {rdata_int[1:DEPTH-1], 32'b0};
             valid_n   = {valid_int[1:DEPTH-1], 1'b0};
           end
         end
@@ -255,7 +253,6 @@ module riscv_fetch_fifo
     end
   end
 
-`ifndef verilator
 // synopsys translate_off   
   //----------------------------------------------------------------------------
   // Assertions
@@ -265,7 +262,6 @@ module riscv_fetch_fifo
   assert property (
     @(posedge clk) (in_valid_i) |-> ((valid_Q[DEPTH-1] == 1'b0) || (clear_i == 1'b1) || (in_replace2_i == 1'b1)) );
 // synopsys translate_on
-`endif
 
 endmodule
 
@@ -298,7 +294,8 @@ module riscv_prefetch_buffer
 
   // Prefetch Buffer Status
   output logic        busy_o
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
   enum logic [1:0] {IDLE, WAIT_GNT, WAIT_RVALID, WAIT_ABORTED } CS, NS;
   enum logic [1:0] {HWLP_NONE, HWLP_IN, HWLP_FETCHING, HWLP_DONE } hwlp_CS, hwlp_NS;

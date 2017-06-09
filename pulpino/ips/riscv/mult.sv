@@ -54,7 +54,8 @@ module riscv_mult
   output logic        multicycle_o,
   output logic        ready_o,
   input  logic        ex_ready_i
-); `include "riscv_defines.sv"
+);
+`include "riscv_defines.sv"
 
   ///////////////////////////////////////////////////////////////
   //  ___ _  _ _____ ___ ___ ___ ___   __  __ _   _ _  _____   //
@@ -85,7 +86,7 @@ module riscv_mult
   logic        mulh_active;
   logic        mulh_save;
   logic        mulh_ready;
-  enum logic [2:0] {IDLE, STEP0, STEP1, STEP2, FINISH} mulh_CS, mulh_NS;
+  logic [2:0]  IDLE=0, STEP0=1, STEP1=2, STEP2=3, FINISH=4, mulh_CS, mulh_NS;
 
   // prepare the rounding value
   assign short_round_tmp = (32'h00000001) << imm_i;
@@ -210,14 +211,14 @@ module riscv_mult
   //                                           //
   ///////////////////////////////////////////////
 
-  logic [3:0][ 8:0] dot_char_op_a;
-  logic [3:0][ 8:0] dot_char_op_b;
-  logic [3:0][17:0] dot_char_mul;
+  logic [ 8:0] dot_char_op_a[3:0];
+  logic [ 8:0] dot_char_op_b[3:0];
+  logic [17:0] dot_char_mul[3:0];
   logic [31:0]      dot_char_result;
 
-  logic [1:0][16:0] dot_short_op_a;
-  logic [1:0][16:0] dot_short_op_b;
-  logic [1:0][33:0] dot_short_mul;
+  logic [16:0] dot_short_op_a[1:0];
+  logic [16:0] dot_short_op_b[1:0];
+  logic [33:0] dot_short_mul[1:0];
   logic [31:0]      dot_short_result;
 
 
@@ -282,7 +283,8 @@ module riscv_mult
   assign ready_o      = mulh_ready;
 
 // synopsys translate_off
-`ifndef verilator
+`ifndef SKIP_ASSERT
+  
   //----------------------------------------------------------------------------
   // Assertions
   //----------------------------------------------------------------------------
