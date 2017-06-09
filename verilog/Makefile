@@ -100,15 +100,6 @@ simv: $(verilog_srcs) $(verilog_headers) $(XILINX_VERILOG)/glbl.v
 	-y $(XILINX_VERILOG)/unisims \
 	$(verilog_srcs) 2>&1 | tee $@.log
 
-tokens.v: $(verilog_srcs) $(verilog_headers) $(XILINX_VERILOG)/glbl.v
-	vcs -full64 -Xmangle=4 +systemverilogext+sv +libext+.v +lint=TFIPC-L -gui \
-	+define+BYPASS_CLK_DIV \
-        +incdir+../pulpino/rtl/includes \
-        +incdir+../pulpino/ips/riscv/include \
-	$(XILINX_VERILOG)/glbl.v \
-	-y $(XILINX_VERILOG)/unisims \
-	$(verilog_srcs) 2>&1 | tee $@.log
-
 sed: $(verilog_srcs)
 	sh remove_modern_constructs.sh $(verilog_srcs)
 
