@@ -303,6 +303,41 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
+      <File Path="$PPRDIR/../verilog/iopad.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/code0.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/generic_fifo_dc.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/data0.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/rachelset.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
       <Config>
         <Option Name="DesignMode" Val="RTL"/>
         <Option Name="TopModule" Val="eth_top"/>
@@ -356,8 +391,8 @@
         <Option Name="VerilogDir" Val="$PPRDIR/../../lowrisc-chip-eth-debug/fpga/board/nexys4_ddr/generated-src"/>
         <Option Name="VerilogDir" Val="$PPRDIR/../../lowrisc-chip-eth-debug/fpga/board/nexys4_ddr/lowrisc-chip-imp/lowrisc-chip-imp.srcs/sources_1/ip/mig_7series_0/mig_7series_0/example_design/sim"/>
         <Option Name="SrcSet" Val="sources_1"/>
-        <Option Name="xsim.elaborate.xelab.more_options" Val="-cc gcc -sv_lib dpi"/>
         <Define Name="FPGA"/>
+        <Define Name="BYPASS_CLK_DIV"/>
       </Config>
     </FileSet>
     <FileSet Name="clk_wiz_nexys4ddr_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/clk_wiz_nexys4ddr_0">

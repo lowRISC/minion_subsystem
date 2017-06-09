@@ -1,4 +1,4 @@
-default: verilator
+default: xvlog
 
 base_dir = ..
 
@@ -6,7 +6,6 @@ verilog_srcs = \
 	nettype_none.v \
 	minion_tb.v \
 	coremem.sv \
-	fstore2.v \
 	dualmem.v \
 	rachelset.v \
 	iopad.v \
@@ -24,6 +23,7 @@ verilog_srcs = \
 	sd_top.sv \
 	uart.v \
 	nettype_wire.v \
+	fstore2.v \
 	../pulpino/ips/riscv/controller.sv \
 	../pulpino/ips/riscv/cs_registers.sv \
 	../pulpino/ips/riscv/debug_unit.sv \
@@ -78,6 +78,15 @@ iverilog: $(verilog_srcs) $(verilog_headers)
         -I ../pulpino/rtl/includes \
         -I ../pulpino/ips/riscv/include \
 	$(verilog_srcs) 2>&1 | tee $@.log
+
+xvlog: $(verilog_srcs) $(verilog_headers)
+	xvlog -d BYPASS_CLK_DIV -d SKIP_ASSERT --sv \
+        -i ../pulpino/rtl/includes \
+        -i ../pulpino/ips/riscv/include \
+	$(verilog_srcs) 2>&1 | tee $@.log
+	xelab minion_tb
+	echo run all | xsim work.minion_tb
+	gtkwave dump.vcd
 
 simv: $(verilog_srcs) $(verilog_headers)
 	vcs -full64 +systemverilogext+sv +libext+.v +lint=TFIPC-L -gui \

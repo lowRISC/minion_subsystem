@@ -4,12 +4,12 @@ module dualmem(clka, clkb, dina, dinb, addra, addrb, wea, web, douta, doutb, ena
    parameter rwidth = 13;
    parameter dw = 8;
    
-   input clka, clkb;
+   input wire clka, clkb;
    input [dw-1:0] dina, dinb;
    input [rwidth-1:0] addra, addrb;
    input [0:0]        wea, web;
    input [0:0]        ena, enb;
-   output reg [dw-1:0]       douta, doutb;
+   output [dw-1:0]       douta, doutb;
 
 `ifndef XILINX
 

@@ -82,6 +82,7 @@ minion_soc dut
    
 initial
   begin
+     $dumpvars;
      clk = 0;
      rstn = 0;
      from_dip = 0;

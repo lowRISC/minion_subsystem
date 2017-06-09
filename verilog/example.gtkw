@@ -1,0 +1,23 @@
+[*]
+[*] GTKWave Analyzer v3.3.66 (w)1999-2015 BSI
+[*] Fri Jun  9 16:57:10 2017
+[*]
+[dumpfile] "/local/scratch/jrrk2/minion_subsystem/verilog/dump.vcd"
+[dumpfile_mtime] "Fri Jun  9 16:55:17 2017"
+[dumpfile_size] 11295073
+[savefile] "/local/scratch/jrrk2/minion_subsystem/verilog/example.gtkw"
+[timestart] 0
+[size] 1000 600
+[pos] -1 -1
+*-29.058386 0 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] minion_tb.
+[treeopen] minion_tb.dut.
+[sst_width] 213
+[signals_width] 86
+[sst_expanded] 1
+[sst_vpaned_height] 158
+@28
+minion_tb.uart_rx
+minion_tb.uart_tx
+[pattern_trace] 1
+[pattern_trace] 0

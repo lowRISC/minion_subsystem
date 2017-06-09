@@ -622,7 +622,7 @@ module prefetch_L0_buffer_L0
 
   logic [2:0] EMPTY=0, VALID_L0=1, WAIT_GNT=2, WAIT_RVALID=3, ABORTED_BRANCH=4, WAIT_HWLOOP=5, CS, NS;
 
-  logic [31:0]   L0_buffer[3:0];
+  logic [RDATA_IN_WIDTH-1:0]   L0_buffer;
   logic      [31:0]   addr_q, instr_addr_int;
   logic               valid;
 

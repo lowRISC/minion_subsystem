@@ -52,7 +52,8 @@ module riscv_fetch_fifo
 `include "riscv_defines.sv"
 
   localparam DEPTH = 4; // must be 3 or greater
-
+  integer 		h;
+   
   // index 0 is used for output
   logic [31:0]  addr_n[0:DEPTH-1],    addr_int[0:DEPTH-1],    addr_Q[0:DEPTH-1];
   logic [31:0]  rdata_n[0:DEPTH-1],   rdata_int[0:DEPTH-1],   rdata_Q[0:DEPTH-1];
@@ -195,8 +196,13 @@ module riscv_fetch_fifo
 
       if (is_hwlp_int[1]) begin
         addr_n[0] = addr_int[1][31:0];
-        rdata_n   = {rdata_int[1:DEPTH-1], 32'b0};
-        valid_n   = {valid_int[1:DEPTH-1], 1'b0};
+	 for (h=0; h < DEPTH-1; h=h+1)
+	   begin
+              rdata_n[h] = rdata_int[h+1];
+	      rdata_n[DEPTH-1] = 32'b0;
+              valid_n[h] = valid_int[h+1];
+	      valid_n[DEPTH-1] = 1'b0;
+	   end
       end else begin
         if (addr_int[0][1]) begin
           // unaligned case
@@ -206,8 +212,13 @@ module riscv_fetch_fifo
             addr_n[0] = {addr_next[31:2], 2'b10};
           end
 
-          rdata_n  = {rdata_int[1:DEPTH-1], 32'b0};
-          valid_n  = {valid_int[1:DEPTH-1], 1'b0};
+	 for (h=0; h < DEPTH-1; h=h+1)
+	   begin
+              rdata_n[h] = rdata_int[h+1];
+	      rdata_n[DEPTH-1] = 32'b0;
+              valid_n[h] = valid_int[h+1];
+	      valid_n[DEPTH-1] = 1'b0;
+	   end
         end else begin
           // aligned case
           if (aligned_is_compressed) begin
@@ -216,8 +227,14 @@ module riscv_fetch_fifo
           end else begin
             // move to next entry in FIFO
             addr_n[0] = {addr_next[31:2], 2'b00};
-            rdata_n   = {rdata_int[1:DEPTH-1], 32'b0};
-            valid_n   = {valid_int[1:DEPTH-1], 1'b0};
+
+	    for (h=0; h < DEPTH-1; h=h+1)
+	      begin
+		 rdata_n[h] = rdata_int[h+1];
+		 rdata_n[DEPTH-1] = 32'b0;
+		 valid_n[h] = valid_int[h+1];
+		 valid_n[DEPTH-1] = 1'b0;
+	      end
           end
         end
       end
