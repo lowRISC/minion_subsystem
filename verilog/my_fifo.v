@@ -1,5 +1,4 @@
 // Abstraction of subset of Xilinx FIFO generator functionality to a primitive
-`default_nettype none
 
   module my_fifo #(parameter width=9) (
                                        input wire              rd_clk,
@@ -112,4 +111,3 @@
    endgenerate
    
 endmodule
-`default_nettype wire

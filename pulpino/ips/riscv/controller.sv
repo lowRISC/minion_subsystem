@@ -27,26 +27,26 @@
 
 module riscv_controller
 (
-  input  logic        clk,
-  input  logic        rst_n,
+  input  wire         clk,
+  input  wire         rst_n,
 
-  input  logic        fetch_enable_i,             // Start the decoding
+  input  wire         fetch_enable_i,             // Start the decoding
   output logic        ctrl_busy_o,                // Core is busy processing instructions
   output logic        is_decoding_o,              // Core is in decoding state
 
   // decoder related signals
   output logic        deassert_we_o,              // deassert write enable for next instruction
-  input  logic        illegal_insn_i,             // decoder encountered an invalid instruction
-  input  logic        eret_insn_i,                // decoder encountered an eret instruction
-  input  logic        pipe_flush_i,               // decoder wants to do a pipe flush
+  input  wire         illegal_insn_i,             // decoder encountered an invalid instruction
+  input  wire         eret_insn_i,                // decoder encountered an eret instruction
+  input  wire         pipe_flush_i,               // decoder wants to do a pipe flush
 
-  input  logic        rega_used_i,                // register A is used
-  input  logic        regb_used_i,                // register B is used
-  input  logic        regc_used_i,                // register C is used
+  input  wire         rega_used_i,                // register A is used
+  input  wire         regb_used_i,                // register B is used
+  input  wire         regc_used_i,                // register C is used
 
   // from IF/ID pipeline
-  input  logic        instr_valid_i,              // instruction coming from IF/ID pipeline is valid
-  input  logic [31:0] instr_rdata_i,              // Instruction read from instr memory/cache: (sampled in the if stage)
+  input  wire         instr_valid_i,              // instruction coming from IF/ID pipeline is valid
+  input  wire  [31:0] instr_rdata_i,              // Instruction read from instr memory/cache: (sampled in the if stage)
 
   // from prefetcher
   output logic        instr_req_o,                // Start fetching instructions
@@ -56,20 +56,20 @@ module riscv_controller
   output logic [2:0]  pc_mux_o,                   // Selector in the Fetch stage to select the rigth PC (normal, jump ...)
 
   // LSU
-  input  logic        data_req_ex_i,              // data memory access is currently performed in EX stage
-  input  logic        data_misaligned_i,
-  input  logic        data_load_event_i,
+  input  wire         data_req_ex_i,              // data memory access is currently performed in EX stage
+  input  wire         data_misaligned_i,
+  input  wire         data_load_event_i,
 
   // from ALU
-  input  logic        mult_multicycle_i,          // multiplier is taken multiple cycles and uses op c as storage
+  input  wire         mult_multicycle_i,          // multiplier is taken multiple cycles and uses op c as storage
 
   // jump/branch signals
-  input  logic        branch_taken_ex_i,          // branch taken signal from EX ALU
-  input  logic [1:0]  jump_in_id_i,               // jump is being calculated in ALU
-  input  logic [1:0]  jump_in_dec_i,              // jump is being calculated in ALU
+  input  wire         branch_taken_ex_i,          // branch taken signal from EX ALU
+  input  wire  [1:0]  jump_in_id_i,               // jump is being calculated in ALU
+  input  wire  [1:0]  jump_in_dec_i,              // jump is being calculated in ALU
 
   // Exception Controller Signals
-  input  logic        exc_req_i,
+  input  wire         exc_req_i,
   output logic        exc_ack_o,
 
   output logic        exc_save_if_o,
@@ -77,19 +77,19 @@ module riscv_controller
   output logic        exc_restore_id_o,
 
   // Debug Signals
-  input  logic        dbg_req_i,                  // a trap was hit, so we have to flush EX and WB
+  input  wire         dbg_req_i,                  // a trap was hit, so we have to flush EX and WB
   output logic        dbg_ack_o,                  // we stopped and give control to debug now
 
-  input  logic        dbg_stall_i,                // Pipeline stall is requested
-  input  logic        dbg_jump_req_i,             // Change PC to value from debug unit
+  input  wire         dbg_stall_i,                // Pipeline stall is requested
+  input  wire         dbg_jump_req_i,             // Change PC to value from debug unit
 
   // Forwarding signals from regfile
-  input  logic [4:0]  regfile_waddr_ex_i,         // FW: write address from EX stage
-  input  logic        regfile_we_ex_i,            // FW: write enable from  EX stage
-  input  logic [4:0]  regfile_waddr_wb_i,         // FW: write address from WB stage
-  input  logic        regfile_we_wb_i,            // FW: write enable from  WB stage
-  input  logic [4:0]  regfile_alu_waddr_fw_i,     // FW: ALU/MUL write address from EX stage
-  input  logic        regfile_alu_we_fw_i,        // FW: ALU/MUL write enable from  EX stage
+  input  wire  [4:0]  regfile_waddr_ex_i,         // FW: write address from EX stage
+  input  wire         regfile_we_ex_i,            // FW: write enable from  EX stage
+  input  wire  [4:0]  regfile_waddr_wb_i,         // FW: write address from WB stage
+  input  wire         regfile_we_wb_i,            // FW: write enable from  WB stage
+  input  wire  [4:0]  regfile_alu_waddr_fw_i,     // FW: ALU/MUL write address from EX stage
+  input  wire         regfile_alu_we_fw_i,        // FW: ALU/MUL write enable from  EX stage
 
   // forwarding signals
   output logic [1:0]  operand_a_fw_mux_sel_o,     // regfile ra data selector form ID stage
@@ -97,15 +97,15 @@ module riscv_controller
   output logic [1:0]  operand_c_fw_mux_sel_o,     // regfile rc data selector form ID stage
 
   // forwarding detection signals
-  input logic         reg_d_ex_is_reg_a_i,
-  input logic         reg_d_ex_is_reg_b_i,
-  input logic         reg_d_ex_is_reg_c_i,
-  input logic         reg_d_wb_is_reg_a_i,
-  input logic         reg_d_wb_is_reg_b_i,
-  input logic         reg_d_wb_is_reg_c_i,
-  input logic         reg_d_alu_is_reg_a_i,
-  input logic         reg_d_alu_is_reg_b_i,
-  input logic         reg_d_alu_is_reg_c_i,
+  input wire          reg_d_ex_is_reg_a_i,
+  input wire          reg_d_ex_is_reg_b_i,
+  input wire          reg_d_ex_is_reg_c_i,
+  input wire          reg_d_wb_is_reg_a_i,
+  input wire          reg_d_wb_is_reg_b_i,
+  input wire          reg_d_wb_is_reg_c_i,
+  input wire          reg_d_alu_is_reg_a_i,
+  input wire          reg_d_alu_is_reg_b_i,
+  input wire          reg_d_alu_is_reg_c_i,
 
 
   // stall signals
@@ -116,11 +116,11 @@ module riscv_controller
   output logic        jr_stall_o,
   output logic        load_stall_o,
 
-  input  logic        id_ready_i,                 // ID stage is ready
+  input  wire         id_ready_i,                 // ID stage is ready
 
-  input  logic        if_valid_i,                 // IF stage is done
-  input  logic        ex_valid_i,                 // EX stage is done
-  input  logic        wb_valid_i,                 // WB stage is done
+  input  wire         if_valid_i,                 // IF stage is done
+  input  wire         ex_valid_i,                 // EX stage is done
+  input  wire         wb_valid_i,                 // WB stage is done
 
   // Performance Counters
   output logic        perf_jump_o,                // we are executing a jump instruction   (j, jr, jal, jalr)

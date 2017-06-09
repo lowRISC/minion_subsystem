@@ -36,61 +36,61 @@ module riscv_cs_registers
 )
 (
   // Clock and Reset
-  input  logic        clk,
-  input  logic        rst_n,
+  input  wire         clk,
+  input  wire         rst_n,
 
   // Core and Cluster ID
-  input  logic  [3:0] core_id_i,
-  input  logic  [5:0] cluster_id_i,
+  input  wire   [3:0] core_id_i,
+  input  wire   [5:0] cluster_id_i,
 
   // Interface to registers (SRAM like)
-  input  logic        csr_access_i,
-  input  logic [11:0] csr_addr_i,
-  input  logic [31:0] csr_wdata_i,
-  input  logic  [1:0] csr_op_i,
+  input  wire         csr_access_i,
+  input  wire  [11:0] csr_addr_i,
+  input  wire  [31:0] csr_wdata_i,
+  input  wire   [1:0] csr_op_i,
   output logic [31:0] csr_rdata_o,
 
   // Interrupts
   output logic        irq_enable_o,
   output logic [31:0] mepc_o,
 
-  input  logic [31:0] pc_if_i,
-  input  logic [31:0] pc_id_i,
-  input  logic [31:0] pc_ex_i,
-  input  logic        data_load_event_ex_i,
-  input  logic        exc_save_if_i,
-  input  logic        exc_save_id_i,
-  input  logic        exc_restore_i,
+  input  wire  [31:0] pc_if_i,
+  input  wire  [31:0] pc_id_i,
+  input  wire  [31:0] pc_ex_i,
+  input  wire         data_load_event_ex_i,
+  input  wire         exc_save_if_i,
+  input  wire         exc_save_id_i,
+  input  wire         exc_restore_i,
 
-  input  logic [5:0]  exc_cause_i,
-  input  logic        save_exc_cause_i,
+  input  wire  [5:0]  exc_cause_i,
+  input  wire         save_exc_cause_i,
 
   // Hardware loops
-  input  logic  [31:0] hwlp_start_i,
-  input  logic  [31:0] hwlp_end_i,
-  input  logic  [31:0] hwlp_cnt_i,
+  input  wire   [31:0] hwlp_start_i,
+  input  wire   [31:0] hwlp_end_i,
+  input  wire   [31:0] hwlp_cnt_i,
 
   output logic [31:0]              hwlp_data_o,
-  output logic [N_HWLP_BITS-1:0]   hwlp_regid_o,
+  output logic    hwlp_regid_o,
   output logic [2:0]               hwlp_we_o,
 
   // Performance Counters
-  input  logic                 id_valid_i,        // ID stage is done
-  input  logic                 is_compressed_i,   // compressed instruction in ID
-  input  logic                 is_decoding_i,     // controller is in DECODE state
+  input  wire                  id_valid_i,        // ID stage is done
+  input  wire                  is_compressed_i,   // compressed instruction in ID
+  input  wire                  is_decoding_i,     // controller is in DECODE state
 
-  input  logic                 imiss_i,           // instruction fetch
-  input  logic                 pc_set_i,          // pc was set to a new value
-  input  logic                 jump_i,            // jump instruction seen   (j, jr, jal, jalr)
-  input  logic                 branch_i,          // branch instruction seen (bf, bnf)
-  input  logic                 branch_taken_i,    // branch was taken
-  input  logic                 ld_stall_i,        // load use hazard
-  input  logic                 jr_stall_i,        // jump register use hazard
+  input  wire                  imiss_i,           // instruction fetch
+  input  wire                  pc_set_i,          // pc was set to a new value
+  input  wire                  jump_i,            // jump instruction seen   (j, jr, jal, jalr)
+  input  wire                  branch_i,          // branch instruction seen (bf, bnf)
+  input  wire                  branch_taken_i,    // branch was taken
+  input  wire                  ld_stall_i,        // load use hazard
+  input  wire                  jr_stall_i,        // jump register use hazard
 
-  input  logic                 mem_load_i,        // load from memory in this cycle
-  input  logic                 mem_store_i,       // store to memory in this cycle
+  input  wire                  mem_load_i,        // load from memory in this cycle
+  input  wire                  mem_store_i,       // store to memory in this cycle
 
-  input  logic [N_EXT_CNT-1:0] ext_counters_i
+  input  wire  [N_EXT_CNT-1:0] ext_counters_i
 );
 `include "riscv_defines.sv"
 
@@ -107,7 +107,7 @@ module riscv_cs_registers
   logic [N_PERF_COUNTERS-1:0]    PCCR_in;  // input signals for each counter category
   logic [N_PERF_COUNTERS-1:0]    PCCR_inc, PCCR_inc_q; // should the counter be increased?
 
-  logic [N_PERF_REGS-1:0] [31:0] PCCR_q, PCCR_n; // performance counters counter register
+  logic [31:0] PCCR_q[N_PERF_REGS-1:0], PCCR_n[N_PERF_REGS-1:0]; // performance counters counter register
   logic [1:0]                    PCMR_n, PCMR_q; // mode register, controls saturation and global enable
   logic [N_PERF_COUNTERS-1:0]    PCER_n, PCER_q; // selected counter input
 

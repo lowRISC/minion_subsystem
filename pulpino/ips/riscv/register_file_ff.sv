@@ -27,21 +27,21 @@ module riscv_register_file
 )
 (
     // Clock and Reset
-    input  logic         clk,
-    input  logic         rst_n,
+    input  wire          clk,
+    input  wire          rst_n,
 
-    input  logic                   test_en_i,
+    input  wire                    test_en_i,
 
     //Read port R1
-    input  logic [ADDR_WIDTH-1:0]  raddr_a_i,
+    input  wire  [ADDR_WIDTH-1:0]  raddr_a_i,
     output logic [DATA_WIDTH-1:0]  rdata_a_o,
 
     //Read port R2
-    input  logic [ADDR_WIDTH-1:0]  raddr_b_i,
+    input  wire  [ADDR_WIDTH-1:0]  raddr_b_i,
     output logic [DATA_WIDTH-1:0]  rdata_b_o,
 
     //Read port R3
-    input  logic [ADDR_WIDTH-1:0]  raddr_c_i,
+    input  wire  [ADDR_WIDTH-1:0]  raddr_c_i,
     output logic [DATA_WIDTH-1:0]  rdata_c_o,
 
     // Write port W1
@@ -58,7 +58,7 @@ module riscv_register_file
 
   localparam    NUM_WORDS = 2**ADDR_WIDTH;
 
-  logic [NUM_WORDS-1:0][DATA_WIDTH-1:0] rf_reg;
+  logic [DATA_WIDTH-1:0] rf_reg[NUM_WORDS-1:0];
   logic [NUM_WORDS-1:0]                 we_a_dec;
   logic [NUM_WORDS-1:0]                 we_b_dec;
 

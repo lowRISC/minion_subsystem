@@ -33,48 +33,48 @@ module riscv_ex_stage
 `include "riscv_widths.sv"
 )
 (
-  input  logic        clk,
-  input  logic        rst_n,
+  input  wire         clk,
+  input  wire         rst_n,
 
   // ALU signals from ID stage
-  input  logic [ALU_OP_WIDTH-1:0] alu_operator_i,
-  input  logic [31:0] alu_operand_a_i,
-  input  logic [31:0] alu_operand_b_i,
-  input  logic [31:0] alu_operand_c_i,
-  input  logic [ 4:0] bmask_a_i,
-  input  logic [ 4:0] bmask_b_i,
-  input  logic [ 1:0] imm_vec_ext_i,
-  input  logic [ 1:0] alu_vec_mode_i,
+  input  wire  [ALU_OP_WIDTH-1:0] alu_operator_i,
+  input  wire  [31:0] alu_operand_a_i,
+  input  wire  [31:0] alu_operand_b_i,
+  input  wire  [31:0] alu_operand_c_i,
+  input  wire  [ 4:0] bmask_a_i,
+  input  wire  [ 4:0] bmask_b_i,
+  input  wire  [ 1:0] imm_vec_ext_i,
+  input  wire  [ 1:0] alu_vec_mode_i,
 
   // Multiplier signals
-  input  logic [ 2:0] mult_operator_i,
-  input  logic [31:0] mult_operand_a_i,
-  input  logic [31:0] mult_operand_b_i,
-  input  logic [31:0] mult_operand_c_i,
-  input  logic        mult_en_i,
-  input  logic        mult_sel_subword_i,
-  input  logic [ 1:0] mult_signed_mode_i,
-  input  logic [ 4:0] mult_imm_i,
+  input  wire  [ 2:0] mult_operator_i,
+  input  wire  [31:0] mult_operand_a_i,
+  input  wire  [31:0] mult_operand_b_i,
+  input  wire  [31:0] mult_operand_c_i,
+  input  wire         mult_en_i,
+  input  wire         mult_sel_subword_i,
+  input  wire  [ 1:0] mult_signed_mode_i,
+  input  wire  [ 4:0] mult_imm_i,
 
-  input  logic [31:0] mult_dot_op_a_i,
-  input  logic [31:0] mult_dot_op_b_i,
-  input  logic [31:0] mult_dot_op_c_i,
-  input  logic [ 1:0] mult_dot_signed_i,
+  input  wire  [31:0] mult_dot_op_a_i,
+  input  wire  [31:0] mult_dot_op_b_i,
+  input  wire  [31:0] mult_dot_op_c_i,
+  input  wire  [ 1:0] mult_dot_signed_i,
 
   output logic        mult_multicycle_o,
 
   // input from ID stage
-  input  logic        branch_in_ex_i,
-  input  logic [4:0]  regfile_alu_waddr_i,
-  input  logic        regfile_alu_we_i,
+  input  wire         branch_in_ex_i,
+  input  wire  [4:0]  regfile_alu_waddr_i,
+  input  wire         regfile_alu_we_i,
 
   // directly passed through to WB stage, not used in EX
-  input  logic        regfile_we_i,
-  input  logic [4:0]  regfile_waddr_i,
+  input  wire         regfile_we_i,
+  input  wire  [4:0]  regfile_waddr_i,
 
   // CSR access
-  input  logic        csr_access_i,
-  input  logic [31:0] csr_rdata_i,
+  input  wire         csr_access_i,
+  input  wire  [31:0] csr_rdata_i,
 
   // Output of EX stage pipeline
   output logic [4:0]  regfile_waddr_wb_o,
@@ -90,11 +90,11 @@ module riscv_ex_stage
   output logic        branch_decision_o,
 
   // Stall Control
-  input  logic        lsu_ready_ex_i, // EX part of LSU is done
+  input  wire         lsu_ready_ex_i, // EX part of LSU is done
 
   output logic        ex_ready_o, // EX stage ready for new data
   output logic        ex_valid_o, // EX stage gets new data
-  input  logic        wb_ready_i  // WB stage ready for new data
+  input  wire         wb_ready_i  // WB stage ready for new data
 );
 `include "riscv_defines.sv"
 

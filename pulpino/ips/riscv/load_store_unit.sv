@@ -26,35 +26,35 @@
 
 module riscv_load_store_unit
 (
-    input  logic         clk,
-    input  logic         rst_n,
+    input  wire          clk,
+    input  wire          rst_n,
 
     // output to data memory
     output logic         data_req_o,
-    input  logic         data_gnt_i,
-    input  logic         data_rvalid_i,
-    input  logic         data_err_i,
+    input  wire          data_gnt_i,
+    input  wire          data_rvalid_i,
+    input  wire          data_err_i,
 
     output logic [31:0]  data_addr_o,
     output logic         data_we_o,
     output logic [3:0]   data_be_o,
     output logic [31:0]  data_wdata_o,
-    input  logic [31:0]  data_rdata_i,
+    input  wire  [31:0]  data_rdata_i,
 
     // signals from ex stage
-    input  logic         data_we_ex_i,         // write enable                      -> from ex stage
-    input  logic [1:0]   data_type_ex_i,       // Data type word, halfword, byte    -> from ex stage
-    input  logic [31:0]  data_wdata_ex_i,      // data to write to memory           -> from ex stage
-    input  logic [1:0]   data_reg_offset_ex_i, // offset inside register for stores -> from ex stage
-    input  logic         data_sign_ext_ex_i,   // sign extension                    -> from ex stage
+    input  wire          data_we_ex_i,         // write enable                      -> from ex stage
+    input  wire  [1:0]   data_type_ex_i,       // Data type word, halfword, byte    -> from ex stage
+    input  wire  [31:0]  data_wdata_ex_i,      // data to write to memory           -> from ex stage
+    input  wire  [1:0]   data_reg_offset_ex_i, // offset inside register for stores -> from ex stage
+    input  wire          data_sign_ext_ex_i,   // sign extension                    -> from ex stage
 
     output logic [31:0]  data_rdata_ex_o,      // requested data                    -> to ex stage
-    input  logic         data_req_ex_i,        // data request                      -> from ex stage
-    input  logic [31:0]  operand_a_ex_i,       // operand a from RF for address     -> from ex stage
-    input  logic [31:0]  operand_b_ex_i,       // operand b from RF for address     -> from ex stage
-    input  logic         addr_useincr_ex_i,    // use a + b or just a for address   -> from ex stage
+    input  wire          data_req_ex_i,        // data request                      -> from ex stage
+    input  wire  [31:0]  operand_a_ex_i,       // operand a from RF for address     -> from ex stage
+    input  wire  [31:0]  operand_b_ex_i,       // operand b from RF for address     -> from ex stage
+    input  wire          addr_useincr_ex_i,    // use a + b or just a for address   -> from ex stage
 
-    input  logic         data_misaligned_ex_i, // misaligned access in last ld/st   -> from ID/EX pipeline
+    input  wire          data_misaligned_ex_i, // misaligned access in last ld/st   -> from ID/EX pipeline
     output logic         data_misaligned_o,    // misaligned access was detected    -> to controller
 
     // exception signals
@@ -65,7 +65,7 @@ module riscv_load_store_unit
     output logic         lsu_ready_ex_o, // LSU ready for new data in EX stage
     output logic         lsu_ready_wb_o, // LSU ready for new data in WB stage
 
-    input  logic         ex_valid_i,
+    input  wire          ex_valid_i,
     output logic         busy_o
 );
 `include "riscv_defines.sv"

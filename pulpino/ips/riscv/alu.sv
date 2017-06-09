@@ -24,7 +24,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 // import riscv_defines::*;
 
-module riscv_alu#(`include "riscv_widths.sv")
+module riscv_alu
+#(
+`include "riscv_widths.sv"
+)
 (
   input  logic                     clk,
   input  logic                     rst_n,
@@ -45,8 +48,8 @@ module riscv_alu#(`include "riscv_widths.sv")
   output logic                     ready_o,
   input  logic                     ex_ready_i
 );
+   
 `include "riscv_defines.sv"
-
 
   logic [31:0] operand_a_rev;
   logic [31:0] operand_a_neg;
@@ -61,10 +64,10 @@ module riscv_alu#(`include "riscv_widths.sv")
     begin
       assign operand_a_rev[k] = operand_a_i[31-k];
     end
-  endgenerate
+//  endgenerate
 
   // bit reverse operand_a_neg for left shifts and bit counting
-  generate
+//  generate
     genvar m;
     for(m = 0; m < 32; m++)
     begin
@@ -459,7 +462,7 @@ module riscv_alu#(`include "riscv_widths.sv")
   //                                              //
   //////////////////////////////////////////////////
 
-  logic [ 3: 0][1:0] shuffle_byte_sel; // select byte in register: 31:24, 23:16, 15:8, 7:0
+  logic [1:0] shuffle_byte_sel[ 3: 0]; // select byte in register: 31:24, 23:16, 15:8, 7:0
   logic [ 3: 0]      shuffle_reg_sel;  // select register: rD/rS2 or rS1
   logic [ 1: 0]      shuffle_reg1_sel; // select register rD or rS2 for next stage
   logic [ 1: 0]      shuffle_reg0_sel;
@@ -564,9 +567,12 @@ module riscv_alu#(`include "riscv_widths.sv")
     endcase
   end
 
+   integer h;
+   
   always @*
-  begin
-    shuffle_byte_sel = 'x;
+    begin
+       for (h = 0; h < 4; h=h+1)
+	 shuffle_byte_sel[h] = 'x;
 
     // byte selector
     case (operator_i)
@@ -937,11 +943,9 @@ module alu_ff
   output logic                   no_ones_o
 );
 
-  localparam NUM_LEVELS = $clog2(LEN);
-
-  logic [LEN-1:0] [NUM_LEVELS-1:0]           index_lut;
-  logic [2**NUM_LEVELS-1:0]                  sel_nodes;
-  logic [2**NUM_LEVELS-1:0] [NUM_LEVELS-1:0] index_nodes;
+  logic [$clog2(LEN)-1:0]           index_lut[LEN-1:0];
+  logic [2**$clog2(LEN)-1:0]                  sel_nodes;
+  logic [$clog2(LEN)-1:0] index_nodes[2**$clog2(LEN)-1:0];
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -959,9 +963,9 @@ module alu_ff
     genvar k;
     genvar l;
     genvar level;
-    for (level = 0; level < NUM_LEVELS; level++) begin
+    for (level = 0; level < $clog2(LEN); level++) begin
     //------------------------------------------------------------
-    if (level < NUM_LEVELS-1) begin
+    if (level < $clog2(LEN)-1) begin
       for (l = 0; l < 2**level; l++) begin
         assign sel_nodes[2**level-1+l]   = sel_nodes[2**(level+1)-1+l*2] | sel_nodes[2**(level+1)-1+l*2+1];
         assign index_nodes[2**level-1+l] = (sel_nodes[2**(level+1)-1+l*2] == 1'b1) ?
@@ -969,7 +973,7 @@ module alu_ff
       end
     end
     //------------------------------------------------------------
-    if (level == NUM_LEVELS-1) begin
+    if (level == $clog2(LEN)-1) begin
       for (k = 0; k < 2**level; k++) begin
         // if two successive indices are still in the vector...
         if (k * 2 < LEN) begin
@@ -1008,10 +1012,10 @@ module alu_popcnt
   output logic [5: 0]  result_o
 );
 
-  logic [15:0][1:0] cnt_l1;
-  logic [ 7:0][2:0] cnt_l2;
-  logic [ 3:0][3:0] cnt_l3;
-  logic [ 1:0][4:0] cnt_l4;
+  logic [1:0] cnt_l1[15:0];
+  logic [2:0] cnt_l2[ 7:0];
+  logic [3:0] cnt_l3[ 3:0];
+  logic [4:0] cnt_l4[ 1:0];
 
   genvar      l, m, n, p;
   generate for(l = 0; l < 16; l++)

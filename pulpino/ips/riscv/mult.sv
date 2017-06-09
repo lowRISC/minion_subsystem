@@ -26,34 +26,34 @@
 
 module riscv_mult
 (
-  input  logic        clk,
-  input  logic        rst_n,
+  input  wire         clk,
+  input  wire         rst_n,
 
-  input  logic        enable_i,
-  input  logic [ 2:0] operator_i,
+  input  wire         enable_i,
+  input  wire  [ 2:0] operator_i,
 
   // integer and short multiplier
-  input  logic        short_subword_i,
-  input  logic [ 1:0] short_signed_i,
+  input  wire         short_subword_i,
+  input  wire  [ 1:0] short_signed_i,
 
-  input  logic [31:0] op_a_i,
-  input  logic [31:0] op_b_i,
-  input  logic [31:0] op_c_i,
+  input  wire  [31:0] op_a_i,
+  input  wire  [31:0] op_b_i,
+  input  wire  [31:0] op_c_i,
 
-  input  logic [ 4:0] imm_i,
+  input  wire  [ 4:0] imm_i,
 
 
   // dot multiplier
-  input  logic [ 1:0] dot_signed_i,
-  input  logic [31:0] dot_op_a_i,
-  input  logic [31:0] dot_op_b_i,
-  input  logic [31:0] dot_op_c_i,
+  input  wire  [ 1:0] dot_signed_i,
+  input  wire  [31:0] dot_op_a_i,
+  input  wire  [31:0] dot_op_b_i,
+  input  wire  [31:0] dot_op_c_i,
 
   output logic [31:0] result_o,
 
   output logic        multicycle_o,
   output logic        ready_o,
-  input  logic        ex_ready_i
+  input  wire         ex_ready_i
 );
 `include "riscv_defines.sv"
 

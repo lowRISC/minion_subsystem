@@ -28,12 +28,12 @@ module riscv_exc_controller
 `include "riscv_widths.sv"
 )
 (
-  input  logic        clk,
-  input  logic        rst_n,
+  input  wire         clk,
+  input  wire         rst_n,
 
   // handshake signals to controller
   output logic        req_o,
-  input  logic        ack_i,
+  input  wire         ack_i,
 
   output logic        trap_o,
 
@@ -42,24 +42,24 @@ module riscv_exc_controller
   output logic  [4:0] vec_pc_mux_o,   // selects interrupt handler for vectorized interrupts
 
   // interrupt lines
-  input  logic [31:0] irq_i,          // level-triggered interrupt inputs
-  input  logic        irq_enable_i,   // interrupt enable bit from CSR
+  input  wire  [31:0] irq_i,          // level-triggered interrupt inputs
+  input  wire         irq_enable_i,   // interrupt enable bit from CSR
 
   // from decoder
-  input  logic        ebrk_insn_i,    // ebrk instruction encountered (EBREAK)
-  input  logic        illegal_insn_i, // illegal instruction encountered
-  input  logic        ecall_insn_i,   // ecall instruction encountered
-  input  logic        eret_insn_i,    // eret instruction encountered
+  input  wire         ebrk_insn_i,    // ebrk instruction encountered (EBREAK)
+  input  wire         illegal_insn_i, // illegal instruction encountered
+  input  wire         ecall_insn_i,   // ecall instruction encountered
+  input  wire         eret_insn_i,    // eret instruction encountered
 
-  input  logic        lsu_load_err_i,
-  input  logic        lsu_store_err_i,
+  input  wire         lsu_load_err_i,
+  input  wire         lsu_store_err_i,
 
   // to CSR
   output logic [5:0]  cause_o,
   output logic        save_cause_o,
 
   // from debug unit
-  input  logic [DBG_SETS_W-1:0] dbg_settings_i
+  input  wire  [DBG_SETS_W-1:0] dbg_settings_i
 );
 `include "riscv_defines.sv"
 

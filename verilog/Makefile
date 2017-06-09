@@ -4,6 +4,7 @@ default: verilator
 base_dir = ..
 
 verilog_srcs = \
+	nettype_none.v \
 	minion_tb.v \
 	coremem.sv \
 	dualmem.v \
@@ -20,6 +21,7 @@ verilog_srcs = \
 	sd_data_serial_host.sv \
 	sd_top.sv \
 	uart.v \
+	nettype_wire.v \
 	../pulpino/ips/riscv/controller.sv \
 	../pulpino/ips/riscv/cs_registers.sv \
 	../pulpino/ips/riscv/debug_unit.sv \
@@ -68,13 +70,18 @@ verilator: $(verilog_srcs) $(verilog_headers)
 	$(verilog_srcs) 2>&1 | tee $@.log
 
 cvc: $(verilog_srcs) $(verilog_headers) $(XILINX_VIVADO)/data/verilog/src/glbl.v
-	cvc64 -sv +libext+.v +lint=TFIPC-L \
+	cvc64 -sv +libext+.v +lint=TFIPC-L +show_canceled_e \
 	+define+BYPASS_CLK_DIV +define+SKIP_ASSERT \
         +incdir+../pulpino/rtl/includes \
         +incdir+../pulpino/ips/riscv/include \
 	$(XILINX_VIVADO)/data/verilog/src/glbl.v \
-	-y $(XILINX_VIVADO)/data/verilog/src/retarget \
-	-y $(XILINX_VIVADO)/data/verilog/src/unisims \
+	$(XILINX_VIVADO)/data/verilog/src/glbl.v \
+	$(XILINX_VIVADO)/data/verilog/src/retarget/RAMB16_S1_S1.v \
+	$(XILINX_VIVADO)/data/verilog/src/retarget/RAMB16_S2_S2.v \
+	$(XILINX_VIVADO)/data/verilog/src/retarget/RAMB16_S9.v \
+	$(XILINX_VIVADO)/data/verilog/src/unisims/FIFO18E1.v \
+	$(XILINX_VIVADO)/data/verilog/src/unisims/IOBUF.v \
+	$(XILINX_VIVADO)/data/verilog/src/unisims/RAMB18E1.v \
 	$(verilog_srcs) 2>&1 | tee $@.log
 
 iverilog: $(verilog_srcs) $(verilog_headers)

@@ -1,5 +1,3 @@
-`default_nettype none
-
   module vga_ctrl (
                    input wire        clk_p,
                    input wire        CPU_RESETN,
@@ -124,4 +122,3 @@
      end
 
 endmodule
-`default_nettype wire

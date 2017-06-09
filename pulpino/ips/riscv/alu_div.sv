@@ -72,7 +72,7 @@ module riscv_alu_div
 
   logic ARegEn_S, BRegEn_S, ResRegEn_S, ABComp_S, PmSel_S, LoadEn_S;
 
-  enum logic [1:0] {IDLE, DIVIDE, FINISH} State_SN, State_SP;
+  logic [1:0] IDLE=0, DIVIDE=1, FINISH=2, State_SN, State_SP;
 
 
   ///////////////////////////////////////////////////////////////////////////////
@@ -214,7 +214,7 @@ module riscv_alu_div
   // assertions
   ///////////////////////////////////////////////////////////////////////////////
 
-`ifndef SYNTHESIS
+`ifndef SKIP_ASSERT
   initial
   begin : p_assertions
     assert (C_LOG_WIDTH == $clog2(C_WIDTH+1)) else $error("C_LOG_WIDTH must be $clog2(C_WIDTH+1)");

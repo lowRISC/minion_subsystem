@@ -54,8 +54,8 @@ module riscv_fetch_fifo
   localparam DEPTH = 4; // must be 3 or greater
 
   // index 0 is used for output
-  logic [0:DEPTH-1] [31:0]  addr_n,    addr_int,    addr_Q;
-  logic [0:DEPTH-1] [31:0]  rdata_n,   rdata_int,   rdata_Q;
+  logic [31:0]  addr_n[0:DEPTH-1],    addr_int[0:DEPTH-1],    addr_Q[0:DEPTH-1];
+  logic [31:0]  rdata_n[0:DEPTH-1],   rdata_int[0:DEPTH-1],   rdata_Q[0:DEPTH-1];
   logic [0:DEPTH-1]         valid_n,   valid_int,   valid_Q;
   logic [0:1      ]         is_hwlp_n, is_hwlp_int, is_hwlp_Q;
 
@@ -230,11 +230,11 @@ module riscv_fetch_fifo
 
   always @(posedge clk, negedge rst_n)
   begin
-    if(rst_n == 1'b0)
+     if(rst_n == 1'b0) for (j = 0; j < DEPTH; j=j+1)
     begin
-      addr_Q    <= '{default: '0};
-      rdata_Q   <= '{default: '0};
-      valid_Q   <= '0;
+      addr_Q[j]    <= '0;
+      rdata_Q[j]   <= '0;
+      valid_Q[j]   <= '0;
       is_hwlp_Q <= '0;
     end
     else
@@ -254,6 +254,7 @@ module riscv_fetch_fifo
   end
 
 // synopsys translate_off   
+`ifndef SKIP_ASSERT
   //----------------------------------------------------------------------------
   // Assertions
   //----------------------------------------------------------------------------
@@ -261,6 +262,7 @@ module riscv_fetch_fifo
   // check for FIFO overflows
   assert property (
     @(posedge clk) (in_valid_i) |-> ((valid_Q[DEPTH-1] == 1'b0) || (clear_i == 1'b1) || (in_replace2_i == 1'b1)) );
+`endif
 // synopsys translate_on
 
 endmodule
@@ -295,10 +297,11 @@ module riscv_prefetch_buffer
   // Prefetch Buffer Status
   output logic        busy_o
 );
+   
 `include "riscv_defines.sv"
 
-  enum logic [1:0] {IDLE, WAIT_GNT, WAIT_RVALID, WAIT_ABORTED } CS, NS;
-  enum logic [1:0] {HWLP_NONE, HWLP_IN, HWLP_FETCHING, HWLP_DONE } hwlp_CS, hwlp_NS;
+  logic [1:0] IDLE=0, WAIT_GNT=1, WAIT_RVALID=2, WAIT_ABORTED=3, CS, NS;
+  logic [1:0] HWLP_NONE=0, HWLP_IN=1, HWLP_FETCHING=2, HWLP_DONE=3, hwlp_CS, hwlp_NS;
 
   logic [31:0] instr_addr_q, fetch_addr;
   logic        fetch_is_hwlp;

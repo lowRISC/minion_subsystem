@@ -28,18 +28,18 @@ module riscv_prefetch_L0_buffer
   parameter                                   RDATA_IN_WIDTH = 128
 )
 (
-  input  logic                                clk,
-  input  logic                                rst_n,
+  input  wire                                 clk,
+  input  wire                                 rst_n,
 
-  input  logic                                req_i,
+  input  wire                                 req_i,
 
-  input  logic                                branch_i,
-  input  logic [31:0]                         addr_i,
+  input  wire                                 branch_i,
+  input  wire  [31:0]                         addr_i,
 
-  input  logic                                hwloop_i,
-  input  logic [31:0]                         hwloop_target_i,
+  input  wire                                 hwloop_i,
+  input  wire  [31:0]                         hwloop_target_i,
 
-  input  logic                                ready_i,
+  input  wire                                 ready_i,
   output logic                                valid_o,
   output logic [31:0]                         rdata_o,
   output logic [31:0]                         addr_o,
@@ -48,9 +48,9 @@ module riscv_prefetch_L0_buffer
   // goes to instruction memory / instruction cache
   output logic                                instr_req_o,
   output logic [31:0]                         instr_addr_o,
-  input  logic                                instr_gnt_i,
-  input  logic                                instr_rvalid_i,
-  input  logic [RDATA_IN_WIDTH/32-1:0][31:0]  instr_rdata_i,
+  input  wire                                 instr_gnt_i,
+  input  wire                                 instr_rvalid_i,
+  input  wire  [RDATA_IN_WIDTH-1:0]           instr_rdata_i,
 
   // Prefetch Buffer Status
   output logic                                busy_o
@@ -59,10 +59,10 @@ module riscv_prefetch_L0_buffer
 
   logic                               busy_L0;
 
-  enum logic [3:0] { IDLE, BRANCHED,
-                     HWLP_WAIT_GNT, HWLP_GRANTED, HWLP_GRANTED_WAIT, HWLP_FETCH_DONE,
-                     NOT_VALID, NOT_VALID_GRANTED, NOT_VALID_CROSS, NOT_VALID_CROSS_GRANTED,
-                     VALID, VALID_CROSS, VALID_GRANTED, VALID_FETCH_DONE } CS, NS;
+   logic [3:0] 	        IDLE=0, BRANCHED=1,
+			HWLP_WAIT_GNT=2, HWLP_GRANTED=3, HWLP_GRANTED_WAIT=4, HWLP_FETCH_DONE=5,
+			NOT_VALID=6, NOT_VALID_GRANTED=7, NOT_VALID_CROSS=8, NOT_VALID_CROSS_GRANTED=9,
+                        VALID=10, VALID_CROSS=11, VALID_GRANTED=12, VALID_FETCH_DONE=13, CS, NS;
 
   logic                               do_fetch;
   logic                               do_hwlp, do_hwlp_int;
@@ -86,7 +86,7 @@ module riscv_prefetch_L0_buffer
   logic                       [31:0]  rdata_last_q;
 
   logic                               valid_L0;
-  logic [RDATA_IN_WIDTH/32-1:0][31:0] rdata_L0;
+  logic [RDATA_IN_WIDTH-1:0] 	      rdata_L0;
   logic                        [31:0] addr_L0;
 
   logic                               fetch_valid;
@@ -134,7 +134,7 @@ module riscv_prefetch_L0_buffer
   );
 
 
-  assign rdata = (use_last || use_hwlp) ? rdata_last_q : rdata_L0[addr_o[3:2]];
+  assign rdata = (use_last || use_hwlp) ? rdata_last_q : rdata_L0 >> {addr_o[3:2],5'b00000};
 
   // the lower part of rdata_unaligned is always the higher part of rdata
   assign rdata_unaligned[15:0] = rdata[31:16];
@@ -144,17 +144,17 @@ module riscv_prefetch_L0_buffer
     rdata_unaligned[31:16] = 'x;
 
     case(addr_o[3:2])
-       2'b00: begin rdata_unaligned[31:16] = rdata_L0[1][15:0]; end
-       2'b01: begin rdata_unaligned[31:16] = rdata_L0[2][15:0]; end
-       2'b10: begin rdata_unaligned[31:16] = rdata_L0[3][15:0]; end
-       2'b11: begin rdata_unaligned[31:16] = rdata_L0[0][15:0]; end
+       2'b00: begin rdata_unaligned[31:16] = rdata_L0[32+15:32]; end
+       2'b01: begin rdata_unaligned[31:16] = rdata_L0[64+15:64]; end
+       2'b10: begin rdata_unaligned[31:16] = rdata_L0[96+15:96]; end
+       2'b11: begin rdata_unaligned[31:16] = rdata_L0[15:0]; end
     endcase // addr_o
   end
 
 
   assign unaligned_is_compressed = rdata[17:16] != 2'b11;
   assign aligned_is_compressed   = rdata[1:0] != 2'b11;
-  assign upper_is_compressed     = rdata_L0[3][17:16] != 2'b11;
+  assign upper_is_compressed     = rdata_L0[96+17:96+16] != 2'b11;
   assign is_crossword            = (addr_o[3:1] == 3'b111) && (~upper_is_compressed);
   assign next_is_crossword       = ((addr_o[3:1] == 3'b110) && (aligned_is_compressed) && (~upper_is_compressed)) || ((addr_o[3:1] == 3'b101) && (~unaligned_is_compressed) && (~upper_is_compressed));
   assign next_upper_compressed   = ((addr_o[3:1] == 3'b110) && (aligned_is_compressed) && upper_is_compressed) || ((addr_o[3:1] == 3'b101) && (~unaligned_is_compressed) && upper_is_compressed);
@@ -166,8 +166,8 @@ module riscv_prefetch_L0_buffer
   assign addr_aligned_next = { addr_o[31:2], 2'b00 } + 32'h4;
   assign addr_real_next    = (next_is_crossword) ? { addr_o[31:4], 4'b0000 } + 32'h16 : { addr_o[31:2], 2'b00 } + 32'h4;
 
-  assign hwlp_unaligned_is_compressed = rdata_L0[2][17:16] != 2'b11;
-  assign hwlp_aligned_is_compressed   = rdata_L0[3][1:0] != 2'b11;
+  assign hwlp_unaligned_is_compressed = rdata_L0[64+17:64+16] != 2'b11;
+  assign hwlp_aligned_is_compressed   = rdata_L0[96+1:96] != 2'b11;
   assign hwlp_is_crossword            = (hwloop_target_i[3:1] == 3'b111) && (~upper_is_compressed);
 
   always @*
@@ -538,7 +538,7 @@ module riscv_prefetch_L0_buffer
               //rdata_last_q <= rdata_L0[3];
               if(ready_i)
               begin
-                   rdata_last_q <= rdata_L0[3];//rdata;
+                   rdata_last_q <= rdata_L0[127:96];//rdata;
               end
               else
               begin
@@ -562,6 +562,7 @@ module riscv_prefetch_L0_buffer
   assign busy_o = busy_L0;
 
 // synopsys translate_off   
+`ifndef SKIP_ASSERT
 
   //----------------------------------------------------------------------------
   // Assertions
@@ -577,6 +578,7 @@ module riscv_prefetch_L0_buffer
   assert property (
     @(posedge clk) (is_crossword) |-> (~next_is_crossword) ) else $warning("Cannot have two crossword accesses back-to-back");
 
+`endif
 // synopsys translate_on
 
 endmodule // prefetch_L0_buffer
@@ -587,40 +589,40 @@ module prefetch_L0_buffer_L0
   parameter                                   RDATA_IN_WIDTH = 128
 )
 (
-  input  logic                                clk,
-  input  logic                                rst_n,
+  input logic 			    clk,
+  input logic 			    rst_n,
 
-  input  logic                                prefetch_i,
-  input  logic [31:0]                         prefetch_addr_i,
+  input logic 			    prefetch_i,
+  input logic [31:0] 		    prefetch_addr_i,
 
-  input  logic                                branch_i,
-  input  logic [31:0]                         branch_addr_i,
+  input logic 			    branch_i,
+  input logic [31:0] 		    branch_addr_i,
 
-  input  logic                                hwlp_i,
-  input  logic [31:0]                         hwlp_addr_i,
+  input logic 			    hwlp_i,
+  input logic [31:0] 		    hwlp_addr_i,
 
 
-  output logic                                fetch_gnt_o,
-  output logic                                fetch_valid_o,
+  output logic 			    fetch_gnt_o,
+  output logic 			    fetch_valid_o,
 
-  output logic                                valid_o,
-  output logic [RDATA_IN_WIDTH/32-1:0][31:0]  rdata_o,
-  output logic [31:0]                         addr_o,
+  output logic 			    valid_o,
+  output logic [RDATA_IN_WIDTH-1:0] rdata_o,
+  output logic [31:0] 		    addr_o,
 
   // goes to instruction memory / instruction cache
-  output logic                                instr_req_o,
-  output logic [31:0]                         instr_addr_o,
-  input  logic                                instr_gnt_i,
-  input  logic                                instr_rvalid_i,
-  input  logic [RDATA_IN_WIDTH/32-1:0][31:0]  instr_rdata_i,
+  output logic 			    instr_req_o,
+  output logic [31:0] 		    instr_addr_o,
+  input logic 			    instr_gnt_i,
+  input logic 			    instr_rvalid_i,
+  input logic [RDATA_IN_WIDTH-1:0]  instr_rdata_i,
 
-  output logic                                busy_o
+  output logic 			    busy_o
 );
 `include "riscv_defines.sv"
 
-  enum logic [2:0] { EMPTY, VALID_L0, WAIT_GNT, WAIT_RVALID, ABORTED_BRANCH, WAIT_HWLOOP } CS, NS;
+  logic [2:0] EMPTY=0, VALID_L0=1, WAIT_GNT=2, WAIT_RVALID=3, ABORTED_BRANCH=4, WAIT_HWLOOP=5, CS, NS;
 
-  logic [3:0][31:0]   L0_buffer;
+  logic [31:0]   L0_buffer[3:0];
   logic      [31:0]   addr_q, instr_addr_int;
   logic               valid;
 

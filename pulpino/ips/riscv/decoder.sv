@@ -31,9 +31,9 @@ module riscv_decoder
 )
 (
   // singals running to/from controller
-  input  logic        deassert_we_i,           // deassert we, we are stalled or not active
-  input  logic        data_misaligned_i,       // misaligned data load/store in progress
-  input  logic        mult_multicycle_i,       // multiplier taking multiple cycles, using op c as storage
+  input  wire         deassert_we_i,           // deassert we, we are stalled or not active
+  input  wire         data_misaligned_i,       // misaligned data load/store in progress
+  input  wire         mult_multicycle_i,       // multiplier taking multiple cycles, using op c as storage
 
   output logic        illegal_insn_o,          // illegal instruction encountered
   output logic        ebrk_insn_o,             // trap instruction encountered
@@ -50,8 +50,8 @@ module riscv_decoder
   output logic [ 1:0] bmask_b_mux_o,           // bit manipulation mask a mux
 
   // from IF/ID pipeline
-  input  logic [31:0] instr_rdata_i,           // instruction read from instr memory/cache
-  input  logic        illegal_c_insn_i,        // compressed instruction decode failed
+  input  wire  [31:0] instr_rdata_i,           // instruction read from instr memory/cache
+  input  wire         illegal_c_insn_i,        // compressed instruction decode failed
 
   // ALU signals
   output logic [ALU_OP_WIDTH-1:0] alu_operator_o, // ALU operation selection

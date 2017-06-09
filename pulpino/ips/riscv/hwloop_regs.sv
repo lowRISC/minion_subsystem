@@ -27,26 +27,26 @@ module riscv_hwloop_regs
 `include "riscv_widths.sv"
 )
 (
-  input  logic                     clk,
-  input  logic                     rst_n,
+  input logic 	      clk,
+  input logic 	      rst_n,
 
   // from ex stage
-  input  logic            [31:0]    hwlp_start_data_i,
-  input  logic            [31:0]    hwlp_end_data_i,
-  input  logic            [31:0]    hwlp_cnt_data_i,
-  input  logic             [2:0]    hwlp_we_i,
-  input  logic [N_HWLP_BITS-1:0]    hwlp_regid_i,         // selects the register set
+  input logic [31:0]  hwlp_start_data_i,
+  input logic [31:0]  hwlp_end_data_i,
+  input logic [31:0]  hwlp_cnt_data_i,
+  input logic [2:0]   hwlp_we_i,
+  input logic 	      hwlp_regid_i, // selects the register set
 
   // from controller
-  input  logic                     valid_i,
+  input logic 	      valid_i,
 
   // from hwloop controller
-  input  logic         hwlp_dec_cnt_i,
+  input logic 	      hwlp_dec_cnt_i,
 
   // to hwloop controller
-  output logic  [31:0] hwlp_start_addr_o,
-  output logic  [31:0] hwlp_end_addr_o,
-  output logic  [31:0] hwlp_counter_o
+  output logic [31:0] hwlp_start_addr_o,
+  output logic [31:0] hwlp_end_addr_o,
+  output logic [31:0] hwlp_counter_o
 );
 `include "riscv_defines.sv"
 
@@ -109,10 +109,10 @@ module riscv_hwloop_regs
     else
     begin
         if ((hwlp_we_i[2] == 1'b1) && (i == hwlp_regid_i)) begin
-          hwlp_counter_q[i] <= hwlp_cnt_data_i;
+          hwlp_counter_q <= hwlp_cnt_data_i;
         end else begin
-          if (hwlp_dec_cnt_i[i] && valid_i)
-            hwlp_counter_q[i] <= hwlp_counter_n[i];
+          if (hwlp_dec_cnt_i && valid_i)
+            hwlp_counter_q <= hwlp_counter_n;
         end
     end
   end

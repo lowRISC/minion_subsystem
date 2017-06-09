@@ -38,26 +38,26 @@ module riscv_id_stage
 `include "riscv_widths.sv"
 )
 (
-    input  logic        clk,
-    input  logic        rst_n,
+    input  wire         clk,
+    input  wire         rst_n,
 
-    input  logic        test_en_i,
+    input  wire         test_en_i,
 
-    input  logic        fetch_enable_i,
+    input  wire         fetch_enable_i,
     output logic        ctrl_busy_o,
     output logic        is_decoding_o,
 
     // Interface to IF stage
-    input  logic  hwlp_dec_cnt_i,
-    input  logic              is_hwlp_i,
-    input  logic              instr_valid_i,
-    input  logic       [31:0] instr_rdata_i,      // comes from pipeline of IF stage
+    input  wire   hwlp_dec_cnt_i,
+    input  wire               is_hwlp_i,
+    input  wire               instr_valid_i,
+    input  wire        [31:0] instr_rdata_i,      // comes from pipeline of IF stage
     output logic              instr_req_o,
 
 
     // Jumps and branches
     output logic        branch_in_ex_o,
-    input  logic        branch_decision_i,
+    input  wire         branch_decision_i,
     output logic [31:0] jump_target_o,
 
     // IF and ID stage signals
@@ -67,23 +67,23 @@ module riscv_id_stage
     output logic [1:0]  exc_pc_mux_o,
     output logic [4:0]  exc_vec_pc_mux_o,
 
-    input  logic        illegal_c_insn_i,
-    input  logic        is_compressed_i,
+    input  wire         illegal_c_insn_i,
+    input  wire         is_compressed_i,
 
-    input  logic [31:0] pc_if_i,
-    input  logic [31:0] pc_id_i,
+    input  wire  [31:0] pc_if_i,
+    input  wire  [31:0] pc_id_i,
 
     // Stalls
     output logic        halt_if_o,      // controller requests a halt of the IF stage
 
     output logic        id_ready_o,     // ID stage is ready for the next instruction
-    input  logic        ex_ready_i,     // EX stage is ready for the next instruction
+    input  wire         ex_ready_i,     // EX stage is ready for the next instruction
 
-    input  logic        if_ready_i,     // IF stage is done
-    input  logic        if_valid_i,     // IF stage is done
+    input  wire         if_ready_i,     // IF stage is done
+    input  wire         if_valid_i,     // IF stage is done
     output logic        id_valid_o,     // ID stage is done
-    input  logic        ex_valid_i,     // EX stage is done
-    input  logic        wb_valid_i,     // WB stage is done
+    input  wire         ex_valid_i,     // EX stage is done
+    input  wire         wb_valid_i,     // WB stage is done
 
     // Pipeline ID/EX
     output logic [31:0] pc_ex_o,
@@ -131,9 +131,9 @@ module riscv_id_stage
     output logic  [31:0] hwlp_cnt_o,
 
     // hwloop signals from CS register
-    input  logic   [N_HWLP_BITS-1:0] csr_hwlp_regid_i,
-    input  logic               [2:0] csr_hwlp_we_i,
-    input  logic              [31:0] csr_hwlp_data_i,
+    input  wire     csr_hwlp_regid_i,
+    input  wire                [2:0] csr_hwlp_we_i,
+    input  wire               [31:0] csr_hwlp_data_i,
 
     // Interface to load store unit
     output logic        data_req_ex_o,
@@ -146,11 +146,11 @@ module riscv_id_stage
     output logic        data_misaligned_ex_o,
 
     output logic        prepost_useincr_ex_o,
-    input  logic        data_misaligned_i,
+    input  wire         data_misaligned_i,
 
     // Interrupt signals
-    input  logic [31:0] irq_i,
-    input  logic        irq_enable_i,
+    input  wire  [31:0] irq_i,
+    input  wire         irq_enable_i,
 
     output logic [5:0]  exc_cause_o,
     output logic        save_exc_cause_o,
@@ -159,37 +159,37 @@ module riscv_id_stage
     output logic        exc_save_id_o,
     output logic        exc_restore_id_o,
 
-    input  logic        lsu_load_err_i,
-    input  logic        lsu_store_err_i,
+    input  wire         lsu_load_err_i,
+    input  wire         lsu_store_err_i,
 
     // Debug Unit Signals
-    input  logic [DBG_SETS_W-1:0] dbg_settings_i,
-    input  logic        dbg_req_i,
+    input  wire  [DBG_SETS_W-1:0] dbg_settings_i,
+    input  wire         dbg_req_i,
     output logic        dbg_ack_o,
-    input  logic        dbg_stall_i,
+    input  wire         dbg_stall_i,
     output logic        dbg_trap_o,
 
-    input  logic        dbg_reg_rreq_i,
-    input  logic [ 4:0] dbg_reg_raddr_i,
+    input  wire         dbg_reg_rreq_i,
+    input  wire  [ 4:0] dbg_reg_raddr_i,
     output logic [31:0] dbg_reg_rdata_o,
 
-    input  logic        dbg_reg_wreq_i,
-    input  logic [ 4:0] dbg_reg_waddr_i,
-    input  logic [31:0] dbg_reg_wdata_i,
+    input  wire         dbg_reg_wreq_i,
+    input  wire  [ 4:0] dbg_reg_waddr_i,
+    input  wire  [31:0] dbg_reg_wdata_i,
 
-    input  logic        dbg_jump_req_i,
+    input  wire         dbg_jump_req_i,
 
     // Forward Signals
-    input  logic [4:0]  regfile_waddr_wb_i,
-    input  logic        regfile_we_wb_i,
-    input  logic [31:0] regfile_wdata_wb_i, // From wb_stage: selects data from data memory, ex_stage result and sp rdata
+    input  wire  [4:0]  regfile_waddr_wb_i,
+    input  wire         regfile_we_wb_i,
+    input  wire  [31:0] regfile_wdata_wb_i, // From wb_stage: selects data from data memory, ex_stage result and sp rdata
 
-    input  logic [4:0]  regfile_alu_waddr_fw_i,
-    input  logic        regfile_alu_we_fw_i,
-    input  logic [31:0] regfile_alu_wdata_fw_i,
+    input  wire  [4:0]  regfile_alu_waddr_fw_i,
+    input  wire         regfile_alu_we_fw_i,
+    input  wire  [31:0] regfile_alu_wdata_fw_i,
 
     // from ALU
-    input  logic        mult_multicycle_i,    // when we need multiple cycles in the multiplier and use op c as storage
+    input  wire         mult_multicycle_i,    // when we need multiple cycles in the multiplier and use op c as storage
 
     // Performance Counters
     output logic        perf_jump_o,          // we are executing a jump instruction
@@ -299,7 +299,7 @@ module riscv_id_stage
   logic        data_load_event_id;
 
   // hwloop signals
-  logic [N_HWLP_BITS-1:0] hwloop_regid, hwloop_regid_int;
+  logic       hwloop_regid, hwloop_regid_int;
   logic             [2:0] hwloop_we, hwloop_we_int;
   logic                   hwloop_target_mux_sel;
   logic                   hwloop_start_mux_sel;

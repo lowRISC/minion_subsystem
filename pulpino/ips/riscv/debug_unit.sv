@@ -30,31 +30,31 @@ module riscv_debug_unit
   input logic         rst_n,
 
   // Debug Interface
-  input  logic        debug_req_i,
+  input  wire         debug_req_i,
   output logic        debug_gnt_o,
   output logic        debug_rvalid_o,
-  input  logic [14:0] debug_addr_i,
-  input  logic        debug_we_i,
-  input  logic [31:0] debug_wdata_i,
+  input  wire  [14:0] debug_addr_i,
+  input  wire         debug_we_i,
+  input  wire  [31:0] debug_wdata_i,
   output logic [31:0] debug_rdata_o,
 
   output logic        debug_halted_o,
-  input  logic        debug_halt_i,
-  input  logic        debug_resume_i,
+  input  wire         debug_halt_i,
+  input  wire         debug_resume_i,
 
   // signals to core
   output logic [DBG_SETS_W-1:0] settings_o,
 
-  input  logic        trap_i,      // trap found, need to stop the core now
-  input  logic [5:0]  exc_cause_i, // if it was a trap, then the exception controller knows more
+  input  wire         trap_i,      // trap found, need to stop the core now
+  input  wire  [5:0]  exc_cause_i, // if it was a trap, then the exception controller knows more
   output logic        stall_o,     // after we got control, we control the stall signal
   output logic        dbg_req_o,
-  input  logic        dbg_ack_i,
+  input  wire         dbg_ack_i,
 
   // register file read port
   output logic        regfile_rreq_o,
   output logic [ 4:0] regfile_raddr_o,
-  input  logic [31:0] regfile_rdata_i,
+  input  wire  [31:0] regfile_rdata_i,
 
   // register file write port
   output logic        regfile_wreq_o,
@@ -66,20 +66,20 @@ module riscv_debug_unit
   output logic [11:0] csr_addr_o,
   output logic        csr_we_o,
   output logic [31:0] csr_wdata_o,
-  input  logic [31:0] csr_rdata_i,
+  input  wire  [31:0] csr_rdata_i,
 
   // Signals for PPC & NPC register
-  input  logic [31:0] pc_if_i,
-  input  logic [31:0] pc_id_i,
-  input  logic [31:0] pc_ex_i,
+  input  wire  [31:0] pc_if_i,
+  input  wire  [31:0] pc_id_i,
+  input  wire  [31:0] pc_ex_i,
 
-  input  logic        data_load_event_i,
-  input  logic        instr_valid_id_i,
+  input  wire         data_load_event_i,
+  input  wire         instr_valid_id_i,
 
-  input  logic        sleeping_i,
+  input  wire         sleeping_i,
 
-  input  logic        branch_in_ex_i,
-  input  logic        branch_taken_i,
+  input  wire         branch_in_ex_i,
+  input  wire         branch_taken_i,
 
   output logic        jump_req_o,
   output logic [31:0] jump_addr_o
@@ -521,6 +521,8 @@ module riscv_debug_unit
   assign settings_o      = settings_q;
 
 // synopsys translate_off   
+`ifndef SKIP_ASSERT
+
   //----------------------------------------------------------------------------
   // Assertions
   //----------------------------------------------------------------------------
@@ -537,6 +539,7 @@ module riscv_debug_unit
   assert property (
     @(posedge clk) (debug_req_i) |-> (debug_addr_i[1:0] == 2'b00) );
 
+`endif
 // synopsys translate_on
 
 endmodule // debug_unit

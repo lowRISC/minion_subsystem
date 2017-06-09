@@ -16,13 +16,13 @@
 module coremem
   (
    // Clock and Reset
-   input logic  clk_i,
-   input logic  rst_ni,
+   input wire  clk_i,
+   input wire  rst_ni,
 
-   input logic  data_req_i,
+   input wire  data_req_i,
    output logic data_gnt_o,
    output logic data_rvalid_o,
-   input logic  data_we_i,
+   input wire  data_we_i,
    output logic CE, WE
    );
 `include "riscv_defines.sv"

@@ -32,21 +32,21 @@ module riscv_if_stage
 `include "riscv_widths.sv"
 )
 (
-    input  logic        clk,
-    input  logic        rst_n,
+    input  wire         clk,
+    input  wire         rst_n,
 
     // the boot address is used to calculate the exception offsets
-    input  logic [31:0] boot_addr_i,
+    input  wire  [31:0] boot_addr_i,
 
     // instruction request control
-    input  logic        req_i,
+    input  wire         req_i,
 
     // instruction cache interface
     output logic                   instr_req_o,
     output logic            [31:0] instr_addr_o,
-    input  logic                   instr_gnt_i,
-    input  logic                   instr_rvalid_i,
-    input  logic [INSTR_RDATA_WIDTH-1:0] instr_rdata_i,
+    input  wire                    instr_gnt_i,
+    input  wire                    instr_rvalid_i,
+    input  wire  [INSTR_RDATA_WIDTH-1:0] instr_rdata_i,
 
     // Output of IF Pipeline stage
     output logic  hwlp_dec_cnt_id_o,     // currently served instruction was the target of a hwlp
@@ -59,30 +59,30 @@ module riscv_if_stage
     output logic       [31:0] pc_id_o,
 
     // Forwarding ports - control signals
-    input  logic        clear_instr_valid_i,   // clear instruction valid bit in IF/ID pipe
-    input  logic        pc_set_i,              // set the program counter to a new value
-    input  logic [31:0] exception_pc_reg_i,    // address used to restore PC when the interrupt/exception is served
-    input  logic  [2:0] pc_mux_i,              // sel for pc multiplexer
-    input  logic  [1:0] exc_pc_mux_i,          // selects ISR address
-    input  logic  [4:0] exc_vec_pc_mux_i,      // selects ISR address for vectorized interrupt lines
+    input  wire         clear_instr_valid_i,   // clear instruction valid bit in IF/ID pipe
+    input  wire         pc_set_i,              // set the program counter to a new value
+    input  wire  [31:0] exception_pc_reg_i,    // address used to restore PC when the interrupt/exception is served
+    input  wire   [2:0] pc_mux_i,              // sel for pc multiplexer
+    input  wire   [1:0] exc_pc_mux_i,          // selects ISR address
+    input  wire   [4:0] exc_vec_pc_mux_i,      // selects ISR address for vectorized interrupt lines
 
     // jump and branch target and decision
-    input  logic [31:0] jump_target_id_i,      // jump target address
-    input  logic [31:0] jump_target_ex_i,      // jump target address
+    input  wire  [31:0] jump_target_id_i,      // jump target address
+    input  wire  [31:0] jump_target_ex_i,      // jump target address
 
     // from hwloop controller
-    input  logic  [31:0] hwlp_start_i,          // hardware loop start addresses
-    input  logic  [31:0] hwlp_end_i,            // hardware loop end addresses
-    input  logic  [31:0] hwlp_cnt_i,            // hardware loop counters
+    input  wire   [31:0] hwlp_start_i,          // hardware loop start addresses
+    input  wire   [31:0] hwlp_end_i,            // hardware loop end addresses
+    input  wire   [31:0] hwlp_cnt_i,            // hardware loop counters
 
     // from debug unit
-    input  logic [31:0] dbg_jump_addr_i,
-    input  logic        dbg_jump_req_i,
+    input  wire  [31:0] dbg_jump_addr_i,
+    input  wire         dbg_jump_req_i,
 
     // pipeline stall
-    input  logic        halt_if_i,
+    input  wire         halt_if_i,
     output logic        if_ready_o,
-    input  logic        id_ready_i,
+    input  wire         id_ready_i,
     output logic        if_valid_o,
 
     // misc signals
@@ -371,6 +371,7 @@ module riscv_if_stage
   assign if_valid_o = (~halt_if_i) & if_ready_o;
 
 // synopsys translate_off
+`ifndef SKIP_ASSERT
   //----------------------------------------------------------------------------
   // Assertions
   //----------------------------------------------------------------------------
@@ -384,6 +385,7 @@ module riscv_if_stage
   assert property (
     @(posedge clk) (req_i) |-> (~fetch_addr_n[0]) )
     else $warning("There was a request while the fetch_addr_n LSB is set");
+`endif
 // synopsys translate_on
 
 endmodule
