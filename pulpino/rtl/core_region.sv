@@ -142,7 +142,7 @@ module core_region
 
   riscv_core
   #(
-    .N_EXT_PERF_COUNTERS ( 0 )
+    .N_EXT_PERF_COUNTERS ( 1 )
   )
   RISCV_CORE
   (

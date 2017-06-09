@@ -176,11 +176,7 @@ always @*
        end
   end
 
-riscv_core
-#(
-  .N_EXT_PERF_COUNTERS ( 0 )
-)
-RISCV_CORE
+riscv_core RISCV_CORE
 (
   .clk_i           ( msoc_clk          ),
   .rst_ni          ( rstn              ),
@@ -224,7 +220,7 @@ RISCV_CORE
   .fetch_enable_i  ( fetch_enable_i    ),
   .core_busy_o     ( core_busy_o       ),
 
-  .ext_perf_counters_i (  2'b0         )
+  .ext_perf_counters_i (  1'b0         )
 );
 
 //----------------------------------------------------------------------------//

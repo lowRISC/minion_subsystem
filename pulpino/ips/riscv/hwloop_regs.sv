@@ -27,21 +27,21 @@ module riscv_hwloop_regs
 `include "riscv_widths.sv"
 )
 (
-  input logic 	      clk,
-  input logic 	      rst_n,
+  input wire 	      clk,
+  input wire 	      rst_n,
 
   // from ex stage
-  input logic [31:0]  hwlp_start_data_i,
-  input logic [31:0]  hwlp_end_data_i,
-  input logic [31:0]  hwlp_cnt_data_i,
-  input logic [2:0]   hwlp_we_i,
-  input logic 	      hwlp_regid_i, // selects the register set
+  input wire [31:0]  hwlp_start_data_i,
+  input wire [31:0]  hwlp_end_data_i,
+  input wire [31:0]  hwlp_cnt_data_i,
+  input wire [2:0]   hwlp_we_i,
+  input wire 	      hwlp_regid_i, // selects the register set
 
   // from controller
-  input logic 	      valid_i,
+  input wire 	      valid_i,
 
   // from hwloop controller
-  input logic 	      hwlp_dec_cnt_i,
+  input wire 	      hwlp_dec_cnt_i,
 
   // to hwloop controller
   output logic [31:0] hwlp_start_addr_o,

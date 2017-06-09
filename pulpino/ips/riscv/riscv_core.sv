@@ -33,55 +33,55 @@ module riscv_core
   )
 (
   // Clock and Reset
-  input  logic        clk_i,
-  input  logic        rst_ni,
+  input wire        clk_i,
+  input wire        rst_ni,
 
-  input  logic        clock_en_i,    // enable clock, otherwise it is gated
-  input  logic        test_en_i,     // enable all clock gates for testing
+  input wire        clock_en_i,    // enable clock, otherwise it is gated
+  input wire        test_en_i,     // enable all clock gates for testing
 
   // Core ID, Cluster ID and boot address are considered more or less static
-  input  logic [31:0] boot_addr_i,
-  input  logic [ 3:0] core_id_i,
-  input  logic [ 5:0] cluster_id_i,
+  input wire [31:0] boot_addr_i,
+  input wire [ 3:0] core_id_i,
+  input wire [ 5:0] cluster_id_i,
 
   // Instruction memory interface
   output logic                         instr_req_o,
-  input  logic                         instr_gnt_i,
-  input  logic                         instr_rvalid_i,
+  input wire                         instr_gnt_i,
+  input wire                         instr_rvalid_i,
   output logic                  [31:0] instr_addr_o,
-  input  logic [INSTR_RDATA_WIDTH-1:0] instr_rdata_i,
+  input wire [INSTR_RDATA_WIDTH-1:0] instr_rdata_i,
 
   // Data memory interface
   output logic        data_req_o,
-  input  logic        data_gnt_i,
-  input  logic        data_rvalid_i,
+  input wire        data_gnt_i,
+  input wire        data_rvalid_i,
   output logic        data_we_o,
   output logic [3:0]  data_be_o,
   output logic [31:0] data_addr_o,
   output logic [31:0] data_wdata_o,
-  input  logic [31:0] data_rdata_i,
-  input  logic        data_err_i,
+  input wire [31:0] data_rdata_i,
+  input wire        data_err_i,
 
   // Interrupt inputs
-  input  logic [31:0] irq_i,                 // level sensitive IR lines
+  input wire [31:0] irq_i,                 // level sensitive IR lines
 
   // Debug Interface
-  input  logic        debug_req_i,
+  input wire        debug_req_i,
   output logic        debug_gnt_o,
   output logic        debug_rvalid_o,
-  input  logic [14:0] debug_addr_i,
-  input  logic        debug_we_i,
-  input  logic [31:0] debug_wdata_i,
+  input wire [14:0] debug_addr_i,
+  input wire        debug_we_i,
+  input wire [31:0] debug_wdata_i,
   output logic [31:0] debug_rdata_o,
   output logic        debug_halted_o,
-  input  logic        debug_halt_i,
-  input  logic        debug_resume_i,
+  input wire        debug_halt_i,
+  input wire        debug_resume_i,
 
   // CPU Control Signals
-  input  logic        fetch_enable_i,
+  input wire        fetch_enable_i,
   output logic        core_busy_o,
 
-  input  logic [N_EXT_PERF_COUNTERS-1:0] ext_perf_counters_i
+  input wire [N_EXT_PERF_COUNTERS-1:0] ext_perf_counters_i
 );
 `include "riscv_defines.sv"
 
@@ -669,9 +669,6 @@ module riscv_core
   //////////////////////////////////////
 
   riscv_cs_registers
-  #(
-    .N_EXT_CNT       ( N_EXT_PERF_COUNTERS   )
-  )
   cs_registers_i
   (
     .clk                     ( clk                ),

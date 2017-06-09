@@ -45,14 +45,14 @@ module riscv_register_file
     output logic [DATA_WIDTH-1:0]  rdata_c_o,
 
     // Write port W1
-    input logic [ADDR_WIDTH-1:0]   waddr_a_i,
-    input logic [DATA_WIDTH-1:0]   wdata_a_i,
-    input logic                    we_a_i,
+    input wire [ADDR_WIDTH-1:0]   waddr_a_i,
+    input wire [DATA_WIDTH-1:0]   wdata_a_i,
+    input wire                    we_a_i,
 
     // Write port W2
-    input logic [ADDR_WIDTH-1:0]   waddr_b_i,
-    input logic [DATA_WIDTH-1:0]   wdata_b_i,
-    input logic                    we_b_i
+    input wire [ADDR_WIDTH-1:0]   waddr_b_i,
+    input wire [DATA_WIDTH-1:0]   wdata_b_i,
+    input wire                    we_b_i
 );
 `include "riscv_defines.sv"
 

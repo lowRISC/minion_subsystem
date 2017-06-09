@@ -90,26 +90,18 @@ module riscv_cs_registers
   input  wire                  mem_load_i,        // load from memory in this cycle
   input  wire                  mem_store_i,       // store to memory in this cycle
 
-  input  wire  [N_EXT_CNT-1:0] ext_counters_i
+  input  wire  [N_EXT_PERF_COUNTERS-1:0] ext_counters_i
 );
 `include "riscv_defines.sv"
 
-  localparam N_PERF_COUNTERS = 11 + N_EXT_CNT;
-
-`ifdef ASIC_SYNTHESIS
-  localparam N_PERF_REGS     = 1;
-`else
-  localparam N_PERF_REGS     = N_PERF_COUNTERS;
-`endif
-
   // Performance Counter Signals
   logic                          id_valid_q;
-  logic [N_PERF_COUNTERS-1:0]    PCCR_in;  // input signals for each counter category
-  logic [N_PERF_COUNTERS-1:0]    PCCR_inc, PCCR_inc_q; // should the counter be increased?
+  logic [11 + N_EXT_PERF_COUNTERS-1:0]    PCCR_in;  // input signals for each counter category
+  logic [11 + N_EXT_PERF_COUNTERS-1:0]    PCCR_inc, PCCR_inc_q; // should the counter be increased?
 
-  logic [31:0] PCCR_q[N_PERF_REGS-1:0], PCCR_n[N_PERF_REGS-1:0]; // performance counters counter register
+  logic [31:0] PCCR_q[11 + N_EXT_PERF_COUNTERS-1:0], PCCR_n[11 + N_EXT_PERF_COUNTERS-1:0]; // performance counters counter register
   logic [1:0]                    PCMR_n, PCMR_q; // mode register, controls saturation and global enable
-  logic [N_PERF_COUNTERS-1:0]    PCER_n, PCER_q; // selected counter input
+  logic [11 + N_EXT_PERF_COUNTERS-1:0]    PCER_n, PCER_q; // selected counter input
 
   logic [31:0]                   perf_rdata;
   logic [4:0]                    pccr_index;
@@ -313,9 +305,9 @@ module riscv_cs_registers
   // assign external performance counters
   generate
     genvar i;
-    for(i = 0; i < N_EXT_CNT; i++)
+    for(i = 0; i < N_EXT_PERF_COUNTERS; i++)
     begin
-      assign PCCR_in[N_PERF_COUNTERS - N_EXT_CNT + i] = ext_counters_i[i];
+      assign PCCR_in[11 + i] = ext_counters_i[i];
     end
   endgenerate
 
@@ -334,7 +326,7 @@ module riscv_cs_registers
       case (csr_addr_i)
         12'h7A0: begin
           is_pcer = 1'b1;
-          perf_rdata[N_PERF_COUNTERS-1:0] = PCER_q;
+          perf_rdata[11 + N_EXT_PERF_COUNTERS-1:0] = PCER_q;
         end
         12'h7A1: begin
           is_pcmr = 1'b1;
@@ -386,7 +378,7 @@ module riscv_cs_registers
 `else
   always @*
   begin
-    for(int i = 0; i < N_PERF_COUNTERS; i++)
+    for(int i = 0; i < 11 + N_EXT_PERF_COUNTERS; i++)
     begin : PERF_CNT_INC
       PCCR_inc[i] = PCCR_in[i] & PCER_q[i] & PCMR_q[0];
 
@@ -425,9 +417,9 @@ module riscv_cs_registers
     if (is_pcer) begin
       case (csr_op_i)
         CSR_OP_NONE:   ;
-        CSR_OP_WRITE:  PCER_n = csr_wdata_i[N_PERF_COUNTERS-1:0];
-        CSR_OP_SET:    PCER_n = csr_wdata_i[N_PERF_COUNTERS-1:0] | PCER_q;
-        CSR_OP_CLEAR:  PCER_n = csr_wdata_i[N_PERF_COUNTERS-1:0] & ~(PCER_q);
+        CSR_OP_WRITE:  PCER_n = csr_wdata_i[11 + N_EXT_PERF_COUNTERS-1:0];
+        CSR_OP_SET:    PCER_n = csr_wdata_i[11 + N_EXT_PERF_COUNTERS-1:0] | PCER_q;
+        CSR_OP_CLEAR:  PCER_n = csr_wdata_i[11 + N_EXT_PERF_COUNTERS-1:0] & ~(PCER_q);
       endcase
     end
   end
@@ -442,7 +434,7 @@ module riscv_cs_registers
       PCER_q <= '0;
       PCMR_q <= 2'h3;
 
-      for(int i = 0; i < N_PERF_REGS; i++)
+      for(int i = 0; i < 11 + N_EXT_PERF_COUNTERS; i++)
       begin
         PCCR_q[i]     <= '0;
         PCCR_inc_q[i] <= '0;
@@ -455,7 +447,7 @@ module riscv_cs_registers
       PCER_q <= PCER_n;
       PCMR_q <= PCMR_n;
 
-      for(int i = 0; i < N_PERF_REGS; i++)
+      for(int i = 0; i < 11 + N_EXT_PERF_COUNTERS; i++)
       begin
         PCCR_q[i]     <= PCCR_n[i];
         PCCR_inc_q[i] <= PCCR_inc[i];

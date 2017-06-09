@@ -25,24 +25,24 @@
 // this cycle already
 module riscv_fetch_fifo
 (
-    input  logic        clk,
-    input  logic        rst_n,
+    input wire        clk,
+    input wire        rst_n,
 
     // control signals
-    input  logic        clear_i,          // clears the contents of the fifo
+    input wire        clear_i,          // clears the contents of the fifo
 
     // input port
-    input  logic [31:0] in_addr_i,
-    input  logic [31:0] in_rdata_i,
-    input  logic        in_valid_i,
+    input wire [31:0] in_addr_i,
+    input wire [31:0] in_rdata_i,
+    input wire        in_valid_i,
     output logic        in_ready_o,
 
-    input  logic        in_replace2_i, // replaces second entry if there is one: "to be served after this instr"
-    input  logic        in_is_hwlp_i,
+    input wire        in_replace2_i, // replaces second entry if there is one: "to be served after this instr"
+    input wire        in_is_hwlp_i,
 
     // output port
     output logic        out_valid_o,
-    input  logic        out_ready_i,
+    input wire        out_ready_i,
     output logic [31:0] out_rdata_o,
     output logic [31:0] out_addr_o,
 
@@ -270,18 +270,18 @@ endmodule
 
 module riscv_prefetch_buffer
 (
-  input  logic        clk,
-  input  logic        rst_n,
+  input wire        clk,
+  input wire        rst_n,
 
-  input  logic        req_i,
+  input wire        req_i,
 
-  input  logic        branch_i,
-  input  logic [31:0] addr_i,
+  input wire        branch_i,
+  input wire [31:0] addr_i,
 
-  input  logic        hwloop_i,
-  input  logic [31:0] hwloop_target_i,
+  input wire        hwloop_i,
+  input wire [31:0] hwloop_target_i,
 
-  input  logic        ready_i,
+  input wire        ready_i,
   output logic        valid_o,
   output logic [31:0] rdata_o,
   output logic [31:0] addr_o,
@@ -289,10 +289,10 @@ module riscv_prefetch_buffer
 
   // goes to instruction memory / instruction cache
   output logic        instr_req_o,
-  input  logic        instr_gnt_i,
+  input wire        instr_gnt_i,
   output logic [31:0] instr_addr_o,
-  input  logic [31:0] instr_rdata_i,
-  input  logic        instr_rvalid_i,
+  input wire [31:0] instr_rdata_i,
+  input wire        instr_rvalid_i,
 
   // Prefetch Buffer Status
   output logic        busy_o

@@ -589,17 +589,17 @@ module prefetch_L0_buffer_L0
   parameter                                   RDATA_IN_WIDTH = 128
 )
 (
-  input logic 			    clk,
-  input logic 			    rst_n,
+  input wire 			    clk,
+  input wire 			    rst_n,
 
-  input logic 			    prefetch_i,
-  input logic [31:0] 		    prefetch_addr_i,
+  input wire 			    prefetch_i,
+  input wire [31:0] 		    prefetch_addr_i,
 
-  input logic 			    branch_i,
-  input logic [31:0] 		    branch_addr_i,
+  input wire 			    branch_i,
+  input wire [31:0] 		    branch_addr_i,
 
-  input logic 			    hwlp_i,
-  input logic [31:0] 		    hwlp_addr_i,
+  input wire 			    hwlp_i,
+  input wire [31:0] 		    hwlp_addr_i,
 
 
   output logic 			    fetch_gnt_o,
@@ -612,9 +612,9 @@ module prefetch_L0_buffer_L0
   // goes to instruction memory / instruction cache
   output logic 			    instr_req_o,
   output logic [31:0] 		    instr_addr_o,
-  input logic 			    instr_gnt_i,
-  input logic 			    instr_rvalid_i,
-  input logic [RDATA_IN_WIDTH-1:0]  instr_rdata_i,
+  input wire 			    instr_gnt_i,
+  input wire 			    instr_rvalid_i,
+  input wire [RDATA_IN_WIDTH-1:0]  instr_rdata_i,
 
   output logic 			    busy_o
 );

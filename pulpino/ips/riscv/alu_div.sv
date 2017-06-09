@@ -29,20 +29,20 @@ module riscv_alu_div
    parameter C_LOG_WIDTH = 6
 )
 (
-    input  logic                    Clk_CI,
-    input  logic                    Rst_RBI,
+    input wire                    Clk_CI,
+    input wire                    Rst_RBI,
     // input IF
-    input  logic [C_WIDTH-1:0]      OpA_DI,
-    input  logic [C_WIDTH-1:0]      OpB_DI,
-    input  logic [C_LOG_WIDTH-1:0]  OpBShift_DI,
-    input  logic                    OpBIsZero_SI,
+    input wire [C_WIDTH-1:0]      OpA_DI,
+    input wire [C_WIDTH-1:0]      OpB_DI,
+    input wire [C_LOG_WIDTH-1:0]  OpBShift_DI,
+    input wire                    OpBIsZero_SI,
     //
-    input  logic                    OpBSign_SI, // gate this to 0 in case of unsigned ops
-    input  logic [1:0]              OpCode_SI,  // 0: udiv, 2: urem, 1: div, 3: rem
+    input wire                    OpBSign_SI, // gate this to 0 in case of unsigned ops
+    input wire [1:0]              OpCode_SI,  // 0: udiv, 2: urem, 1: div, 3: rem
     // handshake
-    input  logic                    InVld_SI,
+    input wire                    InVld_SI,
     // output IF
-    input  logic                    OutRdy_SI,
+    input wire                    OutRdy_SI,
     output logic                    OutVld_SO,
     output logic [C_WIDTH-1:0]      Res_DO
   );

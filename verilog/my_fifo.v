@@ -61,6 +61,7 @@
                         .RDEN(rd_en),              // 1-bit input: Read enable
                         .REGCE(1'b1),              // 1-bit input: Clock enable
                         .RST(rst),                 // 1-bit input: Asynchronous Reset
+                        .RSTREG(rst),              // 1-bit input: Output register set/reset
                         // Write Control Signals: 1-bit (each) input: Write clock and enable input signals
                         .WRCLK(wr_clk),            // 1-bit input: Write clock
                         .WREN(wr_en&~rst),         // 1-bit input: Write enable

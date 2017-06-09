@@ -28,18 +28,18 @@ module riscv_hwloop_controller
 )
 (
   // from id stage
-  input  logic [31:0]              current_pc_i,
+  input wire [31:0]              current_pc_i,
 
   // from hwloop_regs
-  input  logic  [31:0] hwlp_start_addr_i,
-  input  logic  [31:0] hwlp_end_addr_i,
-  input  logic  [31:0] hwlp_counter_i,
+  input wire  [31:0] hwlp_start_addr_i,
+  input wire  [31:0] hwlp_end_addr_i,
+  input wire  [31:0] hwlp_counter_i,
 
   // to hwloop_regs
   output logic         hwlp_dec_cnt_o,
 
   // from pipeline stages
-  input  logic         hwlp_dec_cnt_id_i,
+  input wire         hwlp_dec_cnt_id_i,
 
   // to id stage
   output logic                     hwlp_jump_o,

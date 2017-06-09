@@ -29,24 +29,24 @@ module riscv_alu
 `include "riscv_widths.sv"
 )
 (
-  input  logic                     clk,
-  input  logic                     rst_n,
+  input wire                     clk,
+  input wire                     rst_n,
 
-  input  logic [ALU_OP_WIDTH-1:0] operator_i,
-  input  logic [31:0]              operand_a_i,
-  input  logic [31:0]              operand_b_i,
-  input  logic [31:0]              operand_c_i,
+  input wire [ALU_OP_WIDTH-1:0] operator_i,
+  input wire [31:0]              operand_a_i,
+  input wire [31:0]              operand_b_i,
+  input wire [31:0]              operand_c_i,
 
-  input  logic [ 1:0]              vector_mode_i,
-  input  logic [ 4:0]              bmask_a_i,
-  input  logic [ 4:0]              bmask_b_i,
-  input  logic [ 1:0]              imm_vec_ext_i,
+  input wire [ 1:0]              vector_mode_i,
+  input wire [ 4:0]              bmask_a_i,
+  input wire [ 4:0]              bmask_b_i,
+  input wire [ 1:0]              imm_vec_ext_i,
 
   output logic [31:0]              result_o,
   output logic                     comparison_result_o,
 
   output logic                     ready_o,
-  input  logic                     ex_ready_i
+  input wire                     ex_ready_i
 );
    
 `include "riscv_defines.sv"
@@ -937,7 +937,7 @@ module alu_ff
   parameter LEN = 32
 )
 (
-  input  logic [LEN-1:0]         in_i,
+  input wire [LEN-1:0]         in_i,
 
   output logic [$clog2(LEN)-1:0] first_one_o,
   output logic                   no_ones_o
@@ -1008,7 +1008,7 @@ endmodule
 // count the number of '1's in a word
 module alu_popcnt
 (
-  input  logic [31:0]  in_i,
+  input wire [31:0]  in_i,
   output logic [5: 0]  result_o
 );
 

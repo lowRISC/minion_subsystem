@@ -26,8 +26,8 @@ module riscv_debug_unit
 `include "riscv_widths.sv"
 )
 (
-  input logic         clk,
-  input logic         rst_n,
+  input wire         clk,
+  input wire         rst_n,
 
   // Debug Interface
   input  wire         debug_req_i,
