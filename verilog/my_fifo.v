@@ -20,6 +20,25 @@
    wire [31:0]                                                 DO, DI;
    wire [3:0]                                                  DOP, DIP;
 
+`ifndef XILINX
+
+generic_fifo_dc #(.dw(width), .aw(2048)) fifo1(
+		      .rd_clk(rd_clk),
+		      .wr_clk(wr_clk),
+		      .rst(rst),
+		      .clr(rst),
+		      .din(din),
+		      .we(wr_en),
+		      .dout(dout),
+		      .re(rd_en),
+                      .full(full),
+		      .empty(empty),
+		      .full_n(almostfull),
+		      .empty_n(),
+		      .level() );
+
+`else   
+   
    assign dout = {DOP[width/9-1:0],DO[width/9*8-1:0]};
    assign DIP = din[width-1:width/9*8];
    assign DI = din[width/9*8-1:0];
@@ -110,5 +129,7 @@
                         );
       
    endgenerate
+
+`endif
    
 endmodule

@@ -1,5 +1,3 @@
-XILINX_VERILOG=/local/scratch/jrrk2/regression/xilinx_verilog/src
-
 default: verilator
 
 base_dir = ..
@@ -8,10 +6,13 @@ verilog_srcs = \
 	nettype_none.v \
 	minion_tb.v \
 	coremem.sv \
-	dualmem.v \
 	fstore2.v \
-	minion_soc.sv \
+	dualmem.v \
+	rachelset.v \
+	iopad.v \
 	my_fifo.v \
+	generic_fifo_dc.v \
+	minion_soc.sv \
 	ps2_keyboard.v \
 	ps2_translation_table.v \
 	ps2.v \
@@ -44,7 +45,8 @@ verilog_srcs = \
 	../pulpino/ips/riscv/alu_div.sv \
 	../pulpino/ips/riscv/compressed_decoder.sv \
 	../pulpino/ips/riscv/prefetch_buffer.sv \
-	../software/bootstrap/code.v \
+	code0.v data0.v
+#	../software/bootstrap/code.v \
 	../software/bootstrap/data.v \
 
 verilog_headers = \
@@ -58,30 +60,16 @@ verilog_headers = \
 #--------------------------------------------------------------------
 
 verilator: $(verilog_srcs) $(verilog_headers)
-	verilator -cc -DSKIP_ASSERT \
+	verilator -cc -DBYPASS_CLK_DIV -DSKIP_ASSERT \
         +incdir+../pulpino/rtl/includes \
         +incdir+../pulpino/ips/riscv/include \
-	$(XILINX_VERILOG)/glbl.v \
-	$(XILINX_VERILOG)/unisims/RAMB16_S1_S1.v \
-	$(XILINX_VERILOG)/unisims/RAMB16_S2_S2.v \
-	$(XILINX_VERILOG)/unisims/RAMB16_S9.v \
-	$(XILINX_VERILOG)/unisims/FIFO18E1.v \
-	$(XILINX_VERILOG)/unisims/IOBUF.v \
-	$(XILINX_VERILOG)/unisims/RAMB18E1.v \
 	$(verilog_srcs) 2>&1 | tee $@.log
 
-cvc: $(verilog_srcs) $(verilog_headers) $(XILINX_VERILOG)/glbl.v
+cvc: $(verilog_srcs) $(verilog_headers)
 	echo -sv +libext+.v +lint=TFIPC-L +show_canceled_e \
 	+define+BYPASS_CLK_DIV +define+SKIP_ASSERT \
         +incdir+../pulpino/rtl/includes \
         +incdir+../pulpino/ips/riscv/include \
-	$(XILINX_VERILOG)/glbl.v \
-	$(XILINX_VERILOG)/unisims/RAMB16_S1_S1.v \
-	$(XILINX_VERILOG)/unisims/RAMB16_S2_S2.v \
-	$(XILINX_VERILOG)/unisims/RAMB16_S9.v \
-	$(XILINX_VERILOG)/unisims/FIFO18E1.v \
-	$(XILINX_VERILOG)/unisims/IOBUF.v \
-	$(XILINX_VERILOG)/unisims/RAMB18E1.v \
 	$(verilog_srcs) >cvc.cmd
 	cvc64 -f cvc.cmd 2>&1 | tee $@.log
 
@@ -91,13 +79,11 @@ iverilog: $(verilog_srcs) $(verilog_headers)
         -I ../pulpino/ips/riscv/include \
 	$(verilog_srcs) 2>&1 | tee $@.log
 
-simv: $(verilog_srcs) $(verilog_headers) $(XILINX_VERILOG)/glbl.v
+simv: $(verilog_srcs) $(verilog_headers)
 	vcs -full64 +systemverilogext+sv +libext+.v +lint=TFIPC-L -gui \
 	+define+BYPASS_CLK_DIV \
         +incdir+../pulpino/rtl/includes \
         +incdir+../pulpino/ips/riscv/include \
-	$(XILINX_VERILOG)/glbl.v \
-	-y $(XILINX_VERILOG)/unisims \
 	$(verilog_srcs) 2>&1 | tee $@.log
 
 sed: $(verilog_srcs)

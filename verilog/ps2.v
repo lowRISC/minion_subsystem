@@ -77,22 +77,14 @@ module ps2(clk, rst, rx_ascii_read,
           end
      end
 
-   IOBUF #(
-           .DRIVE(12), // Specify the output drive strength
-           .IOSTANDARD("DEFAULT"), // Specify the I/O standard
-           .SLEW("SLOW") // Specify the output slew rate
-           ) IOBUF_k_clk (
+iopad IOBUF_k_clk (
                           .O(ps2_k_clk_i),     // Buffer output
                           .IO(PS2_K_CLK_IO),   // Buffer inout port (connect directly to top-level port)
                           .I(ps2_k_clk_en_o_),     // Buffer input
                           .T(ps2_k_clk_en_o_)      // 3-state enable input 
                           );
 
-   IOBUF #(
-           .DRIVE(12), // Specify the output drive strength
-           .IOSTANDARD("DEFAULT"), // Specify the I/O standard
-           .SLEW("SLOW") // Specify the output slew rate
-           ) IOBUF_k_data (
+iopad IOBUF_k_data (
                            .O(ps2_k_data_i),     // Buffer output
                            .IO(PS2_K_DATA_IO),   // Buffer inout port (connect directly to top-level port)
                            .I(ps2_k_data_en_o_),     // Buffer input
@@ -142,22 +134,14 @@ module ps2(clk, rst, rx_ascii_read,
    wire ps2_m_clk_i ;
    wire ps2_m_data_i ;
 
-   IOBUF #(
-           .DRIVE(12), // Specify the output drive strength
-           .IOSTANDARD("DEFAULT"), // Specify the I/O standard
-           .SLEW("SLOW") // Specify the output slew rate
-           ) IOBUF_m_clk (
+iopad IOBUF_m_clk (
                           .O(ps2_m_clk_i),     // Buffer output
                           .IO(PS2_M_CLK_IO),   // Buffer inout port (connect directly to top-level port)
                           .I(ps2_m_clk_en_o_),     // Buffer input
                           .T(ps2_m_clk_en_o_)      // 3-state enable input 
                           );
 
-   IOBUF #(
-           .DRIVE(12), // Specify the output drive strength
-           .IOSTANDARD("DEFAULT"), // Specify the I/O standard
-           .SLEW("SLOW") // Specify the output slew rate
-           ) IOBUF_m_data (
+iopad IOBUF_m_data (
                            .O(ps2_m_data_i),     // Buffer output
                            .IO(PS2_M_DATA_IO),   // Buffer inout port (connect directly to top-level port)
                            .I(ps2_m_data_en_o_),     // Buffer input

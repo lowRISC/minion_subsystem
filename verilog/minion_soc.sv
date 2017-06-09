@@ -468,16 +468,8 @@ my_fifo #(.width(9)) uart_rx_fifo (
    wire [11:0] rx_wrcount, rx_rdcount;
    wire data_rst = ~(sd_data_rst&rstn);
    
-   parameter iostd = "LVTTL";
-   parameter slew = "FAST";
-   parameter iodrv = 24;
    // tri-state gate
-   IOBUF #(
-       .DRIVE(iodrv), // Specify the output drive strength
-       .IBUF_LOW_PWR("FALSE"),  // Low Power - "TRUE", High Performance = "FALSE" 
-       .IOSTANDARD(iostd), // Specify the I/O standard
-       .SLEW(slew) // Specify the output slew rate
-    ) IOBUF_cmd_inst (
+iopad IOPAD_cmd_inst (
        .O(sd_cmd_to_host),     // Buffer output
        .IO(sd_cmd),   // Buffer inout port (connect directly to top-level port)
        .I(sd_cmd_to_mem),     // Buffer input
@@ -489,12 +481,7 @@ my_fifo #(.width(9)) uart_rx_fifo (
         .in(sd_cmd_to_host),             
         .maj(sd_cmd_to_host_maj));
 
-   IOBUF #(
-        .DRIVE(iodrv), // Specify the output drive strength
-        .IBUF_LOW_PWR("FALSE"),  // Low Power - "TRUE", High Performance = "FALSE" 
-        .IOSTANDARD(iostd), // Specify the I/O standard
-        .SLEW(slew) // Specify the output slew rate
-     ) IOBUF_clk_inst (
+iopad IOPAD_clk_inst (
         .O(),     // Buffer output
         .IO(sd_sclk),   // Buffer inout port (connect directly to top-level port)
         .I(~sd_clk_o),     // Buffer input
@@ -504,12 +491,7 @@ my_fifo #(.width(9)) uart_rx_fifo (
     genvar sd_dat_ix;
     generate for (sd_dat_ix = 0; sd_dat_ix < 4; sd_dat_ix=sd_dat_ix+1)
         begin
-         IOBUF #(
-           .DRIVE(iodrv), // Specify the output drive strength
-            .IBUF_LOW_PWR("FALSE"),  // Low Power - "TRUE", High Performance = "FALSE" 
-            .IOSTANDARD(iostd), // Specify the I/O standard
-            .SLEW(slew) // Specify the output slew rate
-        ) IOBUF_dat_inst (
+iopad IOPAD_dat_inst (
             .O(sd_dat_to_host[sd_dat_ix]),     // Buffer output
             .IO(sd_dat[sd_dat_ix]),   // Buffer inout port (connect directly to top-level port)
             .I(sd_dat_to_mem[sd_dat_ix]),     // Buffer input
