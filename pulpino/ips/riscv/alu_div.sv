@@ -79,13 +79,13 @@ module riscv_alu_div
   // datapath
   ///////////////////////////////////////////////////////////////////////////////
 
-  assign PmSel_S     = LoadEn_S & ~(OpCode_SI[0] & (OpA_DI[$high(OpA_DI)] ^ OpBSign_SI));
+  assign PmSel_S     = LoadEn_S & ~(OpCode_SI[0] & (OpA_DI[C_WIDTH-1] ^ OpBSign_SI));
 
   // muxes
   assign AddMux_D    = (LoadEn_S) ? OpA_DI  : BReg_DP;
 
   // attention: logical shift in case of negative operand B!
-  assign BMux_D      = (LoadEn_S) ? OpB_DI : {CompInv_SP, (BReg_DP[$high(BReg_DP):1])};
+  assign BMux_D      = (LoadEn_S) ? OpB_DI : {CompInv_SP, (BReg_DP[C_WIDTH-1:1])};
 
   genvar i;
   generate
@@ -181,20 +181,20 @@ module riscv_alu_div
   // get flags
   assign RemSel_SN  = (LoadEn_S) ? OpCode_SI[1] : RemSel_SP;
   assign CompInv_SN = (LoadEn_S) ? OpBSign_SI   : CompInv_SP;
-  assign ResInv_SN  = (LoadEn_S) ? (~OpBIsZero_SI | OpCode_SI[1]) & OpCode_SI[0] & (OpA_DI[$high(OpA_DI)] ^ OpBSign_SI) : ResInv_SP;
+  assign ResInv_SN  = (LoadEn_S) ? (~OpBIsZero_SI | OpCode_SI[1]) & OpCode_SI[0] & (OpA_DI[C_WIDTH-1] ^ OpBSign_SI) : ResInv_SP;
 
   assign AReg_DN   = (ARegEn_S)   ? AddOut_D : AReg_DP;
   assign BReg_DN   = (BRegEn_S)   ? BMux_D   : BReg_DP;
-  assign ResReg_DN = (LoadEn_S)   ? '0       :
-                     (ResRegEn_S) ? {ABComp_S, ResReg_DP[$high(ResReg_DP):1]} : ResReg_DP;
+  assign ResReg_DN = (LoadEn_S)   ? 'b0       :
+                     (ResRegEn_S) ? {ABComp_S, ResReg_DP[C_WIDTH-1:1]} : ResReg_DP;
 
   always @(posedge Clk_CI or negedge Rst_RBI) begin : p_regs
     if(~Rst_RBI) begin
        State_SP   <= IDLE;
-       AReg_DP    <= '0;
-       BReg_DP    <= '0;
-       ResReg_DP  <= '0;
-       Cnt_DP     <= '0;
+       AReg_DP    <= 'b0;
+       BReg_DP    <= 'b0;
+       ResReg_DP  <= 'b0;
+       Cnt_DP     <= 'b0;
        RemSel_SP  <= 1'b0;
        CompInv_SP <= 1'b0;
        ResInv_SP  <= 1'b0;

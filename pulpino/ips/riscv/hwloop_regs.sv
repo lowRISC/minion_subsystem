@@ -55,7 +55,7 @@ module riscv_hwloop_regs
   logic  [31:0] hwlp_end_q;
   logic  [31:0] hwlp_counter_q, hwlp_counter_n;
 
-  int unsigned i;
+  logic  [31:0] i;
 
 
   assign hwlp_start_addr_o = hwlp_start_q;

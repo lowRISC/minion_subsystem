@@ -200,7 +200,7 @@ module riscv_ex_stage
   begin : EX_WB_Pipeline_Register
     if (~rst_n)
     begin
-      regfile_waddr_wb_o   <= '0;
+      regfile_waddr_wb_o   <= 'b0;
       regfile_we_wb_o      <= 1'b0;
     end
     else

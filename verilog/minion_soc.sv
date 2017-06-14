@@ -80,7 +80,7 @@ module minion_soc
   logic  [7:0] core_lsu_rx_byte;
 
   logic [15:0] one_hot_data_addr;
-  logic [31:0] one_hot_rdata[15:0];
+  wire [31:0] one_hot_rdata[15:0];
 // signals from/to core
 logic         core_instr_req;
 logic         core_instr_gnt;
@@ -172,7 +172,7 @@ always @*
      for (i = 0; i < 16; i++)
        begin
 	  one_hot_data_addr[i] = core_lsu_addr[23:20] == i;
-	  core_lsu_rdata |= (one_hot_data_addr[i] ? one_hot_rdata[i] : 32'b0);
+	  core_lsu_rdata = core_lsu_rdata | (one_hot_data_addr[i] ? one_hot_rdata[i] : 32'b0);
        end
   end
 

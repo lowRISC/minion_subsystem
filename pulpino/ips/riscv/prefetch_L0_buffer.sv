@@ -141,7 +141,7 @@ module riscv_prefetch_L0_buffer
 
   always @*
   begin
-    rdata_unaligned[31:16] = 'x;
+    rdata_unaligned[31:16] = 'bx;
 
     case(addr_o[3:2])
        2'b00: begin rdata_unaligned[31:16] = rdata_L0[32+15:32]; end
@@ -519,10 +519,10 @@ module riscv_prefetch_L0_buffer
   begin
     if (~rst_n)
     begin
-      addr_q         <= '0;
+      addr_q         <= 'b0;
       is_hwlp_q      <= 1'b0;
       CS             <= IDLE;
-      rdata_last_q   <= '0;
+      rdata_last_q   <= 'b0;
     end
     else
     begin
@@ -636,7 +636,7 @@ module prefetch_L0_buffer_L0
     NS             = CS;
     valid          = 1'b0;
     instr_req_o    = 1'b0;
-    instr_addr_int = 'x;
+    instr_addr_int = 'bx;
     fetch_valid_o  = 1'b0;
 
     case(CS)
@@ -803,8 +803,8 @@ module prefetch_L0_buffer_L0
     if (~rst_n)
     begin
       CS             <= EMPTY;
-      L0_buffer      <= '0;
-      addr_q         <= '0;
+      L0_buffer      <= 'b0;
+      addr_q         <= 'b0;
     end
     else
     begin

@@ -90,7 +90,7 @@ module riscv_mult
 
   // prepare the rounding value
   assign short_round_tmp = (32'h00000001) << imm_i;
-  assign short_round = (operator_i == MUL_IR) ? {1'b0, short_round_tmp[31:1]} : '0;
+  assign short_round = (operator_i == MUL_IR) ? {1'b0, short_round_tmp[31:1]} : 'b0;
 
   // perform subword selection and sign extensions
   assign short_op_a[15:0] = short_subword[0] ? op_a_i[31:16] : op_a_i[15:0];
@@ -211,15 +211,15 @@ module riscv_mult
   //                                           //
   ///////////////////////////////////////////////
 
-  logic [ 8:0] dot_char_op_a[3:0];
-  logic [ 8:0] dot_char_op_b[3:0];
-  logic [17:0] dot_char_mul[3:0];
-  logic [31:0]      dot_char_result;
+  wire  [ 8:0] dot_char_op_a[3:0];
+  wire  [ 8:0] dot_char_op_b[3:0];
+  wire  [17:0] dot_char_mul[3:0];
+  wire  [31:0]      dot_char_result;
 
-  logic [16:0] dot_short_op_a[1:0];
-  logic [16:0] dot_short_op_b[1:0];
-  logic [33:0] dot_short_mul[1:0];
-  logic [31:0]      dot_short_result;
+  wire  [16:0] dot_short_op_a[1:0];
+  wire  [16:0] dot_short_op_b[1:0];
+  wire  [33:0] dot_short_mul[1:0];
+  wire  [31:0]      dot_short_result;
 
 
   assign dot_char_op_a[0] = {dot_signed_i[1] & dot_op_a_i[ 7], dot_op_a_i[ 7: 0]};
@@ -265,7 +265,7 @@ module riscv_mult
 
   always @*
   begin
-    result_o   = 'x;
+    result_o   = 'bx;
 
     case (operator_i)
       MUL_MAC32, MUL_MSU32: result_o = int_result[31:0];

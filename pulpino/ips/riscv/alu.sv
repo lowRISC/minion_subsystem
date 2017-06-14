@@ -175,7 +175,7 @@ module riscv_alu
 
   assign adder_round_value  = ((operator_i == ALU_ADDR) || (operator_i == ALU_SUBR) ||
                                (operator_i == ALU_ADDUR) || (operator_i == ALU_SUBUR)) ?
-                                {1'b0, bmask[31:1]} : '0;
+                                {1'b0, bmask[31:1]} : 'b0;
   assign adder_round_result = adder_result + adder_round_value;
 
 
@@ -451,7 +451,7 @@ module riscv_alu
   assign clip_is_lower_neg = $signed(operand_a_i) < $signed(operand_b_neg);
   assign clip_is_lower_u   = (operator_i == ALU_CLIPU) && operand_a_i[31];
 
-  assign clip_result       = clip_is_lower_u ? '0 : (clip_is_lower_neg ? operand_b_neg : result_minmax);
+  assign clip_result       = clip_is_lower_u ? 'b0 : (clip_is_lower_neg ? operand_b_neg : result_minmax);
 
   //////////////////////////////////////////////////
   //  ____  _   _ _   _ _____ _____ _     _____   //
@@ -476,10 +476,10 @@ module riscv_alu
 
   always @*
   begin
-    shuffle_reg_sel  = '0;
+    shuffle_reg_sel  = 'b0;
     shuffle_reg1_sel = 2'b01;
     shuffle_reg0_sel = 2'b10;
-    shuffle_through  = '1;
+    shuffle_through  = 'b1;
 
     case(operator_i)
       ALU_EXT, ALU_EXTS: begin
@@ -572,7 +572,7 @@ module riscv_alu
   always @*
     begin
        for (h = 0; h < 4; h=h+1)
-	 shuffle_byte_sel[h] = 'x;
+	 shuffle_byte_sel[h] = 'bx;
 
     // byte selector
     case (operator_i)
@@ -719,7 +719,7 @@ module riscv_alu
 
   always @*
   begin
-    ff_input = 'x;
+    ff_input = 'bx;
 
     case (operator_i)
       ALU_FF1: ff_input = operand_a_i;
@@ -753,7 +753,7 @@ module riscv_alu
 
   always @*
   begin
-    bitop_result = 'x;
+    bitop_result = 'bx;
     case (operator_i)
       ALU_FF1: bitop_result = ff_no_one ? 6'd32 : {1'b0, ff1_result};
       ALU_FL1: bitop_result = ff_no_one ? 6'd32 : {1'b0, fl1_result};
@@ -763,7 +763,7 @@ module riscv_alu
           if (operand_a_i[31])
             bitop_result = 6'd31;
           else
-            bitop_result = '0;
+            bitop_result = 'b0;
         end else begin
           bitop_result = clb_result;
         end
@@ -868,7 +868,7 @@ module riscv_alu
 
   always @*
   begin
-    result_o   = 'x;
+    result_o   = 'bx;
 
     case (operator_i)
       // Standard Operations
@@ -943,9 +943,9 @@ module alu_ff
   output logic                   no_ones_o
 );
 
-  logic [$clog2(LEN)-1:0]           index_lut[LEN-1:0];
-  logic [2**$clog2(LEN)-1:0]                  sel_nodes;
-  logic [$clog2(LEN)-1:0] index_nodes[2**$clog2(LEN)-1:0];
+  wire [$clog2(LEN)-1:0]           index_lut[LEN-1:0];
+  wire [2**$clog2(LEN)-1:0]                  sel_nodes;
+  wire [$clog2(LEN)-1:0] index_nodes[2**$clog2(LEN)-1:0];
 
 
   //////////////////////////////////////////////////////////////////////////////
@@ -988,7 +988,7 @@ module alu_ff
         // if index is out of range
         if (k * 2 > LEN) begin
           assign sel_nodes[2**level-1+k]   = 1'b0;
-          assign index_nodes[2**level-1+k] = '0;
+          assign index_nodes[2**level-1+k] = 'b0;
         end
       end
     end
@@ -1012,10 +1012,10 @@ module alu_popcnt
   output logic [5: 0]  result_o
 );
 
-  logic [1:0] cnt_l1[15:0];
-  logic [2:0] cnt_l2[ 7:0];
-  logic [3:0] cnt_l3[ 3:0];
-  logic [4:0] cnt_l4[ 1:0];
+  wire [1:0] cnt_l1[15:0];
+  wire [2:0] cnt_l2[ 7:0];
+  wire [3:0] cnt_l3[ 3:0];
+  wire [4:0] cnt_l4[ 1:0];
 
   genvar      l, m, n, p;
   generate for(l = 0; l < 16; l++)

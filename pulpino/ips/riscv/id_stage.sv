@@ -396,10 +396,10 @@ module riscv_id_stage
   always @*
   begin
     case (regc_mux)
-      REGC_ZERO:  regfile_addr_rc_id = '0;
+      REGC_ZERO:  regfile_addr_rc_id = 'b0;
       REGC_RD:    regfile_addr_rc_id = instr[`REG_D];
       REGC_S1:    regfile_addr_rc_id = instr[`REG_S1];
-      default:     regfile_addr_rc_id = '0;
+      default:     regfile_addr_rc_id = 'b0;
     endcase
   end
 
@@ -414,15 +414,15 @@ module riscv_id_stage
                                 regfile_waddr_id : regfile_addr_ra_id;
 
   // Forwarding control signals
-  assign reg_d_ex_is_reg_a_id  = (regfile_waddr_ex_o     == regfile_addr_ra_id) && (rega_used_dec == 1'b1) && (regfile_addr_ra_id != '0);
-  assign reg_d_ex_is_reg_b_id  = (regfile_waddr_ex_o     == regfile_addr_rb_id) && (regb_used_dec == 1'b1) && (regfile_addr_rb_id != '0);
-  assign reg_d_ex_is_reg_c_id  = (regfile_waddr_ex_o     == regfile_addr_rc_id) && (regc_used_dec == 1'b1) && (regfile_addr_rc_id != '0);
-  assign reg_d_wb_is_reg_a_id  = (regfile_waddr_wb_i     == regfile_addr_ra_id) && (rega_used_dec == 1'b1) && (regfile_addr_ra_id != '0);
-  assign reg_d_wb_is_reg_b_id  = (regfile_waddr_wb_i     == regfile_addr_rb_id) && (regb_used_dec == 1'b1) && (regfile_addr_rb_id != '0);
-  assign reg_d_wb_is_reg_c_id  = (regfile_waddr_wb_i     == regfile_addr_rc_id) && (regc_used_dec == 1'b1) && (regfile_addr_rc_id != '0);
-  assign reg_d_alu_is_reg_a_id = (regfile_alu_waddr_fw_i == regfile_addr_ra_id) && (rega_used_dec == 1'b1) && (regfile_addr_ra_id != '0);
-  assign reg_d_alu_is_reg_b_id = (regfile_alu_waddr_fw_i == regfile_addr_rb_id) && (regb_used_dec == 1'b1) && (regfile_addr_rb_id != '0);
-  assign reg_d_alu_is_reg_c_id = (regfile_alu_waddr_fw_i == regfile_addr_rc_id) && (regc_used_dec == 1'b1) && (regfile_addr_rc_id != '0);
+  assign reg_d_ex_is_reg_a_id  = (regfile_waddr_ex_o     == regfile_addr_ra_id) && (rega_used_dec == 1'b1) && (regfile_addr_ra_id != 'b0);
+  assign reg_d_ex_is_reg_b_id  = (regfile_waddr_ex_o     == regfile_addr_rb_id) && (regb_used_dec == 1'b1) && (regfile_addr_rb_id != 'b0);
+  assign reg_d_ex_is_reg_c_id  = (regfile_waddr_ex_o     == regfile_addr_rc_id) && (regc_used_dec == 1'b1) && (regfile_addr_rc_id != 'b0);
+  assign reg_d_wb_is_reg_a_id  = (regfile_waddr_wb_i     == regfile_addr_ra_id) && (rega_used_dec == 1'b1) && (regfile_addr_ra_id != 'b0);
+  assign reg_d_wb_is_reg_b_id  = (regfile_waddr_wb_i     == regfile_addr_rb_id) && (regb_used_dec == 1'b1) && (regfile_addr_rb_id != 'b0);
+  assign reg_d_wb_is_reg_c_id  = (regfile_waddr_wb_i     == regfile_addr_rc_id) && (regc_used_dec == 1'b1) && (regfile_addr_rc_id != 'b0);
+  assign reg_d_alu_is_reg_a_id = (regfile_alu_waddr_fw_i == regfile_addr_ra_id) && (rega_used_dec == 1'b1) && (regfile_addr_ra_id != 'b0);
+  assign reg_d_alu_is_reg_b_id = (regfile_alu_waddr_fw_i == regfile_addr_rb_id) && (regb_used_dec == 1'b1) && (regfile_addr_rb_id != 'b0);
+  assign reg_d_alu_is_reg_c_id = (regfile_alu_waddr_fw_i == regfile_addr_rc_id) && (regc_used_dec == 1'b1) && (regfile_addr_rc_id != 'b0);
 
 
 
@@ -532,8 +532,8 @@ module riscv_id_stage
   begin : immediate_a_mux
     case (imm_a_mux_sel)
       IMMA_Z:      imm_a = imm_z_type;
-      IMMA_ZERO:   imm_a = '0;
-      default:      imm_a = '0;
+      IMMA_ZERO:   imm_a = 'b0;
+      default:      imm_a = 'b0;
     endcase
   end
 
@@ -662,19 +662,19 @@ module riscv_id_stage
   always @*
   begin
     case (bmask_a_mux)
-      BMASK_A_ZERO: bmask_a_id = '0;
+      BMASK_A_ZERO: bmask_a_id = 'b0;
       BMASK_A_S3:   bmask_a_id = imm_s3_type[4:0];
-      default:       bmask_a_id = '0;
+      default:       bmask_a_id = 'b0;
     endcase
   end
   always @*
   begin
     case (bmask_b_mux)
-      BMASK_B_ZERO: bmask_b_id = '0;
+      BMASK_B_ZERO: bmask_b_id = 'b0;
       BMASK_B_ONE:  bmask_b_id = 5'd1;
       BMASK_B_S2:   bmask_b_id = imm_s2_type[4:0];
       BMASK_B_S3:   bmask_b_id = imm_s3_type[4:0];
-      default:       bmask_b_id = '0;
+      default:       bmask_b_id = 'b0;
     endcase
   end
 
@@ -684,9 +684,9 @@ module riscv_id_stage
   always @*
   begin
     case (mult_imm_mux)
-      MIMM_ZERO: mult_imm_id = '0;
+      MIMM_ZERO: mult_imm_id = 'b0;
       MIMM_S3:   mult_imm_id = imm_s3_type[4:0];
-      default:    mult_imm_id = '0;
+      default:    mult_imm_id = 'b0;
     endcase
   end
 
@@ -1022,27 +1022,27 @@ module riscv_id_stage
     if (rst_n == 1'b0)
     begin
       alu_operator_ex_o           <= ALU_SLTU;
-      alu_operand_a_ex_o          <= '0;
-      alu_operand_b_ex_o          <= '0;
-      alu_operand_c_ex_o          <= '0;
-      bmask_a_ex_o                <= '0;
-      bmask_b_ex_o                <= '0;
-      imm_vec_ext_ex_o            <= '0;
-      alu_vec_mode_ex_o           <= '0;
+      alu_operand_a_ex_o          <= 'b0;
+      alu_operand_b_ex_o          <= 'b0;
+      alu_operand_c_ex_o          <= 'b0;
+      bmask_a_ex_o                <= 'b0;
+      bmask_b_ex_o                <= 'b0;
+      imm_vec_ext_ex_o            <= 'b0;
+      alu_vec_mode_ex_o           <= 'b0;
 
-      mult_operator_ex_o          <= '0;
-      mult_operand_a_ex_o         <= '0;
-      mult_operand_b_ex_o         <= '0;
-      mult_operand_c_ex_o         <= '0;
+      mult_operator_ex_o          <= 'b0;
+      mult_operand_a_ex_o         <= 'b0;
+      mult_operand_b_ex_o         <= 'b0;
+      mult_operand_c_ex_o         <= 'b0;
       mult_en_ex_o                <= 1'b0;
       mult_sel_subword_ex_o       <= 1'b0;
       mult_signed_mode_ex_o       <= 2'b00;
-      mult_imm_ex_o               <= '0;
+      mult_imm_ex_o               <= 'b0;
 
-      mult_dot_op_a_ex_o          <= '0;
-      mult_dot_op_b_ex_o          <= '0;
-      mult_dot_op_c_ex_o          <= '0;
-      mult_dot_signed_ex_o        <= '0;
+      mult_dot_op_a_ex_o          <= 'b0;
+      mult_dot_op_b_ex_o          <= 'b0;
+      mult_dot_op_c_ex_o          <= 'b0;
+      mult_dot_signed_ex_o        <= 'b0;
 
       regfile_waddr_ex_o          <= 5'b0;
       regfile_we_ex_o             <= 1'b0;
@@ -1063,7 +1063,7 @@ module riscv_id_stage
 
       data_misaligned_ex_o        <= 1'b0;
 
-      pc_ex_o                     <= '0;
+      pc_ex_o                     <= 'b0;
 
       branch_in_ex_o              <= 1'b0;
 

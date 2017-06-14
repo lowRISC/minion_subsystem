@@ -269,7 +269,7 @@ module riscv_debug_unit
   //----------------------------------------------------------------------------
   always @*
   begin
-    dbg_rdata = '0;
+    dbg_rdata = 'b0;
 
     case (rdata_sel_q)
       RD_DBGA: begin
@@ -277,27 +277,27 @@ module riscv_debug_unit
           5'h00: dbg_rdata[31:0] = {15'b0, debug_halted_o, 15'b0, settings_q[DBG_SETS_SSTE]}; // DBG_CTRL
           5'h01: dbg_rdata[31:0] = {15'b0, sleeping_i, 15'b0, dbg_ssth_q}; // DBG_HIT
           5'h02: begin // DBG_IE
-            dbg_rdata[31:16] = '0;
-            dbg_rdata[15:12] = '0;
+            dbg_rdata[31:16] = 'b0;
+            dbg_rdata[15:12] = 'b0;
             dbg_rdata[11]    = settings_q[DBG_SETS_ECALL];
-            dbg_rdata[10: 8] = '0;
+            dbg_rdata[10: 8] = 'b0;
             dbg_rdata[ 7]    = settings_q[DBG_SETS_ELSU];
             dbg_rdata[ 6]    = 1'b0;
             dbg_rdata[ 5]    = settings_q[DBG_SETS_ELSU];
             dbg_rdata[ 4]    = 1'b0;
             dbg_rdata[ 3]    = settings_q[DBG_SETS_EBRK];
             dbg_rdata[ 2]    = settings_q[DBG_SETS_EILL];
-            dbg_rdata[ 1: 0] = '0;
+            dbg_rdata[ 1: 0] = 'b0;
           end
           5'h03: dbg_rdata = {dbg_cause_q[5], 26'b0, dbg_cause_q[4:0]}; // DBG_CAUSE
-          5'h10: dbg_rdata = '0; // DBG_BPCTRL0
-          5'h12: dbg_rdata = '0; // DBG_BPCTRL1
-          5'h14: dbg_rdata = '0; // DBG_BPCTRL2
-          5'h16: dbg_rdata = '0; // DBG_BPCTRL3
-          5'h18: dbg_rdata = '0; // DBG_BPCTRL4
-          5'h1A: dbg_rdata = '0; // DBG_BPCTRL5
-          5'h1C: dbg_rdata = '0; // DBG_BPCTRL6
-          5'h1E: dbg_rdata = '0; // DBG_BPCTRL7
+          5'h10: dbg_rdata = 'b0; // DBG_BPCTRL0
+          5'h12: dbg_rdata = 'b0; // DBG_BPCTRL1
+          5'h14: dbg_rdata = 'b0; // DBG_BPCTRL2
+          5'h16: dbg_rdata = 'b0; // DBG_BPCTRL3
+          5'h18: dbg_rdata = 'b0; // DBG_BPCTRL4
+          5'h1A: dbg_rdata = 'b0; // DBG_BPCTRL5
+          5'h1C: dbg_rdata = 'b0; // DBG_BPCTRL6
+          5'h1E: dbg_rdata = 'b0; // DBG_BPCTRL7
           default:;
         endcase
       end
@@ -319,7 +319,7 @@ module riscv_debug_unit
   //----------------------------------------------------------------------------
   always @*
   begin
-    debug_rdata_o = '0;
+    debug_rdata_o = 'b0;
 
     case (rdata_sel_q)
       RD_CSR:  debug_rdata_o = csr_rdata_i;
@@ -470,8 +470,8 @@ module riscv_debug_unit
     if (~rst_n) begin
       pc_tracking_fsm_cs <= IFID;
 
-      addr_q             <= '0;
-      wdata_q            <= '0;
+      addr_q             <= 'b0;
+      wdata_q            <= 'b0;
       state_q            <= FIRST;
       rdata_sel_q        <= RD_NONE;
       regfile_rreq_q     <= 1'b0;

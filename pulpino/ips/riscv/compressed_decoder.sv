@@ -43,7 +43,7 @@ module riscv_compressed_decoder
   always @*
   begin
     illegal_instr_o = 1'b0;
-    instr_o         = 'x;
+    instr_o         = 'bx;
 
     case (instr_i[1:0])
       // C0

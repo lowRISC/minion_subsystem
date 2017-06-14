@@ -63,8 +63,9 @@ module riscv_register_file
   logic [NUM_WORDS-1:0]                 we_b_dec;
 
   always @*
-  begin : we_a_decoder
-    for (int i = 0; i < NUM_WORDS; i++) begin
+    begin : we_a_decoder
+    integer i;
+    for (i = 0; i < NUM_WORDS; i++) begin
       if (waddr_a_i == i)
         we_a_dec[i] = we_a_i;
       else
@@ -74,7 +75,8 @@ module riscv_register_file
 
   always @*
   begin : we_b_decoder
-    for (int i=0; i<NUM_WORDS; i++) begin
+    integer i;
+    for (i=0; i<NUM_WORDS; i++) begin
       if (waddr_b_i == i)
         we_b_dec[i] = we_b_i;
       else
@@ -104,7 +106,7 @@ module riscv_register_file
     end
 
     // R0 is nil
-    assign rf_reg[0] = '0;
+    assign rf_reg[0] = 'b0;
 
   endgenerate
 

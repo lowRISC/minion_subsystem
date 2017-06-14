@@ -134,7 +134,7 @@ module riscv_cs_registers
   // read logic
   always @*
   begin
-    csr_rdata_int = 'x;
+    csr_rdata_int = 'bx;
 
     case (csr_addr_i)
       // mstatus: always M-mode, contains IE bit
@@ -172,8 +172,8 @@ module riscv_cs_registers
     mestatus_n   = mestatus_q;
     mstatus_n    = mstatus_q;
     exc_cause_n  = exc_cause;
-    hwlp_we_o    = '0;
-    hwlp_regid_o = '0;
+    hwlp_we_o    = 'b0;
+    hwlp_regid_o = 'b0;
 
     case (csr_addr_i)
       // mstatus: IE bit
@@ -264,10 +264,10 @@ module riscv_cs_registers
   begin
     if (rst_n == 1'b0)
     begin
-      mstatus_q  <= '0;
-      mepc_q     <= '0;
-      mestatus_q <= '0;
-      exc_cause  <= '0;
+      mstatus_q  <= 'b0;
+      mepc_q     <= 'b0;
+      mestatus_q <= 'b0;
+      exc_cause  <= 'b0;
     end
     else
     begin
@@ -318,8 +318,8 @@ module riscv_cs_registers
     is_pcmr      = 1'b0;
     is_pcer      = 1'b0;
     pccr_all_sel = 1'b0;
-    pccr_index   = '0;
-    perf_rdata   = '0;
+    pccr_index   = 'b0;
+    perf_rdata   = 'b0;
 
     // only perform csr access if we actually care about the read data
     if (csr_access_i) begin
@@ -377,8 +377,9 @@ module riscv_cs_registers
   end
 `else
   always @*
-  begin
-    for(int i = 0; i < 11 + N_EXT_PERF_COUNTERS; i++)
+    begin:at1
+    integer i;
+    for(i = 0; i < 11 + N_EXT_PERF_COUNTERS; i++)
     begin : PERF_CNT_INC
       PCCR_inc[i] = PCCR_in[i] & PCER_q[i] & PCMR_q[0];
 
@@ -426,18 +427,19 @@ module riscv_cs_registers
 
   // Performance Counter Registers
   always @(posedge clk, negedge rst_n)
-  begin
+    begin:at2
+    integer i;
     if (rst_n == 1'b0)
     begin
       id_valid_q <= 1'b0;
 
-      PCER_q <= '0;
+      PCER_q <= 'b0;
       PCMR_q <= 2'h3;
 
-      for(int i = 0; i < 11 + N_EXT_PERF_COUNTERS; i++)
+      for(i = 0; i < 11 + N_EXT_PERF_COUNTERS; i++)
       begin
-        PCCR_q[i]     <= '0;
-        PCCR_inc_q[i] <= '0;
+        PCCR_q[i]     <= 'b0;
+        PCCR_inc_q[i] <= 'b0;
       end
     end
     else
@@ -447,7 +449,7 @@ module riscv_cs_registers
       PCER_q <= PCER_n;
       PCMR_q <= PCMR_n;
 
-      for(int i = 0; i < 11 + N_EXT_PERF_COUNTERS; i++)
+      for(i = 0; i < 11 + N_EXT_PERF_COUNTERS; i++)
       begin
         PCCR_q[i]     <= PCCR_n[i];
         PCCR_inc_q[i] <= PCCR_inc[i];

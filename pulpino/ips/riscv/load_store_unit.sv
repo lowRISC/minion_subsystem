@@ -165,9 +165,9 @@ module riscv_load_store_unit
   begin
     if(rst_n == 1'b0)
     begin
-      data_type_q     <= '0;
-      rdata_offset_q  <= '0;
-      data_sign_ext_q <= '0;
+      data_type_q     <= 'b0;
+      rdata_offset_q  <= 'b0;
+      data_sign_ext_q <= 'b0;
       data_we_q       <= 1'b0;
     end
     else if (data_gnt_i == 1'b1) // request was granted, we wait for rvalid and can continue to WB
@@ -298,7 +298,7 @@ module riscv_load_store_unit
     if(rst_n == 1'b0)
     begin
       CS            <= IDLE;
-      rdata_q       <= '0;
+      rdata_q       <= 'b0;
     end
     else
     begin

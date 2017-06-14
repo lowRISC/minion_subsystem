@@ -2,9 +2,11 @@ default: xvlog
 
 base_dir = ..
 
+tb_srcs = \
+	minion_tb.v \
+
 verilog_srcs = \
 	nettype_none.v \
-	minion_tb.v \
 	coremem.sv \
 	dualmem.v \
 	rachelset.v \
@@ -59,44 +61,50 @@ verilog_headers = \
 # Build Verilog
 #--------------------------------------------------------------------
 
-verilator: $(verilog_srcs) $(verilog_headers)
+verilator: $(tb_srcs) $(verilog_srcs) $(verilog_headers)
 	verilator -cc -DBYPASS_CLK_DIV -DSKIP_ASSERT \
         +incdir+../pulpino/rtl/includes \
         +incdir+../pulpino/ips/riscv/include \
-	$(verilog_srcs) 2>&1 | tee $@.log
+	$(tb_srcs) $(verilog_srcs) 2>&1 | tee $@.log
 
-cvc: $(verilog_srcs) $(verilog_headers)
+cvc: $(tb_srcs) $(verilog_srcs) $(verilog_headers)
 	echo -sv +libext+.v +lint=TFIPC-L +show_canceled_e \
 	+define+BYPASS_CLK_DIV +define+SKIP_ASSERT \
         +incdir+../pulpino/rtl/includes \
         +incdir+../pulpino/ips/riscv/include \
-	$(verilog_srcs) >cvc.cmd
+	$(tb_srcs) $(verilog_srcs) >cvc.cmd
 	cvc64 -f cvc.cmd 2>&1 | tee $@.log
 
-iverilog: $(verilog_srcs) $(verilog_headers)
+iverilog: $(tb_srcs) $(verilog_srcs) $(verilog_headers)
 	iverilog -g2012 -DSKIP_ASSERT \
         -I ../pulpino/rtl/includes \
         -I ../pulpino/ips/riscv/include \
-	$(verilog_srcs) 2>&1 | tee $@.log
+	$(tb_srcs) $(verilog_srcs) 2>&1 | tee $@.log
 
-xvlog: $(verilog_srcs) $(verilog_headers)
+xvlog: $(tb_srcs) $(verilog_srcs) $(verilog_headers)
 	xvlog -d BYPASS_CLK_DIV -d SKIP_ASSERT --sv \
         -i ../pulpino/rtl/includes \
         -i ../pulpino/ips/riscv/include \
-	$(verilog_srcs) 2>&1 | tee $@.log
+	$(tb_srcs) $(verilog_srcs) 2>&1 | tee $@.log
 	xelab minion_tb
 	echo run all | xsim work.minion_tb
 	gtkwave dump.vcd
 
-simv: $(verilog_srcs) $(verilog_headers)
+simv: $(tb_srcs) $(verilog_srcs) $(verilog_headers)
 	vcs -full64 +systemverilogext+sv +libext+.v +lint=TFIPC-L -gui \
 	+define+BYPASS_CLK_DIV \
         +incdir+../pulpino/rtl/includes \
         +incdir+../pulpino/ips/riscv/include \
-	$(verilog_srcs) 2>&1 | tee $@.log
+	$(tb_srcs) $(verilog_srcs) 2>&1 | tee $@.log
 
-sed: $(verilog_srcs)
-	sh remove_modern_constructs.sh $(verilog_srcs)
+yosys: $(verilog_srcs) $(verilog_headers)
+	@rm -f $@.cmd
+	echo read_verilog -DBYPASS_CLK_DIV -DSKIP_ASSERT -sv -noopt -I../pulpino/rtl/includes -I../pulpino/ips/riscv/include $(verilog_srcs) >>$@.cmd
+	echo write_verilog $@.yosys >>$@.cmd
+	yosys -s $@.cmd 2>&1 | tee $@.log
+
+sed: $(tb_srcs) $(verilog_srcs)
+	sh remove_modern_constructs.sh $(tb_srcs) $(verilog_srcs)
 
 #--------------------------------------------------------------------
 # clean up

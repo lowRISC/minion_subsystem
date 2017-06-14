@@ -141,22 +141,26 @@ module riscv_fetch_fifo
   // FIFO management
   //////////////////////////////////////////////////////////////////////////////
 
-  int j;
+  integer j;
   always @*
-  begin
-    addr_int    = addr_Q;
-    rdata_int   = rdata_Q;
-    valid_int   = valid_Q;
-    is_hwlp_int = is_hwlp_Q;
+    begin:at1
+    reg skip;
+       for (h = 0; h < DEPTH; h=h+1)
+	 begin
+	    addr_int[h]    = addr_Q[h];
+	    rdata_int[h]   = rdata_Q[h];
+	 end
+       valid_int   = valid_Q;
+       is_hwlp_int = is_hwlp_Q;
 
     if (in_valid_i) begin
-      for(j = 0; j < DEPTH; j++) begin
+      skip = 1'b0;
+      for(j = 0; j < DEPTH; j++) if (!skip) begin
         if (~valid_Q[j]) begin
           addr_int[j]  = in_addr_i;
           rdata_int[j] = in_rdata_i;
           valid_int[j] = 1'b1;
-
-          break;
+          skip = 1'b1;
         end
       end
 
@@ -170,7 +174,7 @@ module riscv_fetch_fifo
           rdata_int[0]         = out_rdata_o;
           rdata_int[1]         = in_rdata_i;
           valid_int[1]         = 1'b1;
-          valid_int[2:DEPTH-1] = '0;
+          valid_int[2:DEPTH-1] = 'b0;
 
           // hardware loop incoming?
           is_hwlp_int[1] = in_is_hwlp_i;
@@ -185,9 +189,12 @@ module riscv_fetch_fifo
 
   // move everything by one step
   always @*
-  begin
-    addr_n     = addr_int;
-    rdata_n    = rdata_int;
+    begin
+       for (h = 0; h < DEPTH; h=h+1)
+	 begin
+	    addr_n[h]     = addr_int[h];
+	    rdata_n[h]    = rdata_int[h];
+	 end;
     valid_n    = valid_int;
     is_hwlp_n  = is_hwlp_int;
 
@@ -249,21 +256,24 @@ module riscv_fetch_fifo
   begin
      if(rst_n == 1'b0) for (j = 0; j < DEPTH; j=j+1)
     begin
-      addr_Q[j]    <= '0;
-      rdata_Q[j]   <= '0;
-      valid_Q[j]   <= '0;
-      is_hwlp_Q <= '0;
+      addr_Q[j]    <= 'b0;
+      rdata_Q[j]   <= 'b0;
+      valid_Q[j]   <= 'b0;
+      is_hwlp_Q <= 'b0;
     end
     else
     begin
       // on a clear signal from outside we invalidate the content of the FIFO
       // completely and start from an empty state
       if (clear_i) begin
-        valid_Q    <= '0;
-        is_hwlp_Q  <= '0;
+        valid_Q    <= 'b0;
+        is_hwlp_Q  <= 'b0;
       end else begin
-        addr_Q    <= addr_n;
-        rdata_Q   <= rdata_n;
+	 for (h = 0; h < DEPTH; h=h+1)
+	   begin
+              addr_Q[h]    <= addr_n[h];
+              rdata_Q[h]   <= rdata_n[h];
+	   end;
         valid_Q   <= valid_n;
         is_hwlp_Q <= is_hwlp_n;
       end
@@ -590,7 +600,7 @@ module riscv_prefetch_buffer
     begin
       CS              <= IDLE;
       hwlp_CS         <= HWLP_NONE;
-      instr_addr_q    <= '0;
+      instr_addr_q    <= 'b0;
     end
     else
     begin

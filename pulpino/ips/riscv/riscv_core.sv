@@ -735,7 +735,7 @@ module riscv_core
   assign csr_op       = (dbg_csr_req == 1'b0) ? csr_op_ex
                                               : (dbg_csr_we == 1'b1 ? CSR_OP_WRITE
                                                                     : CSR_OP_NONE );
-  assign csr_addr_int = csr_access_ex ? alu_operand_b_ex[11:0] : '0;
+  assign csr_addr_int = csr_access_ex ? alu_operand_b_ex[11:0] : 'b0;
 
 
   /////////////////////////////////////////////////////////////

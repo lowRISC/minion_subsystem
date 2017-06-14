@@ -173,12 +173,9 @@ module ps2_translation_table
           begin:get_dat_out
              reg [7:0] bit_num ;
              
-             bit_num = translation_table_address[4:0] << 3 ;
-
-             repeat(8)
+             for (bit_num = 3'b000; bit_num <= 3'b111; bit_num=bit_num+1)
                begin
-                  ram_out[bit_num % 8] <= #1 ps2_32byte_constant[bit_num] ;
-                  bit_num = bit_num + 1'b1 ;
+                  ram_out[bit_num] <= #1 ps2_32byte_constant[{translation_table_address[4:0],bit_num[2:0]}] ;
                end
           end
      end

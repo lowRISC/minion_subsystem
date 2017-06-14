@@ -100,7 +100,7 @@ module riscv_exc_controller
   always @*
   begin
     cause_int  = 6'b0;
-    pc_mux_int = 'x;
+    pc_mux_int = 'bx;
 
     if (irq_enable_i) begin
       // pc_mux_int is a critical signal, so try to get it as soon as possible
@@ -144,8 +144,8 @@ module riscv_exc_controller
   always @(posedge clk, negedge rst_n)
   begin
     if (rst_n == 1'b0) begin
-      cause_int_q  <= '0;
-      pc_mux_int_q <= '0;
+      cause_int_q  <= 'b0;
+      pc_mux_int_q <= 'b0;
     end else if (exc_ctrl_cs == IDLE && req_int) begin
       // save cause and ISR when new irq request is first sent to controller
       cause_int_q  <= cause_int;

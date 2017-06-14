@@ -118,7 +118,7 @@ module riscv_if_stage
   // exception PC selection mux
   always @*
   begin : EXC_PC_MUX
-    exc_pc = 'x;
+    exc_pc = 'bx;
 
     case (exc_pc_mux_i)
       EXC_PC_ILLINSN: exc_pc = { boot_addr_i[31:8], EXC_OFF_ILLINSN };
@@ -134,7 +134,7 @@ module riscv_if_stage
   // fetch address selection
   always @*
   begin
-    fetch_addr_n = 'x;
+    fetch_addr_n = 'bx;
 
     case (pc_mux_i)
       PC_BOOT:      fetch_addr_n = {boot_addr_i[31:8], EXC_OFF_RST};
@@ -321,7 +321,7 @@ module riscv_if_stage
   begin
     if (rst_n == 1'b0)
     begin
-      hwlp_dec_cnt_if <= '0;
+      hwlp_dec_cnt_if <= 'b0;
     end
     else
     begin
@@ -336,12 +336,12 @@ module riscv_if_stage
     if (rst_n == 1'b0)
     begin
       instr_valid_id_o      <= 1'b0;
-      instr_rdata_id_o      <= '0;
+      instr_rdata_id_o      <= 'b0;
       illegal_c_insn_id_o   <= 1'b0;
       is_compressed_id_o    <= 1'b0;
-      pc_id_o               <= '0;
+      pc_id_o               <= 'b0;
       is_hwlp_id_q          <= 1'b0;
-      hwlp_dec_cnt_id_o     <= '0;
+      hwlp_dec_cnt_id_o     <= 'b0;
     end
     else
     begin

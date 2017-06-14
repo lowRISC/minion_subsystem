@@ -77,8 +77,8 @@ module riscv_hwloop_controller
   // select corresponding start address and decrement counter
   always @*
   begin
-    hwlp_targ_addr_o = 'x;
-    hwlp_dec_cnt_o   = '0;
+    hwlp_targ_addr_o = 'bx;
+    hwlp_dec_cnt_o   = 'b0;
 
       if (pc_is_end_addr) begin
         hwlp_targ_addr_o  = hwlp_start_addr_i;
