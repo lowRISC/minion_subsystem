@@ -35,22 +35,25 @@ always @(posedge TCK)
                end
            if (UPDATE)
                begin
-                  TO_MEM = SR;
+                  if (WR)
+                      TO_MEM = SR;
                   WREN = WR;
         		  INCEN = 1'b0;
                   CNT = 0;
                end
            if (SHIFT)
              begin
-		     ADDR = ADDR + INCEN;
+		     ADDR = ADDR + {INCEN,2'b0};
 		     INCEN = 1'b0;
              WREN = 1'b0;
              SR = {TDI,SR[dataw-1:1]};
              CNT = CNT + 1;
              if (CNT == dataw)
                   begin
-                     TO_MEM = SR;
-		             if (~WR) SR = FROM_MEM;
+                     if (WR)
+                        TO_MEM = SR;
+		             else
+		                SR = FROM_MEM;
                      WREN = WR;
                      INCEN = INC;
                      CNT = 0;

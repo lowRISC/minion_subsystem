@@ -110,14 +110,14 @@ void hello(void)
   int j = 0;
   enum edcl_mode mode;
   size_t addr, addr2, addr3, addr4, data, arg, setting, last;
-  if (0) myputs("Hello, from bootstrap");
+  myputs("Hello, from bootstrap\r\n");
   addr = (8<<20);
   last = addr+(edcl_max<<4)+12;
   do {
     addr4 = read_code_data8(last);
   }
   while ((unsigned)addr4 != 0xDEADBEEF);
-  if (0) myputs(" start");
+  myputs("start\r\n");
   do {
     int cnt = 0;
     int mask, ready = my_stat(0);
@@ -125,7 +125,7 @@ void hello(void)
     addr3 = addr+(i<<4);
     addr2 = read_code_data8(addr3+4);
     mode = read_code_data8(addr3);
-    //    myputchar(mode+'0');
+    myputchar(mode+'0');
     if (mode) switch(mode)
 	{
 	case edcl_mode_bootstrap:
@@ -187,8 +187,21 @@ static void poll_shm(void)
   if ((unsigned)addr4 == 0xDEADBEEF) hello();
 }
 
+static void eth_test(void)
+{
+  unsigned i;
+  unsigned iobuf[] = {0xdeadbeed, 0xc001f00d, 0x55555555, 0xAAAAAAAA, 0x33333333, 0xCCCCCCCC};
+  volatile unsigned int * const tap_base = (volatile unsigned int*)(15<<20);
+  for (i = 0; i < sizeof(iobuf)/sizeof(*iobuf); i++)
+    {
+      tap_base[1024+i+7] = iobuf[i];
+    }
+  tap_base[512+2] = sizeof(iobuf)/sizeof(*iobuf) + 64;
+}
+
 int main()
 {
+  eth_test();
   myputs("Hello\n");
   for (;;) poll_shm();
 }

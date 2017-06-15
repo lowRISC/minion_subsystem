@@ -75,7 +75,9 @@ entity eth_soc is port
   o_etx_en    : out   std_ulogic;
   o_etx_er    : out   std_ulogic;
   o_emdc      : out   std_ulogic;
-  io_emdio    : inout std_logic;
+  i_emdio     : in    std_logic;
+  o_emdio     : out   std_logic;
+  oe_emdio    : out   std_logic;
   o_erstn     : out   std_ulogic;
   wPllLocked  : in std_ulogic; -- PLL status signal. 0=Unlocked; 1=locked.
   i_clk50_quad : in std_ulogic;
@@ -288,21 +290,15 @@ wSysReset <= i_rst or not wPllLocked;
       irq => open
     );
  
-  emdio_pad : iobuf_tech generic map(
-      CFG_PADTECH
-  ) port map (
-      o  => eth_i.mdio_i,
-      io => io_emdio,
-      i  => eth_o.mdio_o,
-      t  => eth_o.mdio_oe
-  );
   o_egtx_clk <= eth_i.gtx_clk;--eth_i.tx_clk_90;
   o_etxd <= eth_o.txd;
   o_etx_en <= eth_o.tx_en;
   o_etx_er <= eth_o.tx_er;
   o_emdc <= eth_o.mdc;
   o_erstn <= wNReset;
-
+  o_emdio <= eth_o.mdio_o;
+  oe_emdio <= eth_o.mdio_oe;
+  eth_i.mdio_i <= i_emdio;
 
   comblogic : process(i, r, rdata_mux)
     variable v : registers;

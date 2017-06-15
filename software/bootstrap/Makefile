@@ -1,7 +1,7 @@
 LDFLAGS=
 OBJECTS = atmel_generic.o ihex.o srecord.o testGIS.o
 TOOLS=/usr/local/src/ri5cy_gnu_toolchain/install/bin
-CFLAGS=-Wall -Wextra -I../hello -g -m32 -march=IMXpulpv2 -Wa,-march=IMXpulpv2 -Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -fdata-sections -ffunction-sections # -fdiagnostics-color=always
+CFLAGS=-Wall -Wextra -I../hello -g -m32 -march=IMXpulpv2 -Wa,-march=IMXpulpv2 -Wextra -Wall -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -fdata-sections -ffunction-sections -DREAL_UART # -fdiagnostics-color=always
 LFLAGS=-Tlink.common.ld -nostartfiles -Wl,--gc-sections -nostdlib
 
 O =  hello.c # simple.c minion_lib.c

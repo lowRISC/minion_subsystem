@@ -66,6 +66,7 @@ module minion_soc
  input wire                 debug_halt,
  output wire             debug_halted,
  input wire                 debug_resume,
+ input wire             debug_blocksel,
  input wire    [3:0]        datamem_enb,
  output wire [31:0] datamem_doutb,            
  input wire    [3:0]        progmem_enb,
@@ -80,6 +81,29 @@ module minion_soc
  reg [31:0]  keycode;
  wire [31:0] keyb_fifo_status = {keyb_empty,keyb_almostfull,keyb_full,keyb_rderr,keyb_wrerr,keyb_rdcount,keyb_wrcount};
  wire [35:0] keyb_fifo_out;
+// signals from/to core
+logic         core_instr_req;
+logic         core_instr_gnt;
+logic         core_instr_rvalid;
+logic [31:0]  core_instr_addr;
+
+logic         core_lsu_req;
+logic         core_lsu_gnt;
+logic         core_lsu_rvalid;
+logic         core_lsu_we;
+logic [31:0]  core_lsu_rdata;
+
+  logic [31: 0]          core_instr_rdata;
+
+  logic        fetch_enable_i = 1'b1;
+  logic [31:0] irq_i = 32'b0;
+  logic        core_busy_o;
+  logic        clock_gating_i = 1'b1;
+  logic [31:0] boot_addr_i = 32'h80;
+  logic  [7:0] core_lsu_rx_byte;
+
+  logic [15:0] one_hot_data_addr;
+  logic [31:0] one_hot_rdata[15:0];
  
   assign one_hot_rdata[9] = core_lsu_addr[2] ? {keyb_empty,keyb_fifo_out[15:0]} : keyb_fifo_status;
  
@@ -149,29 +173,6 @@ module minion_soc
 //----------------------------------------------------------------------------//
 // Core Instantiation
 //----------------------------------------------------------------------------//
-// signals from/to core
-logic         core_instr_req;
-logic         core_instr_gnt;
-logic         core_instr_rvalid;
-logic [31:0]  core_instr_addr;
-
-logic         core_lsu_req;
-logic         core_lsu_gnt;
-logic         core_lsu_rvalid;
-logic         core_lsu_we;
-logic [31:0]  core_lsu_rdata;
-
-  logic [31: 0]          core_instr_rdata;
-
-  logic        fetch_enable_i = 1'b1;
-  logic [31:0] irq_i = 32'b0;
-  logic        core_busy_o;
-  logic        clock_gating_i = 1'b1;
-  logic [31:0] boot_addr_i = 32'h80;
-  logic  [7:0] core_lsu_rx_byte;
-
-  logic [15:0] one_hot_data_addr;
-  logic [31:0] one_hot_rdata[15:0];
 
   assign shared_sel = one_hot_data_addr[8];
   assign tap_sel = one_hot_data_addr[15];
@@ -221,16 +222,16 @@ RISCV_CORE
 
   .irq_i           ( irq_i             ),
 
-  .debug_req_i     ( debug_req         ),
+  .debug_req_i     ( debug_req && debug_blocksel ),
   .debug_gnt_o     ( debug_gnt         ),
   .debug_rvalid_o  ( debug_rvalid      ),
-  .debug_addr_i    ( debug_addr[14:0]  ),
-  .debug_we_i      ( debug_we          ),
-  .debug_wdata_i   ( debug_wdata       ),
+  .debug_addr_i    ( debug_blocksel ? debug_addr[16:2] : 15'b0 ),
+  .debug_we_i      ( debug_we && debug_blocksel ),
+  .debug_wdata_i   ( debug_blocksel ? debug_wdata : 32'b0 ),
   .debug_rdata_o   ( debug_rdata       ),
   .debug_halted_o  ( debug_halted      ),
-  .debug_halt_i    ( debug_halt        ),
-  .debug_resume_i  ( debug_resume      ),
+  .debug_halt_i    ( debug_blocksel ? debug_halt : 1'b0 ),
+  .debug_resume_i  ( debug_blocksel ? debug_resume : 1'b1 ),
 
   .fetch_enable_i  ( fetch_enable_i    ),
   .core_busy_o     ( core_busy_o       ),
@@ -263,7 +264,7 @@ datamem block_d (
   .douta(one_hot_rdata[1]),
   .web(debug_we),
   .enb(datamem_enb),
-  .addrb(debug_addr),
+  .addrb(debug_addr[15:2]),
   .dinb(debug_wdata),
   .doutb(datamem_doutb)
  );
@@ -296,7 +297,7 @@ progmem block_i (
     .douta(core_instr_rdata),
     .web(debug_halt ? debug_we : ce_d & one_hot_data_addr[0] & we_d),
     .enb(debug_halt ? progmem_enb : we_d ? core_lsu_be : 4'b1111),
-    .addrb(debug_halt ? debug_addr : core_lsu_addr[15:2]),
+    .addrb(debug_halt ? debug_addr[15:2] : core_lsu_addr[15:2]),
     .dinb(debug_halt ? debug_wdata : core_lsu_wdata),
     .doutb(progmem_doutb)
    );
