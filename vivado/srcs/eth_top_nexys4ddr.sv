@@ -152,7 +152,7 @@ jtag_dummy jtag1(
 
    wire [3:0] m_enb = (we_d ? core_lsu_be : 4'hF);
    wire m_web = ce_d & shared_sel & we_d;
-   logic         i_emdio, o_emdio, oe_emdio, o_emdclk, sync, cooked, tx_enable_old;
+   logic         i_emdio, o_emdio, oe_emdio, o_emdclk, sync, cooked, tx_enable_old, loopback;
    
    generate for (r = 0; r < 4; r=r+1)
      RAMB16_S9_S9
@@ -177,10 +177,10 @@ jtag_dummy jtag1(
 
    always @(negedge i_clk50)
     begin
-        if (i_erx_dv)
+        if (loopback ? o_etx_en : i_erx_dv)
             begin
             full = &addr_tap;
-            rx_pair <= i_erxd[1:0];
+            rx_pair <= loopback ? o_etxd : i_erxd[1:0];
             rx_nxt = {rx_pair,rx_byte[15:2]};
             rx_byte <= rx_nxt;
             if ((rx_nxt == 16'HD555) && (byte_sync == 0))
@@ -233,7 +233,7 @@ jtag_dummy jtag1(
 			.mii_rx_frame_i         ( byte_sync ),
 			.mii_rx_data_i          ( rx_byte ),
 			.mii_rx_byte_received_i ( rx_wren ),
-			.mii_rx_error_i         ( i_erx_er )
+			.mii_rx_error_i         ( loopback ? o_etx_er : i_erx_er )
 		);
 
    always @(posedge i_clk50)
@@ -304,9 +304,9 @@ always @(posedge msoc_clk or negedge clk_locked)
     begin
     mac_address <= 48'H230100890702;
     tx_packet_length <= 0;
-    tx_frame_size <= 0;
     tx_enable_i <= 0;
     cooked <= 1'b0;
+    loopback <= 1'b0;
     oe_emdio <= 1'b0;
     o_emdio <= 1'b0;
     o_emdclk <= 1'b0;
@@ -316,7 +316,7 @@ always @(posedge msoc_clk or negedge clk_locked)
      if (tap_sel&we_d&core_lsu_addr[11])
      case(core_lsu_addr[5:2])
         0: mac_address[31:0] <= core_lsu_wdata;
-        1: {cooked,mac_address[47:32]} <= core_lsu_wdata[16:0];
+        1: {loopback,cooked,mac_address[47:32]} <= core_lsu_wdata[16:0];
         2: begin tx_enable_i <= 1; tx_packet_length <= core_lsu_wdata; end
         3: tx_enable_i <= 0;
         4: begin {oe_emdio,o_emdio,o_emdclk} <= core_lsu_wdata[3:0]; end

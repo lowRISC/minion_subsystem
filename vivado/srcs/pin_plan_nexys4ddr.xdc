@@ -84,10 +84,10 @@ set_property PACKAGE_PIN V15 [get_ports o_etx_er]
 set_property IOSTANDARD LVCMOS33 [get_ports o_etx_er]
 set_property PACKAGE_PIN V14 [get_ports o_egtx_clk]
 set_property IOSTANDARD LVCMOS33 [get_ports o_egtx_clk]
-set_property PACKAGE_PIN V12 [get_ports {o_etxd[2]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {o_etxd[2]}]
-set_property PACKAGE_PIN V11 [get_ports {o_etxd[3]}]
-set_property IOSTANDARD LVCMOS33 [get_ports {o_etxd[3]}]
+#set_property PACKAGE_PIN V12 [get_ports {o_etxd[2]}]
+#set_property IOSTANDARD LVCMOS33 [get_ports {o_etxd[2]}]
+#set_property PACKAGE_PIN V11 [get_ports {o_etxd[3]}]
+#set_property IOSTANDARD LVCMOS33 [get_ports {o_etxd[3]}]
 
 ##Buttons
 

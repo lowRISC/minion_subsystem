@@ -1,4 +1,51 @@
-`default_nettype wire
+/*
+This file is part of the ethernet_mac project. https://github.com/pkerling/ethernet_mac
+MAC sublayer functionality (en-/decapsulation, FCS, IPG)
+ 
+Copyright (c) 2015, Philipp Kerling
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of ethernet_mac nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+* Neither the source code, nor any derivative product, may be used to operate
+  weapons, nuclear facilities, life support or other mission critical
+  applications where human life or property may be at stake or endangered.
+  
+* Neither the source code, nor any derivative product, may be used for military
+  purposes.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+This Verilog version generated using 
+vhdl2verilog -in ../ethernet_mac/framing.vhd -out framing.v -top framing -arch rtl
+
+vhdl2verilog is available from: http://www.edautils.com/vhdl2verilog.html
+ 
+Corrections to pass formality verification by Jonathan Kimmitt, to whom all enquiries should be directed
+ */
+
+`default_nettype none
 
 module framing(
         tx_reset_i,
@@ -24,28 +71,28 @@ module framing(
         mii_rx_byte_received_i,
         mii_rx_error_i
     );
-    input tx_reset_i;
-    input tx_clock_i;
-    input rx_reset_i;
-    input rx_clock_i;
-    input [47:0]mac_address_i;
-    input tx_enable_i;
-    input [7:0]tx_data_i;
+    input wire tx_reset_i;
+    input wire tx_clock_i;
+    input wire rx_reset_i;
+    input wire rx_clock_i;
+    input wire [47:0]mac_address_i;
+    input wire tx_enable_i;
+    input wire [7:0]tx_data_i;
     output tx_byte_sent_o;
     output tx_busy_o;
     output rx_frame_o;
     output [7:0]rx_data_o;
     output rx_byte_received_o;
     output rx_error_o;
-    output [10:0]rx_frame_size_o;
+    output wire [10:0]rx_frame_size_o;
     output mii_tx_enable_o;
     output [7:0]mii_tx_data_o;
-    input mii_tx_byte_sent_i;
+    input wire mii_tx_byte_sent_i;
     output mii_tx_gap_o;
-    input mii_rx_frame_i;
-    input [7:0]mii_rx_data_i;
-    input mii_rx_byte_received_i;
-    input mii_rx_error_i;
+    input wire mii_rx_frame_i;
+    input wire [7:0]mii_rx_data_i;
+    input wire mii_rx_byte_received_i;
+    input wire mii_rx_error_i;
 
     function [7:0] extract_byte;
        input [47:0] vec;
@@ -135,6 +182,7 @@ module framing(
             tx_state <= 'b0;
             mii_tx_enable_o <= 1'b0;
             tx_busy_o <= 1'b1;
+            tx_padding_required <= 0;
         end
         else
         begin 
@@ -354,7 +402,7 @@ module framing(
                     if ( mii_rx_frame_i == 1'b0 ) 
                     begin
                         rx_state <= 'b0;
-                        if ( ( ( ( mii_rx_error_i == 1'b1 ) | ( rx_frame_check_sequence != 32'b11000111000001001101110101111011 ) ) | ( rx_frame_size < ( ( 46 + 6 ) + ( 32 / 8 ) ) ) ) | ( rx_frame_size > ( ( 1500 + 6 ) + ( 32 / 8 ) ) ) ) 
+                        if ( ( ( ( mii_rx_error_i == 1'b1 ) | ( rx_frame_check_sequence != 32'b11000111000001001101110101111011 ) ) | ( rx_frame_size < ( ( 46 + 2 + 6 + 6 ) + ( 32 / 8 ) ) ) ) | ( rx_frame_size > ( ( 1500 + 2 + 6 + 6 ) + ( 32 / 8 ) ) ) ) 
                         begin
                             rx_error_o <= 1'b1;
                         end
