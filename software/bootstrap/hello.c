@@ -187,16 +187,35 @@ static void poll_shm(void)
   if ((unsigned)addr4 == 0xDEADBEEF) hello();
 }
 
+enum {max=256};
+static int loopback2 = 0; // was 1<<18;
+static int loopback = 1<<17;
+static int cooked = 1<<16;
+static unsigned char lpbuf[max];
+
 static void eth_test(void)
 {
-  unsigned i;
-  unsigned iobuf[] = {0xdeadbeed, 0xc001f00d, 0x55555555, 0xAAAAAAAA, 0x33333333, 0xCCCCCCCC};
+  unsigned i, j, frame_size;
+  unsigned iobuf[] = {0xffffffff, 0x0702ffff, 0x23010089, 0xdeadbeef,
+		      0xc001f00d, 0x55555555, 0xAAAAAAAA, 0x33333333, 0xCCCCCCCC};
+  volatile unsigned int * const led_base = (volatile unsigned int*)(7<<20);
   volatile unsigned int * const tap_base = (volatile unsigned int*)(15<<20);
+  tap_base[512+1] = loopback2+loopback+cooked+0x2301;
   for (i = 0; i < sizeof(iobuf)/sizeof(*iobuf); i++)
     {
-      tap_base[1024+i+7] = iobuf[i];
+      tap_base[1024+i] = iobuf[i];
     }
-  tap_base[512+2] = sizeof(iobuf)/sizeof(*iobuf) + 64;
+  tap_base[512+2] = sizeof(iobuf) + 7;
+  while (tap_base[512+3] & 0x2)
+    ; // wait to send packet
+  frame_size = tap_base[512+2] >> 16;
+  if (frame_size > max) frame_size = max;
+  for (i = 0; i < ((frame_size-1|3)+1)/4; i++)
+    {
+      unsigned led = tap_base[i];
+      for (j = 0; j < 4; j++)
+	led_base[0] = led >> (j*8);
+    }
 }
 
 int main()

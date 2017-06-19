@@ -84,9 +84,9 @@ logic [31:0] tap_rdata, tap_rdata_pkt, tap_wdata_pkt;
 logic pxl_clk, tx_enable_i, tx_byte_sent_o, tx_busy_o, rx_frame_o, rx_byte_received_o, rx_error_o;
 logic mac_tx_enable, mac_tx_gap, mac_tx_byte_sent, mac_rx_frame, mac_rx_byte_received, mac_rx_error;
 logic [47:0] mac_address;
-logic  [7:0] rx_data_o, tx_data_i, mac_tx_data, mac_rx_data;
+logic  [7:0] rx_data_o0, rx_data_o1, rx_data_o2, rx_data_o, tx_data_i, mac_tx_data, mac_rx_data;
 logic [12:0] rx_frame_size_o;   
-logic [15:0] rx_packet_length, tx_packet_length, tx_frame_size;
+logic [15:0] rx_packet_length, tx_packet_length, tx_frame_size, tx_frame_addr;
 reg [13:0] addr_tap, nxt_addr;
 reg [15:0] rx_byte, rx_nxt;
 reg  [7:0] rx_byte_dly;
@@ -152,7 +152,7 @@ jtag_dummy jtag1(
 
    wire [3:0] m_enb = (we_d ? core_lsu_be : 4'hF);
    wire m_web = ce_d & shared_sel & we_d;
-   logic         i_emdio, o_emdio, oe_emdio, o_emdclk, sync, cooked, tx_enable_old, loopback;
+   logic         i_emdio, o_emdio, oe_emdio, o_emdclk, sync, cooked, tx_enable_old, loopback, loopback2;
    
    generate for (r = 0; r < 4; r=r+1)
      RAMB16_S9_S9
@@ -210,6 +210,8 @@ jtag_dummy jtag1(
 
    assign o_led[8] = rx_error_o;
    assign o_led[9] = rx_frame_o;
+   assign mac_tx_byte_sent = &tx_frame_size[1:0];
+   assign tx_frame_addr = tx_frame_size[12:2] - 7;
    
    framing framing_inst_0 (
 			.rx_reset_i             ( ~clk_locked ),
@@ -222,14 +224,14 @@ jtag_dummy jtag1(
 			.tx_byte_sent_o         ( tx_byte_sent_o ),
 			.tx_busy_o              ( tx_busy_o ),
 			.rx_frame_o             ( rx_frame_o ),
-			.rx_data_o              ( rx_data_o ),
+			.rx_data_o              ( rx_data_o0 ),
 			.rx_byte_received_o     ( rx_byte_received_o ),
 			.rx_error_o             ( rx_error_o ),
 			.rx_frame_size_o        ( rx_frame_size_o ),
 			.mii_tx_enable_o        ( mac_tx_enable ),
 			.mii_tx_gap_o           ( mac_tx_gap ),
 			.mii_tx_data_o          ( mac_tx_data ),
-			.mii_tx_byte_sent_i     ( &tx_frame_size[1:0] ),
+			.mii_tx_byte_sent_i     ( mac_tx_byte_sent ),
 			.mii_rx_frame_i         ( byte_sync ),
 			.mii_rx_data_i          ( rx_byte ),
 			.mii_rx_byte_received_i ( rx_wren ),
@@ -253,32 +255,65 @@ jtag_dummy jtag1(
    assign o_etx_en = tx_busy_o;
    assign o_etx_er = 1'b0;
    assign o_erstn = clk_locked;
-		   
+
+   logic [10:0] rx_addr;
+   logic [7:0] rx_data;
+   logic rx_ena, rx_wea;
+
+   always @(posedge i_clk50) if (rx_byte_received_o)
+     begin
+	rx_data_o <= rx_data_o2;
+	rx_data_o2 <= rx_data_o1;
+	rx_data_o1 <= rx_data_o0;
+     end
+   
+   always @* casez({loopback2,cooked})
+     2'b1?: begin
+	rx_addr = tx_frame_size[12:2];
+	rx_data = mac_tx_data;
+	rx_ena = tx_busy_o;
+	rx_wea = mac_tx_byte_sent;
+        end
+     2'b01: begin
+	rx_addr = rx_frame_size_o;
+	rx_data = rx_data_o;
+	rx_ena = rx_frame_o;
+	rx_wea = rx_byte_received_o;
+        end
+     2'b00: begin
+	rx_addr = addr_tap[12:2];
+	rx_data = rx_byte[7:0];
+	rx_ena = full==0;
+	rx_wea = rx_wren;
+        end
+     endcase
+           
    RAMB16_S9_S36 RAMB16_S1_inst_rx (
                                     .CLKA(i_clk50),               // Port A Clock
                                     .CLKB(msoc_clk),              // Port A Clock
                                     .DOA(),                       // Port A 9-bit Data Output
-                                    .ADDRA(cooked ? rx_frame_size_o : addr_tap[12:2]), // Port A 11-bit Address Input
-                                    .DIA(cooked ? rx_data_o : rx_byte[7:0]),           // Port A 8-bit Data Input
-                                    .DIPA(1'b0),                                         // Port A parity unused
+                                    .ADDRA(rx_addr),              // Port A 11-bit Address Input
+                                    .DIA(rx_data),                // Port A 8-bit Data Input
+                                    .DIPA(1'b0),                  // Port A parity unused
                                     .SSRA(1'b0),                  // Port A Synchronous Set/Reset Input
-                                    .ENA(cooked ? rx_frame_o : full == 0),             // Port A RAM Enable Input
-                                    .WEA(cooked ? rx_byte_received_o : rx_wren),       // Port A Write Enable Input
+                                    .ENA(rx_ena),                 // Port A RAM Enable Input
+                                    .WEA(rx_wea),                 // Port A Write Enable Input
                                     .DOB(tap_rdata_pkt),          // Port B 32-bit Data Output
                                     .DOPB(),                      // Port B parity unused
                                     .ADDRB(core_lsu_addr[10:2]),  // Port B 9-bit Address Input
                                     .DIB(core_lsu_wdata),         // Port B 32-bit Data Input
                                     .DIPB(4'b0),                  // Port B parity unused
-                                    .ENB(1'b1),                   // Port B RAM Enable Input
+                                    .ENB(ce_d & tap_sel & (core_lsu_addr[12:11]==2'b00)),
+                                                                  // Port B RAM Enable Input
                                     .SSRB(1'b0),                  // Port B Synchronous Set/Reset Input
-                                    .WEB(ce_d & tap_sel & we_d)   // Port B Write Enable Input
+                                    .WEB(we_d)                    // Port B Write Enable Input
                                     );
 
    RAMB16_S9_S36 RAMB16_S1_inst_tx (
                                    .CLKA(i_clk50),               // Port A Clock
                                    .CLKB(msoc_clk),              // Port A Clock
                                    .DOA(tx_data_i),              // Port A 9-bit Data Output
-                                   .ADDRA(tx_frame_size[12:2]),// Port A 11-bit Address Input
+                                   .ADDRA(tx_frame_addr),        // Port A 11-bit Address Input
                                    .DIA(8'b0),                   // Port A 8-bit Data Input
                                    .DIPA(1'b0),                  // Port A parity unused
                                    .SSRA(1'b0),                  // Port A Synchronous Set/Reset Input
@@ -289,9 +324,10 @@ jtag_dummy jtag1(
                                    .ADDRB(core_lsu_addr[10:2]),  // Port B 9-bit Address Input
                                    .DIB(core_lsu_wdata),         // Port B 32-bit Data Input
                                    .DIPB(4'b0),                  // Port B parity unused
-                                   .ENB(core_lsu_addr[12]),      // Port B RAM Enable Input
+                                   .ENB(ce_d & tap_sel & (core_lsu_addr[12:11]==2'b10)),
+				                                 // Port B RAM Enable Input
                                    .SSRB(1'b0),                  // Port B Synchronous Set/Reset Input
-                                   .WEB(ce_d & tap_sel & we_d)   // Port B Write Enable Input
+                                   .WEB(we_d)                    // Port B Write Enable Input
                                    );
 
 assign io_emdio = (oe_emdio ? o_emdio : 1'bz);
@@ -307,6 +343,7 @@ always @(posedge msoc_clk or negedge clk_locked)
     tx_enable_i <= 0;
     cooked <= 1'b0;
     loopback <= 1'b0;
+    loopback2 <= 1'b0;
     oe_emdio <= 1'b0;
     o_emdio <= 1'b0;
     o_emdclk <= 1'b0;
@@ -316,21 +353,21 @@ always @(posedge msoc_clk or negedge clk_locked)
      if (tap_sel&we_d&core_lsu_addr[11])
      case(core_lsu_addr[5:2])
         0: mac_address[31:0] <= core_lsu_wdata;
-        1: {loopback,cooked,mac_address[47:32]} <= core_lsu_wdata[16:0];
+        1: {loopback2,loopback,cooked,mac_address[47:32]} <= core_lsu_wdata[18:0];
         2: begin tx_enable_i <= 1; tx_packet_length <= core_lsu_wdata; end
         3: tx_enable_i <= 0;
         4: begin {oe_emdio,o_emdio,o_emdclk} <= core_lsu_wdata[3:0]; end
         6: begin sync = 0; end
       endcase
       sync |= byte_sync;
-      if (tx_busy_o && (tx_frame_size > {tx_packet_length,2'b00}))
+      if (tx_busy_o && (tx_frame_size[12:2] > tx_packet_length))
           tx_enable_i <= 0;
      end
 
 always @* casez(core_lsu_addr_dly[12:2])
     11'b01??????000 : tap_rdata = mac_address[31:0];
     11'b01??????001 : tap_rdata = {cooked,mac_address[47:32]};
-    11'b01??????010 : tap_rdata = {tx_frame_size,tx_packet_length};
+    11'b01??????010 : tap_rdata = {tx_frame_addr,tx_packet_length};
     11'b01??????011 : tap_rdata = {tx_busy_o,tx_enable_i};
     11'b01??????100 : tap_rdata = {oe_emdio,o_emdio,o_emdclk};
     11'b01??????101 : tap_rdata = {i_emdio};
