@@ -54,7 +54,39 @@ module minion_soc
  output  [3:0]    VGA_GREEN_O
  );
  
- wire [19:0] dummy;
+ // signals from/to core
+logic         core_instr_req;
+logic         core_instr_gnt;
+logic         core_instr_rvalid;
+logic [31:0]  core_instr_addr;
+
+logic         core_lsu_req;
+logic         core_lsu_gnt;
+logic         core_lsu_rvalid;
+logic         core_lsu_we;
+logic [31:0]  core_lsu_rdata;
+
+  logic                  debug_req = 1'b0;
+  logic                  debug_gnt;
+  logic                  debug_rvalid;
+  logic [14:0]           debug_addr = 15'b0;
+  logic                  debug_we = 1'b0;
+  logic [31: 0]          debug_wdata = 32'b0;
+  logic [31: 0]          debug_rdata;
+  logic [31: 0]          core_instr_rdata;
+
+  logic        fetch_enable_i = 1'b1;
+  logic [31:0] irq_i = 32'b0;
+  logic        core_busy_o;
+  logic        clock_gating_i = 1'b1;
+  logic [31:0] boot_addr_i = 32'h80;
+  logic  [7:0] core_lsu_rx_byte;
+
+  logic [15:0] one_hot_data_addr;
+  logic [31:0] one_hot_rdata[15:0];
+
+
+wire [19:0] dummy;
  wire        irst, ascii_ready;
  wire [7:0]  readch, scancode;
  wire        keyb_almostfull, keyb_full, keyb_rderr, keyb_wrerr, keyb_empty;   
@@ -131,36 +163,6 @@ module minion_soc
 //----------------------------------------------------------------------------//
 // Core Instantiation
 //----------------------------------------------------------------------------//
-// signals from/to core
-logic         core_instr_req;
-logic         core_instr_gnt;
-logic         core_instr_rvalid;
-logic [31:0]  core_instr_addr;
-
-logic         core_lsu_req;
-logic         core_lsu_gnt;
-logic         core_lsu_rvalid;
-logic         core_lsu_we;
-logic [31:0]  core_lsu_rdata;
-
-  logic                  debug_req = 1'b0;
-  logic                  debug_gnt;
-  logic                  debug_rvalid;
-  logic [14:0]           debug_addr = 15'b0;
-  logic                  debug_we = 1'b0;
-  logic [31: 0]          debug_wdata = 32'b0;
-  logic [31: 0]          debug_rdata;
-  logic [31: 0]          core_instr_rdata;
-
-  logic        fetch_enable_i = 1'b1;
-  logic [31:0] irq_i = 32'b0;
-  logic        core_busy_o;
-  logic        clock_gating_i = 1'b1;
-  logic [31:0] boot_addr_i = 32'h80;
-  logic  [7:0] core_lsu_rx_byte;
-
-  logic [15:0] one_hot_data_addr;
-  logic [31:0] one_hot_rdata[15:0];
 
   assign shared_sel = one_hot_data_addr[8];
    
