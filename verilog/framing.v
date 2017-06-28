@@ -189,6 +189,8 @@ module framing(
             mii_tx_enable_o <= 1'b0;
             tx_busy_o <= 1'b1;
             tx_padding_required <= 0;
+	    tx_fcs_o <= { 32{1'b1} };
+	    rx_fcs_o <= { 32{1'b1} };
         end
         else
         begin 

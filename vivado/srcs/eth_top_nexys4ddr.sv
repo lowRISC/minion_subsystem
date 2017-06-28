@@ -77,7 +77,7 @@ logic [31:0] core_lsu_addr;
 logic [31:0] core_lsu_addr_dly;
 logic [31:0] core_lsu_wdata;
 logic [3:0] core_lsu_be;
-logic        ce_d;
+logic        ce_d, ce_d_dly;
 logic        we_d;
 logic     tap_sel;
 logic [31:0] tap_rdata, tap_rdata_pkt, tap_wdata_pkt, rx_fcs_o, tx_fcs_o;
@@ -88,10 +88,9 @@ logic  [7:0] rx_data_o0, rx_data_o1, rx_data_o2, rx_data_o, tx_data_i, mac_tx_da
 logic [12:0] rx_frame_size_o;   
 logic [15:0] rx_packet_length, tx_packet_length, tx_frame_size, tx_frame_addr;
 reg [13:0] addr_tap, nxt_addr;
-reg [15:0] rx_byte, rx_nxt;
-reg  [7:0] rx_byte_dly;
-reg  [1:0] rx_pair;
-reg        rx_wren, full, byte_sync;
+reg [23:0] rx_byte, rx_nxt, rx_byte_dly;
+reg  [2:0] rx_pair;
+reg        rx_wren, full, byte_sync, mii_rx_frame_i;
    // datamem shared port
    logic [3:0] 	sharedmem_en;
    logic [31:0] sharedmem_dout;
@@ -154,8 +153,6 @@ jtag_dummy jtag1(
    wire m_web = ce_d & shared_sel & we_d;
    logic i_emdio, o_emdio, oe_emdio, o_emdclk, sync, cooked, tx_enable_old, loopback, loopback2;
 
-   logic rx_en0, rx_en1, rx_en2, rx_en3, rx_en4;
-   
    generate for (r = 0; r < 4; r=r+1)
      RAMB16_S9_S9
      RAMB16_S9_S9_inst
@@ -177,46 +174,46 @@ jtag_dummy jtag1(
         );
    endgenerate
 
-   always @(negedge i_clk50)
-    begin
-        if (byte_sync ? rx_en4 : (loopback ? o_etx_en : i_erx_dv))
-            begin
-            full = &addr_tap;
-            {rx_en0,rx_pair} <= loopback ? {o_etx_en,o_etxd} : {i_erx_dv,i_erxd[1:0]};
-            rx_nxt = {rx_pair,rx_byte[15:2]};
-            {rx_en1,rx_byte} <= {rx_en0,rx_nxt};
-            if ((rx_nxt == 16'HD555) && (byte_sync == 0))
-                begin
-                byte_sync <= 1'b1;
-                rx_wren <= 1'b1;
-                addr_tap <= {addr_tap[13:2],2'b00};
-                end
-            else
-                begin
-                if (full == 0)
-                    begin
-                    nxt_addr = addr_tap+1;
-                    addr_tap <= byte_sync ? nxt_addr : nxt_addr&3;
-                    end
-                rx_wren <= &addr_tap[1:0];
-                end // else: !if((rx_nxt == 16'HD555) && (byte_sync == 0))
-	    if (rx_wren)
-	      begin
-		 rx_byte_dly <= byte_sync ? rx_byte : 8'H55;
-		 rx_en4 <= rx_en3;
-		 rx_en3 <= rx_en2;
-		 rx_en2 <= rx_en1;
-	      end
-            end
-        else
-            begin
-            full = 1;
-            addr_tap <= 0;
-            rx_wren <= 0;
-            byte_sync <= 0;
-	    {rx_en4,rx_en3,rx_en2,rx_byte_dly} <= 11'H55;
-            end
-    end
+   always @(posedge i_clk50 or negedge clk_locked)
+     if (clk_locked == 1'b0)
+       begin
+	  byte_sync = 1'b0;
+	  addr_tap <= 'H0;
+	  rx_byte_dly <= {8{3'H5}};
+       end
+     else
+       begin
+       rx_wren <= 0;
+       rx_pair <= loopback ? {o_etx_en,o_etxd} : {i_erx_dv,i_erxd[1:0]};
+       full = rx_pair[2] || rx_byte[2] ? &addr_tap : 1'b1;
+       if ( rx_byte_dly[11] == 1'b0 )
+	 begin
+	    byte_sync = 1'b0;
+	    addr_tap <= 'H0;
+	 end
+       rx_nxt = {rx_pair,rx_byte[23:3]};
+       rx_byte <= rx_nxt;
+       if ((rx_nxt == {3'H7,{7{3'H5}}}) && (byte_sync == 0))
+         begin
+            byte_sync <= 1'b1;
+            rx_wren <= 1'b1;
+            addr_tap <= {addr_tap[13:2],2'b00};
+         end
+       else
+         begin
+            if (full == 0)
+              begin
+                 nxt_addr = addr_tap+1;
+                 addr_tap <= byte_sync ? nxt_addr : nxt_addr&3;
+              end
+            rx_wren <= &addr_tap[1:0];
+         end
+       if (rx_wren)
+	 begin
+	   rx_byte_dly <= byte_sync ? rx_byte : {8{3'H5}};
+           mii_rx_frame_i <= rx_byte_dly[11];
+         end
+       end
 
    assign o_led[8] = rx_error_o;
    assign o_led[9] = rx_frame_o;
@@ -244,25 +241,30 @@ jtag_dummy jtag1(
 			.mii_tx_gap_o           ( mac_tx_gap ),
 			.mii_tx_data_o          ( mac_tx_data ),
 			.mii_tx_byte_sent_i     ( mac_tx_byte_sent ),
-			.mii_rx_frame_i         ( rx_en2|rx_en4 ),
-			.mii_rx_data_i          ( rx_byte_dly ),
+			.mii_rx_frame_i         ( mii_rx_frame_i ),
+			.mii_rx_data_i          ( {rx_byte_dly[10:9],rx_byte_dly[7:6],rx_byte_dly[4:3],rx_byte_dly[1:0]} ),
 			.mii_rx_byte_received_i ( rx_wren ),
 			.mii_rx_error_i         ( loopback ? o_etx_er : i_erx_er )
 		);
 
-   always @(posedge i_clk50)
-     begin
-     if (tx_enable_i & (tx_enable_old == 0))
+   always @(posedge i_clk50 or negedge clk_locked)
+     if (clk_locked == 0)
+       begin
        tx_frame_size <= 0;
-     if (tx_busy_o)
-        begin
-           tx_frame_size <= tx_frame_size + 1;
-	   o_etxd <= mac_tx_data >> {tx_frame_size[1:0],1'b0};
-        end
-     tx_enable_old <= tx_enable_i;
-     if (rx_frame_o & rx_byte_received_o)
-	rx_packet_length <= rx_frame_size_o;
-     end
+       end
+     else
+       begin
+	  if (tx_enable_i & (tx_enable_old == 0))
+	    tx_frame_size <= 0;
+	  if (tx_busy_o)
+            begin
+               tx_frame_size <= tx_frame_size + 1;
+	       o_etxd <= mac_tx_data >> {tx_frame_size[1:0],1'b0};
+            end
+	  tx_enable_old <= tx_enable_i;
+	  if (rx_frame_o & rx_byte_received_o)
+	    rx_packet_length <= rx_frame_size_o;
+       end
 
    assign o_etx_en = mac_tx_enable & ~mac_tx_gap;
    assign o_etx_er = 1'b0;
@@ -345,7 +347,7 @@ jtag_dummy jtag1(
 assign io_emdio = (oe_emdio ? o_emdio : 1'bz);
 assign i_emdio = io_emdio;
 assign o_emdc = o_emdclk;
-assign o_erefclk = i_clk50_quad;
+assign o_erefclk = i_clk50; // was i_clk50_quad;
 
 always @(posedge msoc_clk or negedge clk_locked)
   if (!clk_locked)
@@ -359,34 +361,38 @@ always @(posedge msoc_clk or negedge clk_locked)
     oe_emdio <= 1'b0;
     o_emdio <= 1'b0;
     o_emdclk <= 1'b0;
+    sync <= 1'b0;
+    ce_d_dly <= 1'b0;
     end
-   else
-     begin
-     if (tap_sel&we_d&core_lsu_addr[11])
-     case(core_lsu_addr[5:2])
+  else
+    begin
+    ce_d_dly <= ce_d;
+    if (tap_sel&we_d&core_lsu_addr[11])
+    case(core_lsu_addr[5:2])
         0: mac_address[31:0] <= core_lsu_wdata;
         1: {loopback2,loopback,cooked,mac_address[47:32]} <= core_lsu_wdata[18:0];
         2: begin tx_enable_i <= 1; tx_packet_length <= core_lsu_wdata; end
         3: tx_enable_i <= 0;
         4: begin {oe_emdio,o_emdio,o_emdclk} <= core_lsu_wdata[3:0]; end
         6: begin sync = 0; end
-      endcase
-      sync |= byte_sync;
-      if (tx_busy_o && (tx_frame_size[12:2] > tx_packet_length))
+     endcase
+     sync |= byte_sync;
+     if (tx_busy_o && (tx_frame_size[12:2] > tx_packet_length))
           tx_enable_i <= 0;
-     end
+    end
 
-always @* casez(core_lsu_addr_dly[12:2])
-    11'b01??????000 : tap_rdata = mac_address[31:0];
-    11'b01??????001 : tap_rdata = {loopback2,loopback,cooked,mac_address[47:32]};
-    11'b01??????010 : tap_rdata = {tx_frame_addr,tx_packet_length};
-    11'b01??????011 : tap_rdata = {tx_fcs_o};
-    11'b01??????100 : tap_rdata = {i_emdio,oe_emdio,o_emdio,o_emdclk};
-    11'b01??????101 : tap_rdata = {rx_fcs_o};
-    11'b01??????110 : tap_rdata = {sync};
-    11'b01??????111 : tap_rdata = {rx_error_o,rx_packet_length};
-    11'b00????????? : tap_rdata = tap_rdata_pkt;
-    11'b10????????? : tap_rdata = tap_wdata_pkt;
+   always @* casez({ce_d_dly,core_lsu_addr_dly[12:2]})
+    12'b101??????000 : tap_rdata = mac_address[31:0];
+    12'b101??????001 : tap_rdata = {loopback2,loopback,cooked,mac_address[47:32]};
+    12'b101??????010 : tap_rdata = {tx_frame_addr,tx_packet_length};
+    12'b101??????011 : tap_rdata = {tx_fcs_o};
+    12'b101??????100 : tap_rdata = {i_emdio,oe_emdio,o_emdio,o_emdclk};
+    12'b101??????101 : tap_rdata = {rx_fcs_o};
+    12'b101??????110 : tap_rdata = {sync};
+    12'b101??????111 : tap_rdata = {rx_error_o,rx_packet_length};
+    12'b100????????? : tap_rdata = tap_rdata_pkt;
+    12'b110????????? : tap_rdata = tap_wdata_pkt;
+    default: tap_rdata = 'h0;
     endcase
     
 //----------------------------------------------------------------------------

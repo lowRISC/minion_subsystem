@@ -250,8 +250,6 @@ architecture rtl of framing is
 	
 begin
   rx_frame_size_o <= std_logic_vector(to_unsigned(rx_frame_size,11));
-  rx_fcs_o <= rx_frame_check_sequence;
-  tx_fcs_o <= tx_frame_check_sequence;
   
 	-- Pass mii_tx_byte_sent_i through directly as long as data is being transmitted
 	-- to avoid having to prefetch data in the synchronous process
@@ -267,6 +265,8 @@ begin
 			mii_tx_enable_o <= '0';
 			tx_busy_o       <= '1';
                         tx_padding_required <= 0;
+                        tx_fcs_o <= ( others => '1' );
+                        rx_fcs_o <= ( others => '1' );
 		elsif rising_edge(tx_clock_i) then
 			mii_tx_enable_o <= '0';
 			tx_busy_o       <= '0';
@@ -389,6 +389,7 @@ begin
 							mii_tx_gap_o <= '1';
 							if tx_interpacket_gap_counter = INTERPACKET_GAP_BYTES - 1 then
 								-- Last IPG byte is transmitted in this cycle
+                                                                tx_fcs_o <= tx_frame_check_sequence;
 								tx_state <= TX_IDLE;
 							else
 								tx_interpacket_gap_counter <= tx_interpacket_gap_counter + 1;
@@ -457,6 +458,7 @@ begin
 					rx_byte_received_o <= mii_rx_byte_received_i;
 					if mii_rx_frame_i = '0' then
 						rx_state <= RX_WAIT_START_FRAME_DELIMITER;
+                                                rx_fcs_o <= rx_frame_check_sequence;
 						-- Remaining FCS after parsing whole packet + FCS needs to be a specific value
 						if mii_rx_error_i = '1' or rx_frame_check_sequence /= CRC32_POSTINVERT_MAGIC or rx_frame_size < MIN_FRAME_DATA_BYTES + CRC32_BYTES or rx_frame_size > MAX_FRAME_DATA_BYTES + CRC32_BYTES then
 							rx_error_o <= '1';
