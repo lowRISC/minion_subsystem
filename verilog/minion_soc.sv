@@ -625,6 +625,7 @@ my_fifo #(.width(36)) rx_fifo (
    assign one_hot_rdata[8] = shared_rdata;
    assign one_hot_rdata[15] = tap_rdata;
 
+/*
 clk_wiz_1 sd_clk_div
      (
      // Clock in ports
@@ -642,6 +643,7 @@ clk_wiz_1 sd_clk_div
       // Status and control signals
       .reset(~(sd_clk_rst&rstn)), // input reset
       .locked(sd_clk_locked));      // output locked
+*/
 
 sd_top sdtop(
     .sd_clk     (sd_clk_o),

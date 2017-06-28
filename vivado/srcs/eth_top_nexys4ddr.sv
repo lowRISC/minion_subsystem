@@ -80,7 +80,7 @@ logic [3:0] core_lsu_be;
 logic        ce_d;
 logic        we_d;
 logic     tap_sel;
-logic [31:0] tap_rdata, tap_rdata_pkt, tap_wdata_pkt;
+logic [31:0] tap_rdata, tap_rdata_pkt, tap_wdata_pkt, rx_fcs_o, tx_fcs_o;
 logic pxl_clk, tx_enable_i, tx_byte_sent_o, tx_busy_o, rx_frame_o, rx_byte_received_o, rx_error_o;
 logic mac_tx_enable, mac_tx_gap, mac_tx_byte_sent, mac_rx_frame, mac_rx_byte_received, mac_rx_error;
 logic [47:0] mac_address;
@@ -152,7 +152,9 @@ jtag_dummy jtag1(
 
    wire [3:0] m_enb = (we_d ? core_lsu_be : 4'hF);
    wire m_web = ce_d & shared_sel & we_d;
-   logic         i_emdio, o_emdio, oe_emdio, o_emdclk, sync, cooked, tx_enable_old, loopback, loopback2;
+   logic i_emdio, o_emdio, oe_emdio, o_emdclk, sync, cooked, tx_enable_old, loopback, loopback2;
+
+   logic rx_en0, rx_en1, rx_en2, rx_en3, rx_en4;
    
    generate for (r = 0; r < 4; r=r+1)
      RAMB16_S9_S9
@@ -177,12 +179,12 @@ jtag_dummy jtag1(
 
    always @(negedge i_clk50)
     begin
-        if (loopback ? o_etx_en : i_erx_dv)
+        if (byte_sync ? rx_en4 : (loopback ? o_etx_en : i_erx_dv))
             begin
             full = &addr_tap;
-            rx_pair <= loopback ? o_etxd : i_erxd[1:0];
+            {rx_en0,rx_pair} <= loopback ? {o_etx_en,o_etxd} : {i_erx_dv,i_erxd[1:0]};
             rx_nxt = {rx_pair,rx_byte[15:2]};
-            rx_byte <= rx_nxt;
+            {rx_en1,rx_byte} <= {rx_en0,rx_nxt};
             if ((rx_nxt == 16'HD555) && (byte_sync == 0))
                 begin
                 byte_sync <= 1'b1;
@@ -197,7 +199,14 @@ jtag_dummy jtag1(
                     addr_tap <= byte_sync ? nxt_addr : nxt_addr&3;
                     end
                 rx_wren <= &addr_tap[1:0];
-                end
+                end // else: !if((rx_nxt == 16'HD555) && (byte_sync == 0))
+	    if (rx_wren)
+	      begin
+		 rx_byte_dly <= byte_sync ? rx_byte : 8'H55;
+		 rx_en4 <= rx_en3;
+		 rx_en3 <= rx_en2;
+		 rx_en2 <= rx_en1;
+	      end
             end
         else
             begin
@@ -205,6 +214,7 @@ jtag_dummy jtag1(
             addr_tap <= 0;
             rx_wren <= 0;
             byte_sync <= 0;
+	    {rx_en4,rx_en3,rx_en2,rx_byte_dly} <= 11'H55;
             end
     end
 
@@ -223,17 +233,19 @@ jtag_dummy jtag1(
 			.tx_data_i              ( tx_data_i ),
 			.tx_byte_sent_o         ( tx_byte_sent_o ),
 			.tx_busy_o              ( tx_busy_o ),
+			.tx_fcs_o               ( tx_fcs_o ),
 			.rx_frame_o             ( rx_frame_o ),
 			.rx_data_o              ( rx_data_o0 ),
 			.rx_byte_received_o     ( rx_byte_received_o ),
 			.rx_error_o             ( rx_error_o ),
 			.rx_frame_size_o        ( rx_frame_size_o ),
+			.rx_fcs_o               ( rx_fcs_o ),
 			.mii_tx_enable_o        ( mac_tx_enable ),
 			.mii_tx_gap_o           ( mac_tx_gap ),
 			.mii_tx_data_o          ( mac_tx_data ),
 			.mii_tx_byte_sent_i     ( mac_tx_byte_sent ),
-			.mii_rx_frame_i         ( byte_sync ),
-			.mii_rx_data_i          ( rx_byte ),
+			.mii_rx_frame_i         ( rx_en2|rx_en4 ),
+			.mii_rx_data_i          ( rx_byte_dly ),
 			.mii_rx_byte_received_i ( rx_wren ),
 			.mii_rx_error_i         ( loopback ? o_etx_er : i_erx_er )
 		);
@@ -252,7 +264,7 @@ jtag_dummy jtag1(
 	rx_packet_length <= rx_frame_size_o;
      end
 
-   assign o_etx_en = tx_busy_o;
+   assign o_etx_en = mac_tx_enable & ~mac_tx_gap;
    assign o_etx_er = 1'b0;
    assign o_erstn = clk_locked;
 
@@ -366,11 +378,11 @@ always @(posedge msoc_clk or negedge clk_locked)
 
 always @* casez(core_lsu_addr_dly[12:2])
     11'b01??????000 : tap_rdata = mac_address[31:0];
-    11'b01??????001 : tap_rdata = {cooked,mac_address[47:32]};
+    11'b01??????001 : tap_rdata = {loopback2,loopback,cooked,mac_address[47:32]};
     11'b01??????010 : tap_rdata = {tx_frame_addr,tx_packet_length};
-    11'b01??????011 : tap_rdata = {tx_busy_o,tx_enable_i};
-    11'b01??????100 : tap_rdata = {oe_emdio,o_emdio,o_emdclk};
-    11'b01??????101 : tap_rdata = {i_emdio};
+    11'b01??????011 : tap_rdata = {tx_fcs_o};
+    11'b01??????100 : tap_rdata = {i_emdio,oe_emdio,o_emdio,o_emdclk};
+    11'b01??????101 : tap_rdata = {rx_fcs_o};
     11'b01??????110 : tap_rdata = {sync};
     11'b01??????111 : tap_rdata = {rx_error_o,rx_packet_length};
     11'b00????????? : tap_rdata = tap_rdata_pkt;

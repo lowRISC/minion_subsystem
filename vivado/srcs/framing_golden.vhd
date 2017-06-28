@@ -33,6 +33,7 @@ entity framing is
 		tx_enable_i            : in  std_ulogic;
 		tx_data_i              : in  std_ulogic_vector(7 downto 0);
 		tx_byte_sent_o         : out std_ulogic;
+                tx_fcs_o               : out std_ulogic_vector(31 downto 0);
 		-- Do not start new frames while asserted
 		-- (continuing the previous one is alright)
 		tx_busy_o              : out std_ulogic;
@@ -43,6 +44,7 @@ entity framing is
 		rx_byte_received_o     : out std_ulogic;
 		rx_error_o             : out std_ulogic;
 		rx_frame_size_o        : out std_logic_vector(10 downto 0);
+                rx_fcs_o               : out std_ulogic_vector(31 downto 0);
                 
 		-- TX to MII
 		mii_tx_enable_o        : out std_ulogic;
@@ -248,6 +250,9 @@ architecture rtl of framing is
 	
 begin
   rx_frame_size_o <= std_logic_vector(to_unsigned(rx_frame_size,11));
+  rx_fcs_o <= rx_frame_check_sequence;
+  tx_fcs_o <= tx_frame_check_sequence;
+  
 	-- Pass mii_tx_byte_sent_i through directly as long as data is being transmitted
 	-- to avoid having to prefetch data in the synchronous process
 	tx_byte_sent_o <= '1' when ((tx_state = TX_CLIENT_DATA or tx_state = TX_CLIENT_DATA_WAIT_SOURCE_ADDRESS or tx_state = TX_SOURCE_ADDRESS) and mii_tx_byte_sent_i = '1') else '0';
@@ -296,7 +301,7 @@ begin
 							tx_state <= TX_START_FRAME_DELIMITER;
 							data_out := PREAMBLE_DATA;
 						when TX_START_FRAME_DELIMITER =>
-							tx_state                <= TX_CLIENT_DATA_WAIT_SOURCE_ADDRESS;
+							tx_state                <= TX_CLIENT_DATA;--_WAIT_SOURCE_ADDRESS;
 							data_out                := START_FRAME_DELIMITER_DATA;
 							-- Load padding register
 							tx_padding_required     <= MIN_FRAME_DATA_BYTES;

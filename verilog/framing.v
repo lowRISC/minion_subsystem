@@ -56,12 +56,14 @@ module framing(
         tx_enable_i,
         tx_data_i,
         tx_byte_sent_o,
+	tx_fcs_o,
         tx_busy_o,
         rx_frame_o,
         rx_data_o,
         rx_byte_received_o,
         rx_error_o,
         rx_frame_size_o,
+	rx_fcs_o,
         mii_tx_enable_o,
         mii_tx_data_o,
         mii_tx_byte_sent_i,
@@ -93,7 +95,11 @@ module framing(
     input wire [7:0]mii_rx_data_i;
     input wire mii_rx_byte_received_i;
     input wire mii_rx_error_i;
+    output reg [31:0]rx_fcs_o;
+    output reg [31:0]tx_fcs_o;
 
+   localparam CRC32_POSTINVERT_MAGIC = 32'HC704DD7B;
+   
     function [7:0] extract_byte;
        input [47:0] vec;
        input [2:0]  byteno;
@@ -229,7 +235,7 @@ module framing(
                         end
                         'b111:
                         begin
-                            tx_state <= 'b1000;
+                           tx_state <= 'b1010; // was 'b1000;
                             data_out = 8'b11010101;
                             tx_padding_required <= ( 46 + 2 + 6 + 6 );
                             tx_frame_check_sequence <= { 32{1'b1} };
@@ -326,7 +332,8 @@ module framing(
                             mii_tx_gap_o <= 1'b1;
                             if ( tx_interpacket_gap_counter == ( 12 - 1 ) ) 
                             begin
-                                tx_state <= 'b0;
+			       tx_fcs_o <= tx_frame_check_sequence;
+                               tx_state <= 'b0;
                             end
                             else
                             begin 
@@ -355,7 +362,7 @@ module framing(
     begin : rx_fsm_sync
         if ( rx_reset_i == 1'b1 ) 
         begin
-            rx_state <= 'b0;
+           rx_state <= 'b0;
         end
         else
         begin 
@@ -373,8 +380,8 @@ module framing(
                     rx_frame_check_sequence <= { 32{1'b1} };
                     if ( mii_rx_frame_i == 1'b1 ) 
                     begin
-                        if ( mii_rx_byte_received_i == 1'b1 ) 
-                        begin
+                       if ( mii_rx_byte_received_i == 1'b1 ) 
+                         begin
                             case ( mii_rx_data_i ) 
                             8'b11010101:
                             begin
@@ -388,11 +395,11 @@ module framing(
                                 rx_state <= 2'b11;
                             end
                             endcase
-                        end
-                        if ( mii_rx_error_i == 1'b1 ) 
-                        begin
+                         end
+                       if ( mii_rx_error_i == 1'b1 ) 
+                         begin
                             rx_state <= 2'b11;
-                        end
+                         end
                     end
                 end
                 'b1:
@@ -402,7 +409,8 @@ module framing(
                     if ( mii_rx_frame_i == 1'b0 ) 
                     begin
                         rx_state <= 'b0;
-                        if ( ( ( ( mii_rx_error_i == 1'b1 ) | ( rx_frame_check_sequence != 32'b11000111000001001101110101111011 ) ) | ( rx_frame_size < ( ( 46 + 2 + 6 + 6 ) + ( 32 / 8 ) ) ) ) | ( rx_frame_size > ( ( 1500 + 2 + 6 + 6 ) + ( 32 / 8 ) ) ) ) 
+		        rx_fcs_o <= rx_frame_check_sequence;
+                        if ( ( ( ( mii_rx_error_i == 1'b1 ) | ( rx_frame_check_sequence != CRC32_POSTINVERT_MAGIC ) ) | ( rx_frame_size < ( ( 46 + 2 + 6 + 6 ) + ( 32 / 8 ) ) ) ) | ( rx_frame_size > ( ( 1500 + 2 + 6 + 6 ) + ( 32 / 8 ) ) ) ) 
                         begin
                             rx_error_o <= 1'b1;
                         end
