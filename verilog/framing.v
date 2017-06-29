@@ -163,6 +163,8 @@ module framing(
     reg rx_is_group_address;
     reg [10:0]rx_frame_size;
     reg [31:0]rx_frame_check_sequence;
+    reg [1:0]  update_fcs;
+    reg [7:0]  data_out;
 
     assign rx_frame_size_o = rx_frame_size;
    
@@ -179,18 +181,14 @@ module framing(
             end
         end
     end
-    always @ ( posedge tx_clock_i or posedge tx_reset_i)
-    begin : tx_fsm_sync
-        reg [1:0]update_fcs;
-        reg [7:0]data_out;
-        if ( tx_reset_i == 1'b1 ) 
+    always @ ( posedge tx_clock_i)
+        if ( tx_reset_i ) 
         begin
             tx_state <= 'b0;
             mii_tx_enable_o <= 1'b0;
             tx_busy_o <= 1'b1;
             tx_padding_required <= 0;
-	    tx_fcs_o <= { 32{1'b1} };
-	    rx_fcs_o <= { 32{1'b1} };
+            tx_fcs_o <= 32'b0;
         end
         else
         begin 
@@ -359,12 +357,12 @@ module framing(
                 end
             end
         end
-    end
-    always @ ( posedge rx_clock_i or posedge rx_reset_i)
-    begin : rx_fsm_sync
-        if ( rx_reset_i == 1'b1 ) 
+
+    always @ ( posedge rx_clock_i)
+        if ( rx_reset_i ) 
         begin
            rx_state <= 'b0;
+           rx_fcs_o <= 32'b0;
         end
         else
         begin 
@@ -477,5 +475,5 @@ module framing(
                 endcase
             end
         end
-    end
+
 endmodule 

@@ -4,25 +4,17 @@
 module eth_top
   (
   //! LEDs.
-output wire  [9:0] o_led,
+output wire [15:0] o_led,
 input wire  [7:0] i_dip,
 
   //! Ethernet MAC PHY interface signals
 output wire   o_erefclk     , // RMII clock out
-input wire  i_gmiiclk_p    , // GMII clock in
-input wire  i_gmiiclk_n    ,
-output wire   o_egtx_clk    ,
-input wire  i_etx_clk      ,
-input wire  i_erx_clk      ,
 input wire [1:0] i_erxd    ,
 input wire  i_erx_dv       ,
 input wire  i_erx_er       ,
-input wire  i_erx_col      ,
-input wire  i_erx_crs      ,
 input wire  i_emdint       ,
 output reg  [1:0] o_etxd   ,
 output wire   o_etx_en      ,
-output wire   o_etx_er      ,
 output wire   o_emdc        ,
 inout wire  io_emdio   ,
 output wire   o_erstn    ,   
@@ -80,17 +72,18 @@ logic [3:0] core_lsu_be;
 logic        ce_d, ce_d_dly;
 logic        we_d;
 logic     tap_sel;
+logic [3:0] tap_rdata_pa;   
 logic [31:0] tap_rdata, tap_rdata_pkt, tap_wdata_pkt, rx_fcs_o, tx_fcs_o;
 logic pxl_clk, tx_enable_i, tx_byte_sent_o, tx_busy_o, rx_frame_o, rx_byte_received_o, rx_error_o;
 logic mac_tx_enable, mac_tx_gap, mac_tx_byte_sent, mac_rx_frame, mac_rx_byte_received, mac_rx_error;
 logic [47:0] mac_address;
-logic  [7:0] rx_data_o0, rx_data_o1, rx_data_o2, rx_data_o, tx_data_i, mac_tx_data, mac_rx_data;
-logic [12:0] rx_frame_size_o;   
-logic [15:0] rx_packet_length, tx_packet_length, tx_frame_size, tx_frame_addr;
-reg [13:0] addr_tap, nxt_addr;
+logic  [7:0] rx_data_o1, rx_data_o2, rx_data_o3, rx_data_o, tx_data_i, mac_tx_data, mac_rx_data, mii_rx_data_i;
+logic [10:0] rx_frame_size_o, tx_frame_addr;   
+logic [15:0] rx_packet_length, tx_packet_length, tx_frame_size;
+reg [12:0] addr_tap, nxt_addr;
 reg [23:0] rx_byte, rx_nxt, rx_byte_dly;
 reg  [2:0] rx_pair;
-reg        rx_wren, full, byte_sync, mii_rx_frame_i;
+reg        mii_rx_byte_received_i, full, byte_sync, mii_rx_frame_i, mii_rx_frame_old, rx_pa;
    // datamem shared port
    logic [3:0] 	sharedmem_en;
    logic [31:0] sharedmem_dout;
@@ -147,11 +140,14 @@ jtag_dummy jtag1(
     .RESET(debug_reset),
     .RUNTEST(debug_runtest));
 
-   genvar                       r;
+   genvar r;
 
    wire [3:0] m_enb = (we_d ? core_lsu_be : 4'hF);
    wire m_web = ce_d & shared_sel & we_d;
    logic i_emdio, o_emdio, oe_emdio, o_emdclk, sync, cooked, tx_enable_old, loopback, loopback2;
+   logic [10:0] rx_addr;
+   logic [7:0] rx_data;
+   logic rx_ena, rx_wea;
 
    generate for (r = 0; r < 4; r=r+1)
      RAMB16_S9_S9
@@ -174,49 +170,53 @@ jtag_dummy jtag1(
         );
    endgenerate
 
-   always @(posedge i_clk50 or negedge clk_locked)
+   always @(posedge i_clk50)
      if (clk_locked == 1'b0)
        begin
 	  byte_sync = 1'b0;
 	  addr_tap <= 'H0;
-	  rx_byte_dly <= {8{3'H5}};
+	  rx_byte_dly <= {8{3'H1}};
        end
      else
        begin
-       rx_wren <= 0;
-       rx_pair <= loopback ? {o_etx_en,o_etxd} : {i_erx_dv,i_erxd[1:0]};
-       full = rx_pair[2] || rx_byte[2] ? &addr_tap : 1'b1;
-       if ( rx_byte_dly[11] == 1'b0 )
-	 begin
-	    byte_sync = 1'b0;
-	    addr_tap <= 'H0;
-	 end
-       rx_nxt = {rx_pair,rx_byte[23:3]};
-       rx_byte <= rx_nxt;
-       if ((rx_nxt == {3'H7,{7{3'H5}}}) && (byte_sync == 0))
-         begin
-            byte_sync <= 1'b1;
-            rx_wren <= 1'b1;
-            addr_tap <= {addr_tap[13:2],2'b00};
-         end
-       else
-         begin
-            if (full == 0)
-              begin
-                 nxt_addr = addr_tap+1;
-                 addr_tap <= byte_sync ? nxt_addr : nxt_addr&3;
-              end
-            rx_wren <= &addr_tap[1:0];
-         end
-       if (rx_wren)
-	 begin
-	   rx_byte_dly <= byte_sync ? rx_byte : {8{3'H5}};
-           mii_rx_frame_i <= rx_byte_dly[11];
-         end
+	  mii_rx_byte_received_i <= 0;
+	  rx_pair <= loopback ? {o_etx_en,o_etxd} : {i_erx_dv,i_erxd[1:0]};
+	  full = rx_pair[2] || rx_byte[2] ? &addr_tap : 1'b1;
+	  rx_nxt = {rx_pair,rx_byte[23:3]};
+	  rx_byte <= rx_nxt;
+	  if ((rx_nxt == {3'H7,{7{3'H5}}}) && (byte_sync == 0) && (sync == 0))
+            begin
+               byte_sync <= 1'b1;
+               mii_rx_byte_received_i <= 1'b1;
+               addr_tap <= {addr_tap[12:2],2'b00};
+            end
+	  else
+            begin
+               if (full == 0)
+		 begin
+                    nxt_addr = addr_tap+1;
+                    addr_tap <= byte_sync ? nxt_addr : nxt_addr&3;
+		 end
+               mii_rx_byte_received_i <= &addr_tap[1:0];
+            end
+	  if (mii_rx_byte_received_i)
+	    begin
+	       rx_byte_dly <= byte_sync ? rx_byte : {8{3'H1}};
+               mii_rx_frame_i <= rx_byte_dly[11];
+	       mii_rx_data_i <= {rx_byte_dly[10:9],rx_byte_dly[7:6],rx_byte_dly[4:3],rx_byte_dly[1:0]};
+            end
+	  if (( mii_rx_frame_i == 1'b0 ) && ( mii_rx_frame_old == 1'b1 ))
+	    begin
+	       byte_sync = 1'b0;
+	       if (cooked == 1'b0)
+		 rx_packet_length <= rx_addr;
+	       addr_tap <= 'H0;
+	    end
+	  mii_rx_frame_old = mii_rx_frame_i;
+	  if (cooked & (rx_frame_o & rx_byte_received_o))
+	    rx_packet_length <= rx_frame_size_o;
        end
 
-   assign o_led[8] = rx_error_o;
-   assign o_led[9] = rx_frame_o;
    assign mac_tx_byte_sent = &tx_frame_size[1:0];
    assign tx_frame_addr = tx_frame_size[12:2] - 7;
    
@@ -232,7 +232,7 @@ jtag_dummy jtag1(
 			.tx_busy_o              ( tx_busy_o ),
 			.tx_fcs_o               ( tx_fcs_o ),
 			.rx_frame_o             ( rx_frame_o ),
-			.rx_data_o              ( rx_data_o0 ),
+			.rx_data_o              ( rx_data_o ),
 			.rx_byte_received_o     ( rx_byte_received_o ),
 			.rx_error_o             ( rx_error_o ),
 			.rx_frame_size_o        ( rx_frame_size_o ),
@@ -242,12 +242,12 @@ jtag_dummy jtag1(
 			.mii_tx_data_o          ( mac_tx_data ),
 			.mii_tx_byte_sent_i     ( mac_tx_byte_sent ),
 			.mii_rx_frame_i         ( mii_rx_frame_i ),
-			.mii_rx_data_i          ( {rx_byte_dly[10:9],rx_byte_dly[7:6],rx_byte_dly[4:3],rx_byte_dly[1:0]} ),
-			.mii_rx_byte_received_i ( rx_wren ),
-			.mii_rx_error_i         ( loopback ? o_etx_er : i_erx_er )
+			.mii_rx_data_i          ( mii_rx_data_i ),
+			.mii_rx_byte_received_i ( mii_rx_byte_received_i ),
+			.mii_rx_error_i         ( loopback ? 1'b0 : i_erx_er )
 		);
 
-   always @(posedge i_clk50 or negedge clk_locked)
+   always @(posedge i_clk50)
      if (clk_locked == 0)
        begin
        tx_frame_size <= 0;
@@ -262,23 +262,16 @@ jtag_dummy jtag1(
 	       o_etxd <= mac_tx_data >> {tx_frame_size[1:0],1'b0};
             end
 	  tx_enable_old <= tx_enable_i;
-	  if (rx_frame_o & rx_byte_received_o)
-	    rx_packet_length <= rx_frame_size_o;
        end
 
    assign o_etx_en = mac_tx_enable & ~mac_tx_gap;
-   assign o_etx_er = 1'b0;
    assign o_erstn = clk_locked;
-
-   logic [10:0] rx_addr;
-   logic [7:0] rx_data;
-   logic rx_ena, rx_wea;
 
    always @(posedge i_clk50) if (rx_byte_received_o)
      begin
-	rx_data_o <= rx_data_o2;
+	rx_data_o3 <= rx_data_o2;
 	rx_data_o2 <= rx_data_o1;
-	rx_data_o1 <= rx_data_o0;
+	rx_data_o1 <= cooked ? rx_data_o : mii_rx_data_i;
      end
    
    always @* casez({loopback2,cooked})
@@ -287,18 +280,21 @@ jtag_dummy jtag1(
 	rx_data = mac_tx_data;
 	rx_ena = tx_busy_o;
 	rx_wea = mac_tx_byte_sent;
+	rx_pa = 1'b0;
         end
      2'b01: begin
 	rx_addr = rx_frame_size_o;
-	rx_data = rx_data_o;
+	rx_data = rx_data_o3;
 	rx_ena = rx_frame_o;
 	rx_wea = rx_byte_received_o;
+	rx_pa = 1'b0;
         end
      2'b00: begin
 	rx_addr = addr_tap[12:2];
-	rx_data = rx_byte[7:0];
+	rx_data = rx_data_o1;
 	rx_ena = full==0;
-	rx_wea = rx_wren;
+	rx_wea = mii_rx_byte_received_i;
+	rx_pa = mii_rx_frame_i;
         end
      endcase
            
@@ -308,16 +304,16 @@ jtag_dummy jtag1(
                                     .DOA(),                       // Port A 9-bit Data Output
                                     .ADDRA(rx_addr),              // Port A 11-bit Address Input
                                     .DIA(rx_data),                // Port A 8-bit Data Input
-                                    .DIPA(1'b0),                  // Port A parity unused
+                                    .DIPA(rx_pa),                 // Port A parity unused
                                     .SSRA(1'b0),                  // Port A Synchronous Set/Reset Input
                                     .ENA(rx_ena),                 // Port A RAM Enable Input
                                     .WEA(rx_wea),                 // Port A Write Enable Input
                                     .DOB(tap_rdata_pkt),          // Port B 32-bit Data Output
-                                    .DOPB(),                      // Port B parity unused
+                                    .DOPB(tap_rdata_pa),          // Port B parity unused
                                     .ADDRB(core_lsu_addr[10:2]),  // Port B 9-bit Address Input
                                     .DIB(core_lsu_wdata),         // Port B 32-bit Data Input
                                     .DIPB(4'b0),                  // Port B parity unused
-                                    .ENB(ce_d & tap_sel & (core_lsu_addr[12:11]==2'b00)),
+                                    .ENB(ce_d & tap_sel & (1'b0 == ^core_lsu_addr[12:11])),
                                                                   // Port B RAM Enable Input
                                     .SSRB(1'b0),                  // Port B Synchronous Set/Reset Input
                                     .WEB(we_d)                    // Port B Write Enable Input
@@ -345,11 +341,10 @@ jtag_dummy jtag1(
                                    );
 
 assign io_emdio = (oe_emdio ? o_emdio : 1'bz);
-assign i_emdio = io_emdio;
 assign o_emdc = o_emdclk;
 assign o_erefclk = i_clk50; // was i_clk50_quad;
 
-always @(posedge msoc_clk or negedge clk_locked)
+always @(posedge msoc_clk)
   if (!clk_locked)
     begin
     mac_address <= 48'H230100890702;
@@ -366,6 +361,7 @@ always @(posedge msoc_clk or negedge clk_locked)
     end
   else
     begin
+    i_emdio <= io_emdio;
     ce_d_dly <= ce_d;
     if (tap_sel&we_d&core_lsu_addr[11])
     case(core_lsu_addr[5:2])
@@ -392,6 +388,7 @@ always @(posedge msoc_clk or negedge clk_locked)
     12'b101??????111 : tap_rdata = {rx_error_o,rx_packet_length};
     12'b100????????? : tap_rdata = tap_rdata_pkt;
     12'b110????????? : tap_rdata = tap_wdata_pkt;
+    12'b111????????? : tap_rdata = tap_rdata_pa;
     default: tap_rdata = 'h0;
     endcase
     
@@ -424,7 +421,7 @@ always @(posedge msoc_clk or negedge clk_locked)
      msoc (
          .*,
          .from_dip(i_dip),
-         .to_led(o_led[7:0]),
+         .to_led(o_led),
          .rstn(clk_locked)
         );
 

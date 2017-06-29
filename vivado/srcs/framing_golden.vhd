@@ -256,18 +256,18 @@ begin
 	tx_byte_sent_o <= '1' when ((tx_state = TX_CLIENT_DATA or tx_state = TX_CLIENT_DATA_WAIT_SOURCE_ADDRESS or tx_state = TX_SOURCE_ADDRESS) and mii_tx_byte_sent_i = '1') else '0';
 
 	-- Transmission state machine
-	tx_fsm_sync : process(tx_reset_i, tx_clock_i)
+	tx_fsm_sync : process(tx_clock_i)
 		variable update_fcs : boolean;
 		variable data_out   : std_ulogic_vector(7 downto 0);
 	begin
-		if tx_reset_i = '1' then
+          if rising_edge(tx_clock_i) then
+            	if tx_reset_i = '1' then
 			tx_state        <= TX_IDLE;
 			mii_tx_enable_o <= '0';
 			tx_busy_o       <= '1';
                         tx_padding_required <= 0;
-                        tx_fcs_o <= ( others => '1' );
-                        rx_fcs_o <= ( others => '1' );
-		elsif rising_edge(tx_clock_i) then
+                        tx_fcs_o <= ( others => '0' );
+		else
 			mii_tx_enable_o <= '0';
 			tx_busy_o       <= '0';
 			if tx_state = TX_IDLE then
@@ -410,15 +410,18 @@ begin
 				end if;
 			end if;
 		end if;
+          end if;
 	end process;
 
 	-- Reception state machine
-	rx_fsm_sync : process(rx_reset_i, rx_clock_i)
+	rx_fsm_sync : process(rx_clock_i)
 	begin
+          if rising_edge(rx_clock_i) then
 		if rx_reset_i = '1' then
                   rx_state <= RX_WAIT_START_FRAME_DELIMITER;
-		elsif rising_edge(rx_clock_i) then
-                  rx_error_o         <= '0';
+                  rx_fcs_o <= ( others => '0' );
+                else
+                        rx_error_o         <= '0';
 			rx_data_o          <= mii_rx_data_i;
 			rx_byte_received_o <= '0';
 			rx_frame_o         <= '0';
@@ -515,6 +518,7 @@ begin
 					end if;
 			end case;
 		end if;
+          end if;
 	end process;
 
 end architecture;

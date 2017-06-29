@@ -21,8 +21,8 @@ module minion_soc
  input wire             pxl_clk,
  input wire             msoc_clk,
  input wire             rstn,
- output reg [7:0]   to_led,
- input wire [15:0]  from_dip,
+ output reg [15:0]   to_led,
+ input wire [7:0]  from_dip,
  output wire             sd_sclk,
  input wire             sd_detect,
  inout wire [3:0]   sd_dat,
@@ -123,7 +123,7 @@ logic [31:0]  core_lsu_rdata;
        .rd_clk(~msoc_clk),      // input wire read clk
        .wr_clk(~msoc_clk),      // input wire write clk
        .rst(~rstn),      // input wire rst
-       .din({19'b0, readch[6:0], scancode}),      // input wire [31 : 0] din
+       .din({21'b0, readch[6:0], scancode}),      // input wire [31 : 0] din
        .wr_en(ascii_ready),  // input wire wr_en
        .rd_en(core_lsu_req&core_lsu_we&one_hot_data_addr[9]),  // input wire rd_en
        .dout(keyb_fifo_out),    // output wire [31 : 0] dout
@@ -136,8 +136,9 @@ logic [31:0]  core_lsu_rdata;
        .empty(keyb_empty)  // output wire empty
      );
 
-   wire [7:0] red,  green, blue;
- 
+   wire [7:0] red,  green, blue, fstore_doutb;
+   assign one_hot_rdata[10] = fstore_doutb;
+   
     fstore2 the_fstore(
       .pixel2_clk(pxl_clk),
       .blank(),
@@ -155,8 +156,7 @@ logic [31:0]  core_lsu_rdata;
       .web(ce_d & one_hot_data_addr[10] & we_d),
       .enb(ce_d),
       .addrb(core_lsu_addr[14:2]),
-      .dinb(core_lsu_wdata),
-      .doutb(one_hot_rdata[10]),
+      .doutb(fstore_doutb),
       .irst(~rstn),
       .clk_data(msoc_clk),
       .GPIO_SW_C(GPIO_SW_C),
@@ -312,7 +312,7 @@ progmem block_i (
 
 reg u_trans;
 reg u_recv;
-reg [15:0] u_baud;
+reg [10:0] u_baud;
 wire received, recv_err, is_recv, is_trans, uart_maj;
 wire uart_almostfull, uart_full, uart_rderr, uart_wrerr, uart_empty;   
 wire [11:0] uart_wrcount, uart_rdcount;
@@ -351,8 +351,6 @@ assign one_hot_rdata[3] = {uart_wrcount,uart_almostfull,uart_full,uart_rderr,uar
    wire       sd_cmd_finish, sd_data_finish, sd_cmd_crc_ok, sd_cmd_index_ok;
 
    reg [2:0]  sd_data_start_reg;
-   reg [1:0]  sd_align_reg;
-   reg [15:0] sd_blkcnt_reg;
    reg [11:0] sd_blksize_reg;
    
    reg [15:0] clock_divider_sd_clk_reg;
@@ -364,8 +362,6 @@ assign one_hot_rdata[3] = {uart_wrcount,uart_almostfull,uart_full,uart_rderr,uar
    reg sd_cmd_start_reg;
 
    reg [2:0]  sd_data_start;
-   reg [1:0]  sd_align;
-   reg [15:0] sd_blkcnt;
    reg [11:0] sd_blksize;
    
    reg [15:0] clock_divider_sd_clk;
@@ -375,7 +371,7 @@ assign one_hot_rdata[3] = {uart_wrcount,uart_almostfull,uart_full,uart_rderr,uar
    reg [31:0] sd_cmd_timeout;
 
    reg            sd_cmd_start, sd_cmd_rst, sd_data_rst, sd_clk_rst;
-   reg [15:0] from_dip_reg;
+   reg [7:0] from_dip_reg;
 
 logic [6:0] sd_clk_daddr;
 logic       sd_clk_dclk, sd_clk_den, sd_clk_drdy, sd_clk_dwe, sd_clk_locked;
@@ -389,8 +385,6 @@ always @(posedge msoc_clk or negedge rstn)
     from_dip_reg <= 0;
         u_recv <= 0;
         core_lsu_addr_dly <= 0;
-        sd_align_reg <= 0;
-        sd_blkcnt_reg <= 0;
         sd_blksize_reg <= 0;
         sd_data_start_reg <= 0;
         sd_clk_din <= 0;
@@ -407,7 +401,7 @@ always @(posedge msoc_clk or negedge rstn)
         sd_clk_rst <= 0;
         sd_cmd_timeout_reg <= 0;
         to_led <= 0;
-        u_baud <= 16'd54;
+        u_baud <= 11'd54;
         u_trans <= 1'b0;
         u_tx_byte <= 8'b0;
     end
@@ -418,14 +412,12 @@ always @(posedge msoc_clk or negedge rstn)
         core_lsu_addr_dly <= core_lsu_addr;
         if (core_lsu_req&core_lsu_we&one_hot_data_addr[6])
           case(core_lsu_addr[5:2])
-            0: sd_align_reg <= core_lsu_wdata;
             1: sd_clk_din <= core_lsu_wdata;
             2: sd_cmd_arg_reg <= core_lsu_wdata;
             3: sd_cmd_i_reg <= core_lsu_wdata;
             4: {sd_data_start_reg,sd_cmd_setting_reg[2:0]} <= core_lsu_wdata;
             5: sd_cmd_start_reg <= core_lsu_wdata;
             6: {sd_reset,sd_clk_rst,sd_data_rst,sd_cmd_rst} <= core_lsu_wdata;
-            7: sd_blkcnt_reg <= core_lsu_wdata;
             8: sd_blksize_reg <= core_lsu_wdata;
             9: sd_cmd_timeout_reg <= core_lsu_wdata;
            10: {sd_clk_dwe,sd_clk_den,sd_clk_daddr} <= core_lsu_wdata;
@@ -442,12 +434,10 @@ always @(posedge msoc_clk or negedge rstn)
 
 always @(posedge sd_clk_o)
     begin
-        sd_align <= sd_align_reg;
         sd_cmd_arg <= sd_cmd_arg_reg;
         sd_cmd_i <= sd_cmd_i_reg;
         {sd_data_start,sd_cmd_setting} <= {sd_data_start_reg,sd_cmd_setting_reg};
         sd_cmd_start <= sd_cmd_start_reg;
-        sd_blkcnt <= sd_blkcnt_reg;
         sd_blksize <= sd_blksize_reg;
         sd_cmd_timeout <= sd_cmd_timeout_reg;
     end
@@ -581,12 +571,13 @@ my_fifo #(.width(36)) rx_fifo (
            
    always @(posedge msoc_clk)
      begin
-     sd_status_reg = sd_status;
-     sd_cmd_response_reg = sd_cmd_response;
-     sd_cmd_wait_reg = sd_cmd_wait;
-     sd_data_wait_reg = sd_data_wait;
-     sd_cmd_packet_reg = sd_cmd_packet;
-     sd_transf_cnt_reg = sd_transf_cnt;        
+     sd_detect_reg <= sd_detect;
+     sd_status_reg <= sd_status;
+     sd_cmd_response_reg <= sd_cmd_response;
+     sd_cmd_wait_reg <= sd_cmd_wait;
+     sd_data_wait_reg <= sd_data_wait;
+     sd_cmd_packet_reg <= sd_cmd_packet;
+     sd_transf_cnt_reg <= sd_transf_cnt;        
      case(core_lsu_addr[6:2])
        0: sd_cmd_resp_sel = sd_cmd_response_reg[38:7];
        1: sd_cmd_resp_sel = sd_cmd_response_reg[70:39];
@@ -602,14 +593,14 @@ my_fifo #(.width(36)) rx_fifo (
       11: sd_cmd_resp_sel = tx_fifo_status;
       12: sd_cmd_resp_sel = sd_detect_reg;
       15: sd_cmd_resp_sel = {sd_clk_locked,sd_clk_drdy,sd_clk_dout};
-           16: sd_cmd_resp_sel = sd_align_reg;
+      16: sd_cmd_resp_sel = 'b0;
       17: sd_cmd_resp_sel = sd_clk_din;
       18: sd_cmd_resp_sel = sd_cmd_arg_reg;
       19: sd_cmd_resp_sel = sd_cmd_i_reg;
       20: sd_cmd_resp_sel = {sd_data_start_reg,sd_cmd_setting_reg};
       21: sd_cmd_resp_sel = sd_cmd_start_reg;
       22: sd_cmd_resp_sel = {sd_reset,sd_clk_rst,sd_data_rst,sd_cmd_rst};
-      23: sd_cmd_resp_sel = sd_blkcnt_reg;
+      23: sd_cmd_resp_sel = 'b0;
       24: sd_cmd_resp_sel = sd_blksize_reg;
       25: sd_cmd_resp_sel = sd_cmd_timeout_reg;
       26: sd_cmd_resp_sel = {sd_clk_dwe,sd_clk_den,sd_clk_daddr};
@@ -655,8 +646,6 @@ sd_top sdtop(
     .arg_i      (sd_cmd_arg),
     .start_i    (sd_cmd_start),
     .sd_data_start_i(sd_data_start),
-    .sd_align_i(sd_align),
-    .sd_blkcnt_i(sd_blkcnt),
     .sd_blksize_i(sd_blksize),
     .sd_data_i(data_out_tx_fifo),
     .sd_dat_to_host(sd_dat_to_host_maj),

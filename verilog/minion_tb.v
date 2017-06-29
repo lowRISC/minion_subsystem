@@ -9,7 +9,6 @@
    reg 		   clk;
    reg 		   rstn;
    wire [7:0] 	   to_led;
-   reg [15:0] 	   from_dip;
    wire 	   sd_sclk;
    reg 		   sd_detect;
    wire [3:0] 	   sd_dat;
@@ -33,23 +32,15 @@
    wire [3:0] 	   VGA_GREEN_O;
 
 wire  [9:0] o_led;
-wire  [7:0] i_dip = 8'b0;
+wire  [7:0] i_dip = 8'h80;
 
   //! Ethernet MAC PHY interface signals
 wire   o_erefclk     ; // RMII clock out
-wire  i_gmiiclk_p    ; // GMII clock in
-wire  i_gmiiclk_n    ;
-wire   o_egtx_clk    ;
-wire  i_etx_clk      ;
-wire  i_erx_clk      ;
 wire  [1:0] o_etxd   ;
 wire   o_etx_en      ;
-wire   o_etx_er      ;
 wire [1:0] i_erxd = o_etxd  ;
 wire    i_erx_dv = o_etx_en ;
-wire  i_erx_er = o_etx_er   ;
-wire  i_erx_col      ;
-wire  i_erx_crs      ;
+wire  i_erx_er = 1'b0   ;
 wire  i_emdint       ;
 wire   o_emdc        ;
 wire  io_emdio   ;
@@ -86,20 +77,12 @@ eth_top dut
    .o_led(o_led),
    .i_dip(i_dip),
    .o_erefclk(o_erefclk),
-   .i_gmiiclk_p(i_gmiiclk_p),
-   .i_gmiiclk_n(i_gmiiclk_n),
-   .o_egtx_clk(o_egtx_clk),
-   .i_etx_clk(i_etx_clk),
-   .i_erx_clk(i_erx_clk),
    .i_erxd(i_erxd),
    .i_erx_dv(i_erx_dv),
    .i_erx_er(i_erx_er),
-   .i_erx_col(i_erx_col),
-   .i_erx_crs(i_erx_crs),
    .i_emdint(i_emdint),
    .o_etxd(o_etxd),
    .o_etx_en(o_etx_en),
-   .o_etx_er(o_etx_er),
    .o_emdc(o_emdc),
    .io_emdio(io_emdio),
    .o_erstn(o_erstn),
@@ -127,7 +110,6 @@ initial
      $dumpvars;
      clk = 0;
      rstn = 0;
-     from_dip = 0;
      sd_detect = 0;
      GPIO_SW_C = 0;
      GPIO_SW_W = 0;

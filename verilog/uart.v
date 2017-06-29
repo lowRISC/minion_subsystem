@@ -33,7 +33,7 @@ module uart(
             output           is_receiving, // Low when receive line is idle.
             output           is_transmitting, // Low when transmit line is idle.
             output reg       recv_error, // Indicates error in receiving packet.
-            input [15:0]     baud,
+            input [10:0]     baud,
             input            recv_ack
             );
 

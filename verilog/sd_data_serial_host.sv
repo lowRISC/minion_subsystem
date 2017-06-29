@@ -64,9 +64,7 @@ module sd_data_serial_host(
            //Control signals
            input [`BLKSIZE_W-1:0] 	 blksize,
            input 			 bus_4bit,
-           input [`BLKCNT_W-1:0] 	 blkcnt,
            input [1:0] 			 start,
-           input [1:0] 			 byte_alignment,
 	   input [31:0] 		 timeout_i,
            output 			 sd_data_busy,
            output 			 busy,
@@ -141,9 +139,11 @@ begin: FSM_OUT
         bus_4bit_reg <= 0;     
         wait_reg_o <= 0;
         finish_o <= 0;
-           DAT_dat_reg <= 0;
-           data_out <= 0;
-           transf_cnt_o <= 0;
+        DAT_dat_reg <= 0;
+        data_out <= 0;
+        transf_cnt_o <= 0;
+        for (k = 0; k < 4; k=k+1)
+          crc_din[k] <= 0;
     end
     else begin
            // sd data input pad register

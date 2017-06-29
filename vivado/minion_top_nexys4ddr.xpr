@@ -10,12 +10,12 @@
     <Option Name="Part" Val="xc7a100tcsg324-1"/>
     <Option Name="CompiledLibDir" Val="$PCACHEDIR/compile_simlib"/>
     <Option Name="CompiledLibDirXSim" Val=""/>
-    <Option Name="CompiledLibDirModelSim" Val="/local/scratch/jrrk2/lowrisc-chip-logging/minion_subsystem/vivado/minion_top_nexys4ddr.cache/compile_simlib/modelsim"/>
-    <Option Name="CompiledLibDirQuesta" Val="/local/scratch/jrrk2/lowrisc-chip-logging/minion_subsystem/vivado/minion_top_nexys4ddr.cache/compile_simlib/questa"/>
-    <Option Name="CompiledLibDirIES" Val="/local/scratch/jrrk2/lowrisc-chip-logging/minion_subsystem/vivado/minion_top_nexys4ddr.cache/compile_simlib/ies"/>
-    <Option Name="CompiledLibDirVCS" Val="/local/scratch/jrrk2/lowrisc-chip-logging/minion_subsystem/vivado/minion_top_nexys4ddr.cache/compile_simlib/vcs"/>
-    <Option Name="CompiledLibDirRiviera" Val="/local/scratch/jrrk2/lowrisc-chip-logging/minion_subsystem/vivado/minion_top_nexys4ddr.cache/compile_simlib/riviera"/>
-    <Option Name="CompiledLibDirActivehdl" Val="/local/scratch/jrrk2/lowrisc-chip-logging/minion_subsystem/vivado/minion_top_nexys4ddr.cache/compile_simlib/activehdl"/>
+    <Option Name="CompiledLibDirModelSim" Val="$PCACHEDIR/compile_simlib/modelsim"/>
+    <Option Name="CompiledLibDirQuesta" Val="$PCACHEDIR/compile_simlib/questa"/>
+    <Option Name="CompiledLibDirIES" Val="$PCACHEDIR/compile_simlib/ies"/>
+    <Option Name="CompiledLibDirVCS" Val="$PCACHEDIR/compile_simlib/vcs"/>
+    <Option Name="CompiledLibDirRiviera" Val="$PCACHEDIR/compile_simlib/riviera"/>
+    <Option Name="CompiledLibDirActivehdl" Val="$PCACHEDIR/compile_simlib/activehdl"/>
     <Option Name="TargetSimulator" Val="VCS"/>
     <Option Name="BoardPart" Val=""/>
     <Option Name="SourceMgmtMode" Val="DisplayOnly"/>
@@ -413,20 +413,6 @@
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_nexys4ddr_0.xdc"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_nexys4ddr_0_board.xdc"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_nexys4ddr_0.xml"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_v5_3_1/mmcm_pll_drp_func_7s_mmcm.vh"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_nexys4ddr_0_ooc.xdc"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_nexys4ddr_0_sim_netlist.vhdl"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_nexys4ddr_0_sim_netlist.v"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_nexys4ddr_0_stub.vhdl"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_nexys4ddr_0_stub.v"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_nexys4ddr_0.v"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_v5_3_1/mmcm_pll_drp_func_7s_pll.vh"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_nexys4ddr_0_clk_wiz.v"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_v5_3_1/mmcm_pll_drp_func_us_mmcm.vh"/>
-        <CompFileExtendedInfo CompFileName="clk_wiz_nexys4ddr_0.xci" FileRelPathName="clk_wiz_v5_3_1/mmcm_pll_drp_func_us_pll.vh"/>
       </File>
       <Config>
         <Option Name="TopModule" Val="clk_wiz_nexys4ddr_0"/>

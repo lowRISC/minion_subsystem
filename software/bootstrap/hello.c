@@ -190,7 +190,7 @@ static void poll_shm(void)
 enum {max=256};
 static int loopback2 = 0; // was 1<<18;
 static int loopback = 1<<17;
-static int cooked = 1<<16;
+static int cooked = 0; // 1<<16;
 static unsigned char lpbuf[max];
 
 static int mask(int j)
@@ -225,7 +225,9 @@ static void eth_test(void)
 
 int main()
 {
-  eth_test();
+  volatile unsigned int * const dip_base = (volatile unsigned int*)(7<<20);
+  if (dip_base[0] & 0x80)
+    eth_test();
   myputs("Hello\n");
   for (;;) poll_shm();
 }
