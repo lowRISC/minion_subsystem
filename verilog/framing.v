@@ -63,7 +63,9 @@ module framing(
         rx_byte_received_o,
         rx_error_o,
         rx_frame_size_o,
+        rx_packet_length_o,
 	rx_fcs_o,
+	rx_fcs_err_o,
         mii_tx_enable_o,
         mii_tx_data_o,
         mii_tx_byte_sent_i,
@@ -97,7 +99,9 @@ module framing(
     input wire mii_rx_error_i;
     output reg [31:0]rx_fcs_o;
     output reg [31:0]tx_fcs_o;
-
+    output wire rx_fcs_err_o;
+    output reg [10:0]rx_packet_length_o;
+   
    localparam CRC32_POSTINVERT_MAGIC = 32'HC704DD7B;
    
     function [7:0] extract_byte;
@@ -154,7 +158,8 @@ module framing(
     reg [31:0]tx_frame_check_sequence;
     reg [2:0]tx_mac_address_byte;
     reg [3:0]tx_interpacket_gap_counter;
-    reg [1:0]rx_state;
+    reg [2:0]rx_state;
+    reg [2:0]rx_padding;
     reg rx_error_o;
     reg [7:0]rx_data_o;
     reg rx_byte_received_o;
@@ -165,8 +170,11 @@ module framing(
     reg [31:0]rx_frame_check_sequence;
     reg [1:0]  update_fcs;
     reg [7:0]  data_out;
+    wire rx_fcs_err;
 
     assign rx_frame_size_o = rx_frame_size;
+    assign rx_fcs_err_o = rx_fcs_err;
+    assign rx_fcs_err = rx_frame_check_sequence != CRC32_POSTINVERT_MAGIC;
    
     always @ (  tx_state or  mii_tx_byte_sent_i)
     begin
@@ -376,29 +384,30 @@ module framing(
                 begin
                     rx_mac_address_byte <= 3'b000;
                     rx_is_group_address <= 1'b1;
-                    rx_frame_size <= 0;
                     rx_frame_check_sequence <= { 32{1'b1} };
                     if ( mii_rx_frame_i == 1'b1 ) 
                     begin
+                       rx_frame_size <= 0;
+		       rx_packet_length_o <= 0;
                        if ( mii_rx_byte_received_i == 1'b1 ) 
                          begin
                             case ( mii_rx_data_i ) 
                             8'b11010101:
                             begin
-                                rx_state <= 1'b1;
+                                rx_state <= 'b1;
                             end
                             8'b01010101:
                             begin
                             end
                             default :
                             begin
-                                rx_state <= 2'b11;
+                                rx_state <= 'b11;
                             end
                             endcase
                          end
                        if ( mii_rx_error_i == 1'b1 ) 
                          begin
-                            rx_state <= 2'b11;
+                            rx_state <= 'b11;
                          end
                     end
                 end
@@ -408,9 +417,12 @@ module framing(
                     rx_byte_received_o <= mii_rx_byte_received_i;
                     if ( mii_rx_frame_i == 1'b0 ) 
                     begin
-                        rx_state <= 'b0;
+                        rx_state <= 'b100;
+                        rx_padding <= 'b100;
 		        rx_fcs_o <= rx_frame_check_sequence;
-                        if ( ( ( ( mii_rx_error_i == 1'b1 ) | ( rx_frame_check_sequence != CRC32_POSTINVERT_MAGIC ) ) | ( rx_frame_size < ( ( 46 + 2 + 6 + 6 ) + ( 32 / 8 ) ) ) ) | ( rx_frame_size > ( ( 1500 + 2 + 6 + 6 ) + ( 32 / 8 ) ) ) ) 
+		        if ( rx_fcs_err == 0)
+			  rx_packet_length_o <= rx_frame_size;
+                        if ( ( ( ( mii_rx_error_i == 1'b1 ) | rx_fcs_err ) | ( rx_frame_size < ( ( 46 + 2 + 6 + 6 ) + ( 32 / 8 ) ) ) ) | ( rx_frame_size > ( ( 1500 + 2 + 6 + 6 ) + ( 32 / 8 ) ) ) )
                         begin
                             rx_error_o <= 1'b1;
                         end
@@ -471,6 +483,20 @@ module framing(
                     begin
                         rx_state <= 'b0;
                     end
+                end
+                'b100:
+                begin
+                    rx_frame_o <= 1'b1;
+                    rx_byte_received_o <= mii_rx_byte_received_i;
+                    if ( rx_padding == 1'b0 ) 
+                      begin
+                        rx_state <= 'b0;
+                      end
+		    else if ( mii_rx_byte_received_i == 1'b1 ) 
+                      begin
+                        rx_padding <= rx_padding - 1;
+                        rx_frame_size <= rx_frame_size + 1;
+                      end
                 end
                 endcase
             end

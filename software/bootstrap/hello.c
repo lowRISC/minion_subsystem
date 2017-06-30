@@ -190,7 +190,8 @@ static void poll_shm(void)
 enum {max=256};
 static int loopback2 = 0; // was 1<<18;
 static int loopback = 1<<17;
-static int cooked = 0; // 1<<16;
+// static int cooked = 0;
+static int cooked = 1<<16;
 static unsigned char lpbuf[max];
 
 static int mask(int j)
