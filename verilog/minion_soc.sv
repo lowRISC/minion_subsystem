@@ -17,6 +17,7 @@ module minion_soc
  output wire             uart_tx,
  input wire             uart_rx,
  // clock and reset
+ input wire             clk_100,
  input wire             clk_200MHz,
  input wire             pxl_clk,
  input wire             msoc_clk,
@@ -36,8 +37,6 @@ module minion_soc
  output wire             we_d,
  output wire             shared_sel,
  input wire [31:0]  shared_rdata,
- output wire             tap_sel,
- input wire [31:0]  tap_rdata,
  // pusb button array
  input wire             GPIO_SW_C,
  input wire             GPIO_SW_W,
@@ -70,7 +69,27 @@ module minion_soc
  input wire    [3:0]        datamem_enb,
  output wire [31:0] datamem_doutb,            
  input wire    [3:0]        progmem_enb,
- output wire [31:0] progmem_doutb
+ output wire [31:0] progmem_doutb,
+
+   // AXI port to Xilinx eth_lite
+ output wire [31 : 0] eth_axi_awaddr,
+ output wire [2 : 0]  eth_axi_awprot,
+ output wire 	       eth_axi_awvalid,
+ input wire 	       eth_axi_awready,
+ output wire [31 : 0] eth_axi_wdata,
+ output wire [3 : 0]  eth_axi_wstrb,
+ output wire 	       eth_axi_wvalid,
+ input wire 	       eth_axi_wready,
+ input wire [1 : 0]   eth_axi_bresp,
+ input wire 	       eth_axi_bvalid,
+ output wire 	       eth_axi_bready,
+ output wire [31 : 0] eth_axi_araddr,
+ output wire 	       eth_axi_arvalid,
+ input wire 	       eth_axi_arready,
+ input wire [31 : 0]  eth_axi_rdata,
+ input wire 	       eth_axi_rvalid,
+ input wire [1 : 0]   eth_axi_rresp,
+ output wire 	       eth_axi_rready
    );
  
  wire [19:0] dummy;
@@ -82,16 +101,19 @@ module minion_soc
  wire [31:0] keyb_fifo_status = {keyb_empty,keyb_almostfull,keyb_full,keyb_rderr,keyb_wrerr,keyb_rdcount,keyb_wrcount};
  wire [35:0] keyb_fifo_out;
 // signals from/to core
-logic         core_instr_req;
-logic         core_instr_gnt;
-logic         core_instr_rvalid;
+logic      core_instr_req;
+logic      core_instr_gnt;
+logic   core_instr_rvalid;
+   
 logic [31:0]  core_instr_addr;
 
 logic         core_lsu_req;
-logic         core_lsu_gnt;
-logic         core_lsu_rvalid;
+logic      core_lsu_gnt, core_lsu_gnt_mem, core_lsu_gnt_eth;
+   
+logic   core_lsu_rvalid, core_lsu_rvalid_mem, core_lsu_rvalid_eth;
+   
 logic         core_lsu_we;
-logic [31:0]  core_lsu_rdata;
+logic [31:0] core_lsu_rdata, core_lsu_rdata_mem, core_lsu_rdata_eth;   
 
   logic [31: 0]          core_instr_rdata;
 
@@ -104,6 +126,7 @@ logic [31:0]  core_lsu_rdata;
 
   logic [15:0] one_hot_data_addr;
   logic [31:0] one_hot_rdata[15:0];
+  logic       tap_sel;
  
   assign one_hot_rdata[9] = core_lsu_addr[2] ? {keyb_empty,keyb_fifo_out[15:0]} : keyb_fifo_status;
  
@@ -175,7 +198,9 @@ logic [31:0]  core_lsu_rdata;
 //----------------------------------------------------------------------------//
 
   assign shared_sel = one_hot_data_addr[8];
-  assign tap_sel = one_hot_data_addr[15];
+  assign tap_sel = one_hot_data_addr[14];
+  assign core_lsu_gnt = tap_sel ? core_lsu_gnt_eth : core_lsu_gnt_mem;
+  assign core_lsu_rvalid = tap_sel ? core_lsu_rvalid_eth : core_lsu_rvalid_mem;
 
 always_comb
   begin:onehot
@@ -247,14 +272,89 @@ coremem coremem_d
 (
  .clk_i(msoc_clk),
  .rst_ni(rstn),
- .data_req_i(core_lsu_req),
- .data_gnt_o(core_lsu_gnt),
- .data_rvalid_o(core_lsu_rvalid),
+ .data_req_i(core_lsu_req & (tap_sel == 0)),
+ .data_gnt_o(core_lsu_gnt_mem),
+ .data_rvalid_o(core_lsu_rvalid_mem),
  .data_we_i(core_lsu_we),
  .CE(ce_d),
  .WE(we_d)
  );
+   
+core2axi #(.REGISTERED_GRANT("TRUE")) coreaxi0
+(
+ .clk_i(msoc_clk),
+ .rst_ni(rstn),
+ .data_req_i(core_lsu_req & tap_sel),
+ .data_gnt_o(core_lsu_gnt_eth),
+ .data_rvalid_o(core_lsu_rvalid_eth),
+ .data_addr_i(tap_sel ? core_lsu_addr : 32'b0),
+ .data_we_i(core_lsu_we),
+ .data_be_i(core_lsu_be),
+ .data_rdata_o(one_hot_rdata[14]),
+ .data_wdata_i(tap_sel ? core_lsu_wdata : 32'b0),
 
+  .aw_id_o(),
+  .aw_addr_o(  eth_axi_awaddr ),
+  .aw_len_o(),
+  .aw_size_o(),
+  .aw_burst_o(),
+  .aw_lock_o(),
+  .aw_cache_o(),
+  .aw_prot_o(  eth_axi_awprot ),
+  .aw_region_o(),
+  .aw_user_o(),
+  .aw_qos_o(),
+  .aw_valid_o(  eth_axi_awvalid ),
+  .aw_ready_i(  eth_axi_awready ),
+    // ---------------------------------------------------------
+
+    //AXI write data bus -------------- // USED// --------------
+
+  .w_data_o(  eth_axi_wdata),
+  .w_strb_o(  eth_axi_wstrb),
+  .w_last_o(),
+  .w_user_o(),
+  .w_valid_o(  eth_axi_wvalid),
+  .w_ready_i(  eth_axi_wready),
+    // ---------------------------------------------------------
+
+    //AXI write response bus -------------- // USED// ----------
+
+  .b_id_i( 16'b0 ),
+  .b_resp_i(  eth_axi_bresp),
+  .b_valid_i(  eth_axi_bvalid),
+  .b_user_i( 10'b0 ),
+  .b_ready_o(  eth_axi_bready),
+    // ---------------------------------------------------------
+
+    //AXI read address bus -------------------------------------
+  .ar_id_o(),
+  .ar_addr_o(  eth_axi_araddr ),
+  .ar_len_o(),
+  .ar_size_o(),
+  .ar_burst_o(),
+  .ar_lock_o(),
+  .ar_cache_o(),
+  .ar_prot_o(),
+  .ar_region_o(),
+  .ar_user_o(),
+  .ar_qos_o(),
+  .ar_valid_o(  eth_axi_arvalid ),
+  .ar_ready_i(  eth_axi_arready ),
+    // ---------------------------------------------------------
+
+
+    //AXI read data bus ----------------------------------------
+  .r_id_i( 16'b0 ),
+  .r_data_i(  eth_axi_rdata ),
+  .r_resp_i(  eth_axi_rresp ),
+  .r_last_i( 1'b0 ),
+  .r_user_i( 10'b0 ),
+  .r_valid_i(  eth_axi_rvalid ),
+  .r_ready_o(  eth_axi_rready )
+    // ---------------------------------------------------------
+ );
+   
 datamem block_d (
   .clk(msoc_clk),
   .wea(ce_d & one_hot_data_addr[1] & we_d),
@@ -614,7 +714,6 @@ my_fifo #(.width(36)) rx_fifo (
    assign one_hot_rdata[6] = sd_cmd_resp_sel;
    assign one_hot_rdata[7] = from_dip_reg;
    assign one_hot_rdata[8] = shared_rdata;
-   assign one_hot_rdata[15] = tap_rdata;
 
 /*
 clk_wiz_1 sd_clk_div

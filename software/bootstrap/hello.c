@@ -187,41 +187,33 @@ static void poll_shm(void)
   if ((unsigned)addr4 == 0xDEADBEEF) hello();
 }
 
-enum {max=256};
-static int loopback2 = 0; // was 1<<18;
-static int loopback = 1<<17;
-// static int cooked = 0;
-static int cooked = 1<<16;
-static unsigned char lpbuf[max];
-
-static int mask(int j)
+static void axi_write(size_t addr, int data, int strb)
 {
-  return ((j >= 6) && (j < 12)) ? 0xFF : (j >= 12 ? j-12+0x13 : j);
+  volatile unsigned int * const eth_base = (volatile unsigned int*)(14<<20);
+  eth_base[addr>>2] = data;
+}
+
+static int axi_read(size_t addr)
+{
+  volatile unsigned int * const eth_base = (volatile unsigned int*)(14<<20);
+  int rslt = eth_base[addr>>2];
+  return rslt;
 }
 
 static void eth_test(void)
 {
-  unsigned i, j, frame_size;
-  volatile unsigned int * const led_base = (volatile unsigned int*)(7<<20);
-  volatile unsigned int * const tap_base = (volatile unsigned int*)(15<<20);
-  tap_base[512+0] = 0x03020100;
-  tap_base[512+1] = loopback2+loopback+cooked+0x0504;
-  for (i = 0; i < 0x11; i++)
-    {
-      int j = i*4;
-      tap_base[1024+i] = mask(j) | (mask(j+1) << 8) | (mask(j+2) << 16) | (mask(j+3) << 24);
-    }
-  tap_base[512+2] = 0x42;
-  while (tap_base[512+3] & 0x2)
-    ; // wait to send packet
-  frame_size = tap_base[512+2] >> 16;
-  if (frame_size > max) frame_size = max;
-  for (i = 0; i < (((frame_size-1)|3)+1)/4; i++)
-    {
-      unsigned led = tap_base[i];
-      for (j = 0; j < 4; j++)
-	led_base[0] = led >> (j*8);
-    }
+axi_write(0x00000000,0xffffffff,0xf);
+axi_write(0x00000004,0xffffffff,0xf);
+axi_write(0x00000008,0xffffffff,0xf);
+axi_write(0x0000000c,0x11111111,0xf);
+axi_write(0x00000010,0x22222222,0xf);
+axi_write(0x00000014,0x33333333,0xf);
+ axi_read(0x0000001c);
+axi_write(0x00000020,0x55555555,0xf);
+axi_write(0x000007f8,0x80000000,0xf);
+axi_write(0x000007f4,0x00000014,0xf);
+axi_write(0x000007fc,0x00000009,0xf);
+ while (axi_read(0x000007fc) == 0x00000009);
 }
 
 int main()

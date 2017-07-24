@@ -3,7 +3,8 @@ default: simv
 base_dir = ..
 
 tb_srcs = \
-	minion_tb.v \
+	../../../jtag_digilent/eth_logger_tb.v \
+	minion_tb_logging.v \
 
 verilog_srcs = \
 	nettype_none.v \
