@@ -10,13 +10,12 @@
     <Option Name="Part" Val="xc7a100tcsg324-1"/>
     <Option Name="CompiledLibDir" Val="$PCACHEDIR/compile_simlib"/>
     <Option Name="CompiledLibDirXSim" Val=""/>
-    <Option Name="CompiledLibDirModelSim" Val="$PCACHEDIR/compile_simlib/modelsim"/>
-    <Option Name="CompiledLibDirQuesta" Val="$PCACHEDIR/compile_simlib/questa"/>
-    <Option Name="CompiledLibDirIES" Val="$PCACHEDIR/compile_simlib/ies"/>
-    <Option Name="CompiledLibDirVCS" Val="$PCACHEDIR/compile_simlib/vcs"/>
-    <Option Name="CompiledLibDirRiviera" Val="$PCACHEDIR/compile_simlib/riviera"/>
-    <Option Name="CompiledLibDirActivehdl" Val="$PCACHEDIR/compile_simlib/activehdl"/>
-    <Option Name="TargetSimulator" Val="VCS"/>
+    <Option Name="CompiledLibDirModelSim" Val="/local/scratch/jrrk2/lowrisc-chip-logging/minion_subsystem/vivado/minion_top_nexys4ddr.cache/compile_simlib/modelsim"/>
+    <Option Name="CompiledLibDirQuesta" Val="/local/scratch/jrrk2/lowrisc-chip-logging/minion_subsystem/vivado/minion_top_nexys4ddr.cache/compile_simlib/questa"/>
+    <Option Name="CompiledLibDirIES" Val="/local/scratch/jrrk2/lowrisc-chip-logging/minion_subsystem/vivado/minion_top_nexys4ddr.cache/compile_simlib/ies"/>
+    <Option Name="CompiledLibDirVCS" Val="/local/scratch/jrrk2/lowrisc-chip-logging/minion_subsystem/vivado/minion_top_nexys4ddr.cache/compile_simlib/vcs"/>
+    <Option Name="CompiledLibDirRiviera" Val="/local/scratch/jrrk2/lowrisc-chip-logging/minion_subsystem/vivado/minion_top_nexys4ddr.cache/compile_simlib/riviera"/>
+    <Option Name="CompiledLibDirActivehdl" Val="/local/scratch/jrrk2/lowrisc-chip-logging/minion_subsystem/vivado/minion_top_nexys4ddr.cache/compile_simlib/activehdl"/>
     <Option Name="BoardPart" Val=""/>
     <Option Name="SourceMgmtMode" Val="DisplayOnly"/>
     <Option Name="ActiveSimSet" Val="sim_1"/>
@@ -29,11 +28,11 @@
     <Option Name="IPUserFilesDir" Val="$PPRDIR/../../eth_top/eth_top.ip_user_files"/>
     <Option Name="IPStaticSourceDir" Val="$PPRDIR/../../eth_top/eth_top.ip_user_files/ipstatic"/>
     <Option Name="EnableBDX" Val="FALSE"/>
-    <Option Name="WTXSimLaunchSim" Val="51"/>
+    <Option Name="WTXSimLaunchSim" Val="52"/>
     <Option Name="WTModelSimLaunchSim" Val="0"/>
     <Option Name="WTQuestaLaunchSim" Val="0"/>
     <Option Name="WTIesLaunchSim" Val="0"/>
-    <Option Name="WTVcsLaunchSim" Val="2"/>
+    <Option Name="WTVcsLaunchSim" Val="4"/>
     <Option Name="WTRivieraLaunchSim" Val="0"/>
     <Option Name="WTActivehdlLaunchSim" Val="0"/>
     <Option Name="WTXSimExportSim" Val="15"/>
@@ -400,12 +399,6 @@
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
       </File>
-      <File Path="$PPRDIR/../eth_lite/mii_to_rmii_0_exdes.vhd">
-        <FileInfo>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
       <File Path="$PPRDIR/srcs/ip/mii_to_rmii_0/mii_to_rmii_0.xci">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -419,62 +412,6 @@
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="doc/axi_ethernetlite_v3_0_changelog.txt"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_0.xml"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="synth/axi_ethernetlite_0.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_0_ooc.xdc"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_0_clocks.xdc"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_0.xdc"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="fifo_generator_v13_1_1/hdl/fifo_generator_v13_1.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="fifo_generator_v13_1_1/hdl/fifo_generator_v13_1_vhsyn_rfs.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="blk_mem_gen_v8_3_3/hdl/blk_mem_gen_v8_3.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="blk_mem_gen_v8_3_3/hdl/blk_mem_gen_v8_3_vhsyn_rfs.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_0_stub.vhdl"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_0_stub.v"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_0.dcp"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="sim/axi_ethernetlite_0.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/axi_ethernetlite.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/axi_interface.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/xemac.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/emac.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/emac_dpram.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/mdio_if.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/macaddrram.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/receive.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/transmit.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/bocntr.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/crcgenrx.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/crcgentx.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/deferral.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/msh_cnt.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/ram16x4.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/rx_intrfce.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/rx_statemachine.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/tx_intrfce.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/tx_statemachine.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/cntr5bit.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/crcnibshiftreg.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/defer_state.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/lfsr16.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/mac_pkg.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="fifo_generator_v13_1_1/hdl/fifo_generator_v13_1_rfs.v"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="lib_fifo_v1_0_5/hdl/src/vhdl/async_fifo_fg.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/mux_onehot_f.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="fifo_generator_v13_1_1/simulation/fifo_generator_vlog_beh.v"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="blk_mem_gen_v8_3_3/simulation/blk_mem_gen_v8_3.v"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_lite_ipif_v3_0_4/hdl/src/vhdl/axi_lite_ipif.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="lib_bmg_v1_0_5/hdl/src/vhdl/blk_mem_gen_wrapper.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="lib_cdc_v1_0_2/hdl/src/vhdl/cdc_sync.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_lite_ipif_v3_0_4/hdl/src/vhdl/address_decoder.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_lite_ipif_v3_0_4/hdl/src/vhdl/slave_attachment.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_v3_0_7/hdl/src/vhdl/ld_arith_reg.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_lite_ipif_v3_0_4/hdl/src/vhdl/pselect_f.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="fifo_generator_v13_1_1/hdl/fifo_generator_v13_1_rfs.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="lib_fifo_v1_0_5/hdl/src/vhdl/sync_fifo_fg.vhd"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_0_board.xdc"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_0.vho"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_ethernetlite_0.veo"/>
-        <CompFileExtendedInfo CompFileName="axi_ethernetlite_0.xci" FileRelPathName="axi_lite_ipif_v3_0_4/hdl/src/vhdl/ipif_pkg.vhd"/>
       </File>
       <File Path="$PPRDIR/srcs/imports/mii_to_rmii_0/data.coe">
         <FileInfo>
@@ -506,6 +443,13 @@
         </FileInfo>
       </File>
       <File Path="$PPRDIR/../pulpino/ips/axi/core2axi/rtl/core2axi.sv">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../verilog/mii_to_rmii_0_exdes.v">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
@@ -595,27 +539,8 @@
         <Define Name="PULP_FPGA_EMUL" Val="1"/>
       </Config>
     </FileSet>
-    <FileSet Name="clk_wiz_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/clk_wiz_0">
-      <File Path="$PPRDIR/srcs/ip/clk_wiz_0/clk_wiz_0.xci">
-        <FileInfo>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <Config>
-        <Option Name="TopModule" Val="clk_wiz_0"/>
-        <Option Name="VerilogDir" Val="$PPRDIR/../pulpino/rtl/includes"/>
-        <Option Name="VerilogDir" Val="$PPRDIR/../pulpino/ips/riscv/include"/>
-        <Option Name="UseBlackboxStub" Val="1"/>
-        <Define Name="FPGA"/>
-        <Define Name="FPGA_FULL"/>
-        <Define Name="NEXYS4"/>
-        <Define Name="ETH_DEBUG"/>
-        <Define Name="PULP_FPGA_EMUL" Val="1"/>
-      </Config>
-    </FileSet>
     <FileSet Name="sim_1" Type="SimulationSrcs" RelSrcDir="$PSRCDIR/sim_1">
+      <Filter Type="Srcs"/>
       <File Path="$PPRDIR/minion_tb_behav.wcfg">
         <FileInfo>
           <Attr Name="UsedIn" Val="simulation"/>
@@ -632,6 +557,7 @@
         <Option Name="TransportIntDelay" Val="0"/>
         <Option Name="SrcSet" Val="sources_1"/>
         <Option Name="XSimWcfgFile" Val="$PPRDIR/minion_tb_behav.wcfg"/>
+        <Option Name="NLNetlistMode" Val="funcsim"/>
         <Define Name="FPGA"/>
         <Define Name="FPGA_FULL"/>
         <Define Name="NEXYS4"/>
@@ -678,18 +604,7 @@
     </Run>
     <Run Id="axi_traffic_gen_0_synth_1" Type="Ft3:Synth" SrcSet="axi_traffic_gen_0" Part="xc7a100tcsg324-1" ConstrsSet="axi_traffic_gen_0" Description="Vivado Synthesis Defaults" Dir="$PRUNDIR/axi_traffic_gen_0_synth_1" IncludeInArchive="true">
       <Strategy Version="1" Minor="2">
-        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2016">
-          <Desc>Vivado Synthesis Defaults</Desc>
-        </StratHandle>
-        <Step Id="synth_design"/>
-      </Strategy>
-      <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
-    </Run>
-    <Run Id="clk_wiz_0_synth_1" Type="Ft3:Synth" SrcSet="clk_wiz_0" Part="xc7a100tcsg324-1" ConstrsSet="clk_wiz_0" Description="Vivado Synthesis Defaults" Dir="$PRUNDIR/clk_wiz_0_synth_1" IncludeInArchive="true">
-      <Strategy Version="1" Minor="2">
-        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2016">
-          <Desc>Vivado Synthesis Defaults</Desc>
-        </StratHandle>
+        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2016"/>
         <Step Id="synth_design"/>
       </Strategy>
       <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
@@ -725,25 +640,7 @@
     </Run>
     <Run Id="axi_traffic_gen_0_impl_1" Type="Ft2:EntireDesign" Part="xc7a100tcsg324-1" ConstrsSet="axi_traffic_gen_0" Description="Default settings for Implementation." SynthRun="axi_traffic_gen_0_synth_1" IncludeInArchive="false">
       <Strategy Version="1" Minor="2">
-        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2016">
-          <Desc>Default settings for Implementation.</Desc>
-        </StratHandle>
-        <Step Id="init_design"/>
-        <Step Id="opt_design"/>
-        <Step Id="power_opt_design"/>
-        <Step Id="place_design"/>
-        <Step Id="post_place_power_opt_design"/>
-        <Step Id="phys_opt_design"/>
-        <Step Id="route_design"/>
-        <Step Id="post_route_phys_opt_design"/>
-        <Step Id="write_bitstream"/>
-      </Strategy>
-    </Run>
-    <Run Id="clk_wiz_0_impl_1" Type="Ft2:EntireDesign" Part="xc7a100tcsg324-1" ConstrsSet="clk_wiz_0" Description="Default settings for Implementation." SynthRun="clk_wiz_0_synth_1" IncludeInArchive="false">
-      <Strategy Version="1" Minor="2">
-        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2016">
-          <Desc>Default settings for Implementation.</Desc>
-        </StratHandle>
+        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2016"/>
         <Step Id="init_design"/>
         <Step Id="opt_design"/>
         <Step Id="power_opt_design"/>
