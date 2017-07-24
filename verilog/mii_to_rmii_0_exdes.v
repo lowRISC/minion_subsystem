@@ -80,8 +80,6 @@ eth_mdc,
 phy_mdio_i,
 phy_mdio_o,
 phy_mdio_t,
-atg_done,
-Led,
 s_axi_aclk,
 s_axi_aresetn,
 s_axi_awaddr,
@@ -100,25 +98,7 @@ s_axi_arready,
 s_axi_rdata,
 s_axi_rresp,
 s_axi_rvalid,
-s_axi_rready,
-m_axi_lite_ch1_awaddr,
-m_axi_lite_ch1_awprot,
-m_axi_lite_ch1_awvalid,
-m_axi_lite_ch1_awready,
-m_axi_lite_ch1_wdata,
-m_axi_lite_ch1_wstrb,
-m_axi_lite_ch1_wvalid,
-m_axi_lite_ch1_wready,
-m_axi_lite_ch1_bresp,
-m_axi_lite_ch1_bvalid,
-m_axi_lite_ch1_bready,
-m_axi_lite_ch1_araddr,
-m_axi_lite_ch1_arvalid,
-m_axi_lite_ch1_arready,
-m_axi_lite_ch1_rdata,
-m_axi_lite_ch1_rvalid,
-m_axi_lite_ch1_rready,
-m_axi_lite_ch1_rresp
+s_axi_rready
 );
 
 input clk_50;
@@ -137,46 +117,27 @@ output eth_mdc;
 input phy_mdio_i;
 output phy_mdio_o;
 output phy_mdio_t;
-output atg_done;
-output[15:0] Led;
 input s_axi_aclk;
-output s_axi_aresetn;
+output wire s_axi_aresetn;
 input[12:0] s_axi_awaddr;
-input s_axi_awvalid;
-output s_axi_awready;
+input wire s_axi_awvalid;
+output wire s_axi_awready;
 input[31:0] s_axi_wdata;
 input[3:0] s_axi_wstrb;
-input s_axi_wvalid;
-output s_axi_wready;
+input wire s_axi_wvalid;
+output wire s_axi_wready;
 output[1:0] s_axi_bresp;
-output s_axi_bvalid;
-input s_axi_bready;
+output wire s_axi_bvalid;
+input wire s_axi_bready;
 input[12:0] s_axi_araddr;
-input s_axi_arvalid;
-output s_axi_arready;
+input wire s_axi_arvalid;
+output wire s_axi_arready;
 output[31:0] s_axi_rdata;
 output[1:0] s_axi_rresp;
-output s_axi_rvalid;
-input s_axi_rready;
-output[31:0] m_axi_lite_ch1_awaddr;
-output[2:0] m_axi_lite_ch1_awprot;
-output m_axi_lite_ch1_awvalid;
-input m_axi_lite_ch1_awready;
-output[31:0] m_axi_lite_ch1_wdata;
-output[3:0] m_axi_lite_ch1_wstrb;
-output m_axi_lite_ch1_wvalid;
-input m_axi_lite_ch1_wready;
-input[1:0] m_axi_lite_ch1_bresp;
-input m_axi_lite_ch1_bvalid;
-output m_axi_lite_ch1_bready;
-output[31:0] m_axi_lite_ch1_araddr;
-output m_axi_lite_ch1_arvalid;
-input m_axi_lite_ch1_arready;
-input[31:0] m_axi_lite_ch1_rdata;
-input m_axi_lite_ch1_rvalid;
-output m_axi_lite_ch1_rready;
-input[1:0] m_axi_lite_ch1_rresp;
+output wire s_axi_rvalid;
+input wire s_axi_rready;
 
+   
 wire   clk_50;
 wire   clk_100;
 wire   locked;
@@ -192,45 +153,26 @@ wire   eth_mdc;
 wire   phy_mdio_i;
 wire   phy_mdio_o;
 wire   phy_mdio_t;
-wire   atg_done;
-reg  [15:0] Led;
 wire   s_axi_aclk;
-wire   s_axi_aresetn;
-wire  [12:0] s_axi_awaddr;
-wire   s_axi_awvalid;
-wire   s_axi_awready;
-wire  [31:0] s_axi_wdata;
-wire  [3:0] s_axi_wstrb;
-wire   s_axi_wvalid;
-wire   s_axi_wready;
-wire  [1:0] s_axi_bresp;
-wire   s_axi_bvalid;
-wire   s_axi_bready;
-wire  [12:0] s_axi_araddr;
-wire   s_axi_arvalid;
-wire   s_axi_arready;
-wire  [31:0] s_axi_rdata;
-wire  [1:0] s_axi_rresp;
-wire   s_axi_rvalid;
-wire   s_axi_rready;
-wire  [31:0] m_axi_lite_ch1_awaddr;
-wire  [2:0] m_axi_lite_ch1_awprot;
-wire   m_axi_lite_ch1_awvalid;
-wire   m_axi_lite_ch1_awready;
-wire  [31:0] m_axi_lite_ch1_wdata;
-wire  [3:0] m_axi_lite_ch1_wstrb;
-wire   m_axi_lite_ch1_wvalid;
-wire   m_axi_lite_ch1_wready;
-wire  [1:0] m_axi_lite_ch1_bresp;
-wire   m_axi_lite_ch1_bvalid;
-wire   m_axi_lite_ch1_bready;
-wire  [31:0] m_axi_lite_ch1_araddr;
-wire   m_axi_lite_ch1_arvalid;
-wire   m_axi_lite_ch1_arready;
-wire  [31:0] m_axi_lite_ch1_rdata;
-wire   m_axi_lite_ch1_rvalid;
-wire   m_axi_lite_ch1_rready;
-wire  [1:0] m_axi_lite_ch1_rresp;
+wire   m_axi_aclk  = clk_100;
+wire   m_axi_aresetn;
+wire  [12:0] m_axi_awaddr;
+wire   m_axi_awvalid;
+wire   m_axi_awready;
+wire  [31:0] m_axi_wdata;
+wire  [3:0] m_axi_wstrb;
+wire   m_axi_wvalid;
+wire   m_axi_wready;
+wire  [1:0] m_axi_bresp;
+wire   m_axi_bvalid;
+wire   m_axi_bready;
+wire  [12:0] m_axi_araddr;
+wire   m_axi_arvalid;
+wire   m_axi_arready;
+wire  [31:0] m_axi_rdata;
+wire  [1:0] m_axi_rresp;
+wire   m_axi_rvalid;
+wire   m_axi_rready;
 
 
 wire  phy_tx_en;
@@ -247,9 +189,8 @@ wire [31:0] rmii2phy_tx_en;
 wire [1:0] rmii2phy_txd;
 wire [32:0] const0;
 reg [1:0] Count;
-wire [3:0] exdes_resetn;
+wire exdes_resetn;
 wire  local_rst;
-wire [31:0] atg_status;
 wire  s_out_d1_cdc_to;
 //attribute DONT_TOUCH of s_out_d1_cdc_to : signal is "true";
 wire  s_out_d2;
@@ -265,20 +206,8 @@ wire  zero;
   assign eth_refclk = clk_50;
   assign eth_mdc = phy_mdc;
   assign s_axi_aresetn = exdes_resetn;
-  always @(atg_status or sw) begin
-    case(sw[0] )
-    1'b 0 : begin
-      Led <= atg_status[15:0] ;
-    end
-    1'b 1 : begin
-      Led <= atg_status[31:16] ;
-    end
-    default : begin
-      Led <= 16'b 0000000000000000;
-    end
-    endcase
-  end
-
+  assign m_axi_aresetn = exdes_resetn;
+  
   always @(posedge phy_tx_clk) begin
     if(((locked == 1'b 0) || (sw[1]  == 1'b 1))) begin
       Count <= 2'b 00;
@@ -318,51 +247,27 @@ wire  zero;
     .D(s_out_d1_cdc_to),
     .R(zero));
 
-  axi_traffic_gen_0 ATG_SRC(
-      .s_axi_aclk(s_axi_aclk),
-    .s_axi_aresetn(exdes_resetn),
-    .m_axi_lite_ch1_awaddr(m_axi_lite_ch1_awaddr),
-    .m_axi_lite_ch1_awprot(),
-    .m_axi_lite_ch1_awvalid(m_axi_lite_ch1_awvalid),
-    .m_axi_lite_ch1_awready(m_axi_lite_ch1_awready),
-    .m_axi_lite_ch1_wdata(m_axi_lite_ch1_wdata),
-    .m_axi_lite_ch1_wstrb(m_axi_lite_ch1_wstrb),
-    .m_axi_lite_ch1_wvalid(m_axi_lite_ch1_wvalid),
-    .m_axi_lite_ch1_wready(m_axi_lite_ch1_wready),
-    .m_axi_lite_ch1_bresp(m_axi_lite_ch1_bresp),
-    .m_axi_lite_ch1_bvalid(m_axi_lite_ch1_bvalid),
-    .m_axi_lite_ch1_bready(m_axi_lite_ch1_bready),
-    .m_axi_lite_ch1_araddr(m_axi_lite_ch1_araddr),
-    .m_axi_lite_ch1_arvalid(m_axi_lite_ch1_arvalid),
-    .m_axi_lite_ch1_arready(m_axi_lite_ch1_arready),
-    .m_axi_lite_ch1_rdata(m_axi_lite_ch1_rdata),
-    .m_axi_lite_ch1_rvalid(m_axi_lite_ch1_rvalid),
-    .m_axi_lite_ch1_rready(m_axi_lite_ch1_rready),
-    .m_axi_lite_ch1_rresp(m_axi_lite_ch1_rresp),
-    .done(atg_done),
-    .status(atg_status));
-
   axi_ethernetlite_0 ETH_SRC(
-      .s_axi_aclk(s_axi_aclk),
+      .s_axi_aclk(m_axi_aclk),
     .s_axi_aresetn(exdes_resetn),
     .ip2intc_irpt(),
-    .s_axi_awaddr(s_axi_awaddr[12:0] ),
-    .s_axi_awvalid(s_axi_awvalid),
-    .s_axi_awready(s_axi_awready),
-    .s_axi_wdata(s_axi_wdata),
-    .s_axi_wstrb(s_axi_wstrb),
-    .s_axi_wvalid(s_axi_wvalid),
-    .s_axi_wready(s_axi_wready),
-    .s_axi_bresp(s_axi_bresp),
-    .s_axi_bvalid(s_axi_bvalid),
-    .s_axi_bready(s_axi_bready),
-    .s_axi_araddr(s_axi_araddr[12:0] ),
-    .s_axi_arvalid(s_axi_arvalid),
-    .s_axi_arready(s_axi_arready),
-    .s_axi_rdata(s_axi_rdata),
-    .s_axi_rresp(s_axi_rresp),
-    .s_axi_rvalid(s_axi_rvalid),
-    .s_axi_rready(s_axi_rready),
+    .s_axi_awaddr(m_axi_awaddr[12:0] ),
+    .s_axi_awvalid(m_axi_awvalid),
+    .s_axi_awready(m_axi_awready),
+    .s_axi_wdata(m_axi_wdata),
+    .s_axi_wstrb(m_axi_wstrb),
+    .s_axi_wvalid(m_axi_wvalid),
+    .s_axi_wready(m_axi_wready),
+    .s_axi_bresp(m_axi_bresp),
+    .s_axi_bvalid(m_axi_bvalid),
+    .s_axi_bready(m_axi_bready),
+    .s_axi_araddr(m_axi_araddr[12:0] ),
+    .s_axi_arvalid(m_axi_arvalid),
+    .s_axi_arready(m_axi_arready),
+    .s_axi_rdata(m_axi_rdata),
+    .s_axi_rresp(m_axi_rresp),
+    .s_axi_rvalid(m_axi_rvalid),
+    .s_axi_rready(m_axi_rready),
     .phy_tx_clk(phy_tx_clk),
     .phy_rx_clk(phy_rx_clk),
     .phy_crs(phy_crs),
@@ -391,11 +296,79 @@ wire  zero;
     .rmii2mac_rx_dv(phy_dv),
     .rmii2mac_rx_er(phy_rx_er),
     .rmii2mac_rxd(phy_rx_data),
-    .phy2rmii_crs_dv(rmii2phy_tx_en),
-    .phy2rmii_rx_er(zero),
-    .phy2rmii_rxd(rmii2phy_txd),
+    .phy2rmii_crs_dv(eth_crsdv),
+    .phy2rmii_rx_er(eth_rxerr),
+    .phy2rmii_rxd(eth_rxd),
     .rmii2phy_txd(rmii2phy_txd),
     .rmii2phy_tx_en(rmii2phy_tx_en));
 
+
+  //**********************************************
+  // Instantiate converter
+  //**********************************************
+  axi_clock_converter_0 clk_converter1
+  (
+  //**********************************************
+  // DUT SLAVE INTERFACE
+  //**********************************************
+  /**************** Write Address Channel Signals ****************/
+  .s_axi_awaddr(s_axi_awaddr),
+  .s_axi_awprot(0),
+  .s_axi_awvalid(s_axi_awvalid),
+  .s_axi_awready(s_axi_awready),
+  /**************** Write Data Channel Signals ****************/
+  .s_axi_wdata(s_axi_wdata),
+  .s_axi_wstrb(s_axi_wstrb),
+  .s_axi_wvalid(s_axi_wvalid),
+  .s_axi_wready(s_axi_wready),
+  /**************** Write Response Channel Signals ****************/
+  .s_axi_bresp(s_axi_bresp),
+  .s_axi_bvalid(s_axi_bvalid),
+  .s_axi_bready(s_axi_bready),
+  /**************** Read Address Channel Signals ****************/
+  .s_axi_araddr(s_axi_araddr),
+  .s_axi_arprot(0),
+  .s_axi_arvalid(s_axi_arvalid),
+  .s_axi_arready(s_axi_arready),
+  /**************** Read Data Channel Signals ****************/
+  .s_axi_rdata(s_axi_rdata),
+  .s_axi_rresp(s_axi_rresp),
+  .s_axi_rvalid(s_axi_rvalid),
+  .s_axi_rready(s_axi_rready),
+  /**************** System Signals ****************/
+  .s_axi_aclk(s_axi_aclk),
+  .s_axi_aresetn(s_axi_aresetn),
+
+  //**********************************************
+  // DUT MASTER INTERFACE
+  //**********************************************
+  /**************** Write Address Channel Signals ****************/
+  .m_axi_awaddr(m_axi_awaddr),
+  .m_axi_awprot(),
+  .m_axi_awvalid(m_axi_awvalid),
+  .m_axi_awready(m_axi_awready),
+  /**************** Write Data Channel Signals ****************/
+  .m_axi_wdata(m_axi_wdata),
+  .m_axi_wstrb(m_axi_wstrb),
+  .m_axi_wvalid(m_axi_wvalid),
+  .m_axi_wready(m_axi_wready),
+  /**************** Write Response Channel Signals ****************/
+  .m_axi_bresp(m_axi_bresp),
+  .m_axi_bvalid(m_axi_bvalid),
+  .m_axi_bready(m_axi_bready),
+  /**************** Read Address Channel Signals ****************/
+  .m_axi_araddr(m_axi_araddr),
+  .m_axi_arprot(),
+  .m_axi_arvalid(m_axi_arvalid),
+  .m_axi_arready(m_axi_arready),
+  /**************** Read Data Channel Signals ****************/
+  .m_axi_rdata(m_axi_rdata),
+  .m_axi_rresp(m_axi_rresp),
+  .m_axi_rvalid(m_axi_rvalid),
+  .m_axi_rready(m_axi_rready),
+  /**************** System Signals ****************/
+  .m_axi_aclk(m_axi_aclk),
+  .m_axi_aresetn(m_axi_aresetn)
+  );
 
 endmodule
