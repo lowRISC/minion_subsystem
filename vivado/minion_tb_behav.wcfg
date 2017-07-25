@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="minion_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="mac_pkg" />
+            <top_module name="minion_tb" />
+            <top_module name="riscv_defines" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="478400000000fs"></ZoomStartTime>
+      <ZoomEndTime time="535300000001fs"></ZoomEndTime>
+      <Cursor1Time time="503500000000fs"></Cursor1Time>
+   </zoom_setting>
+   <WVObjectSize size="100" />
+   <wvobject type="logic" fp_name="/minion_tb/uart_tx">
+      <obj_property name="ElementShortName">uart_tx</obj_property>
+      <obj_property name="ObjectShortName">uart_tx</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/uart_rx">
+      <obj_property name="ElementShortName">uart_rx</obj_property>
+      <obj_property name="ObjectShortName">uart_rx</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/u_break">
+      <obj_property name="ElementShortName">u_break</obj_property>
+      <obj_property name="ObjectShortName">u_break</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/clk">
+      <obj_property name="ElementShortName">clk</obj_property>
+      <obj_property name="ObjectShortName">clk</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/rstn">
+      <obj_property name="ElementShortName">rstn</obj_property>
+      <obj_property name="ObjectShortName">rstn</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/to_led">
+      <obj_property name="ElementShortName">to_led[7:0]</obj_property>
+      <obj_property name="ObjectShortName">to_led[7:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/sd_sclk">
+      <obj_property name="ElementShortName">sd_sclk</obj_property>
+      <obj_property name="ObjectShortName">sd_sclk</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/sd_detect">
+      <obj_property name="ElementShortName">sd_detect</obj_property>
+      <obj_property name="ObjectShortName">sd_detect</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/sd_dat">
+      <obj_property name="ElementShortName">sd_dat[3:0]</obj_property>
+      <obj_property name="ObjectShortName">sd_dat[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/sd_cmd">
+      <obj_property name="ElementShortName">sd_cmd</obj_property>
+      <obj_property name="ObjectShortName">sd_cmd</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/sd_reset">
+      <obj_property name="ElementShortName">sd_reset</obj_property>
+      <obj_property name="ObjectShortName">sd_reset</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/GPIO_SW_C">
+      <obj_property name="ElementShortName">GPIO_SW_C</obj_property>
+      <obj_property name="ObjectShortName">GPIO_SW_C</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/GPIO_SW_W">
+      <obj_property name="ElementShortName">GPIO_SW_W</obj_property>
+      <obj_property name="ObjectShortName">GPIO_SW_W</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/GPIO_SW_E">
+      <obj_property name="ElementShortName">GPIO_SW_E</obj_property>
+      <obj_property name="ObjectShortName">GPIO_SW_E</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/GPIO_SW_N">
+      <obj_property name="ElementShortName">GPIO_SW_N</obj_property>
+      <obj_property name="ObjectShortName">GPIO_SW_N</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/GPIO_SW_S">
+      <obj_property name="ElementShortName">GPIO_SW_S</obj_property>
+      <obj_property name="ObjectShortName">GPIO_SW_S</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/PS2_CLK">
+      <obj_property name="ElementShortName">PS2_CLK</obj_property>
+      <obj_property name="ObjectShortName">PS2_CLK</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/PS2_DATA">
+      <obj_property name="ElementShortName">PS2_DATA</obj_property>
+      <obj_property name="ObjectShortName">PS2_DATA</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/VGA_HS_O">
+      <obj_property name="ElementShortName">VGA_HS_O</obj_property>
+      <obj_property name="ObjectShortName">VGA_HS_O</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/VGA_VS_O">
+      <obj_property name="ElementShortName">VGA_VS_O</obj_property>
+      <obj_property name="ObjectShortName">VGA_VS_O</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/VGA_RED_O">
+      <obj_property name="ElementShortName">VGA_RED_O[3:0]</obj_property>
+      <obj_property name="ObjectShortName">VGA_RED_O[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/VGA_BLUE_O">
+      <obj_property name="ElementShortName">VGA_BLUE_O[3:0]</obj_property>
+      <obj_property name="ObjectShortName">VGA_BLUE_O[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/VGA_GREEN_O">
+      <obj_property name="ElementShortName">VGA_GREEN_O[3:0]</obj_property>
+      <obj_property name="ObjectShortName">VGA_GREEN_O[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/o_led">
+      <obj_property name="ElementShortName">o_led[9:0]</obj_property>
+      <obj_property name="ObjectShortName">o_led[9:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/i_dip">
+      <obj_property name="ElementShortName">i_dip[7:0]</obj_property>
+      <obj_property name="ObjectShortName">i_dip[7:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/o_erefclk">
+      <obj_property name="ElementShortName">o_erefclk</obj_property>
+      <obj_property name="ObjectShortName">o_erefclk</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/o_etxd">
+      <obj_property name="ElementShortName">o_etxd[1:0]</obj_property>
+      <obj_property name="ObjectShortName">o_etxd[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/o_etx_en">
+      <obj_property name="ElementShortName">o_etx_en</obj_property>
+      <obj_property name="ObjectShortName">o_etx_en</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/i_erxd">
+      <obj_property name="ElementShortName">i_erxd[1:0]</obj_property>
+      <obj_property name="ObjectShortName">i_erxd[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/i_erx_dv">
+      <obj_property name="ElementShortName">i_erx_dv</obj_property>
+      <obj_property name="ObjectShortName">i_erx_dv</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/i_erx_er">
+      <obj_property name="ElementShortName">i_erx_er</obj_property>
+      <obj_property name="ObjectShortName">i_erx_er</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/i_emdint">
+      <obj_property name="ElementShortName">i_emdint</obj_property>
+      <obj_property name="ObjectShortName">i_emdint</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/o_emdc">
+      <obj_property name="ElementShortName">o_emdc</obj_property>
+      <obj_property name="ObjectShortName">o_emdc</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/io_emdio">
+      <obj_property name="ElementShortName">io_emdio</obj_property>
+      <obj_property name="ObjectShortName">io_emdio</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/o_erstn">
+      <obj_property name="ElementShortName">o_erstn</obj_property>
+      <obj_property name="ObjectShortName">o_erstn</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/clk_p">
+      <obj_property name="ElementShortName">clk_p</obj_property>
+      <obj_property name="ObjectShortName">clk_p</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/clk_n">
+      <obj_property name="ElementShortName">clk_n</obj_property>
+      <obj_property name="ObjectShortName">clk_n</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/rst_top">
+      <obj_property name="ElementShortName">rst_top</obj_property>
+      <obj_property name="ObjectShortName">rst_top</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/uart_rts">
+      <obj_property name="ElementShortName">uart_rts</obj_property>
+      <obj_property name="ObjectShortName">uart_rts</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/uart_cts">
+      <obj_property name="ElementShortName">uart_cts</obj_property>
+      <obj_property name="ObjectShortName">uart_cts</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/CA">
+      <obj_property name="ElementShortName">CA</obj_property>
+      <obj_property name="ObjectShortName">CA</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/CB">
+      <obj_property name="ElementShortName">CB</obj_property>
+      <obj_property name="ObjectShortName">CB</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/CC">
+      <obj_property name="ElementShortName">CC</obj_property>
+      <obj_property name="ObjectShortName">CC</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/CD">
+      <obj_property name="ElementShortName">CD</obj_property>
+      <obj_property name="ObjectShortName">CD</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/CE">
+      <obj_property name="ElementShortName">CE</obj_property>
+      <obj_property name="ObjectShortName">CE</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/CF">
+      <obj_property name="ElementShortName">CF</obj_property>
+      <obj_property name="ObjectShortName">CF</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/CG">
+      <obj_property name="ElementShortName">CG</obj_property>
+      <obj_property name="ObjectShortName">CG</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/DP">
+      <obj_property name="ElementShortName">DP</obj_property>
+      <obj_property name="ObjectShortName">DP</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/AN">
+      <obj_property name="ElementShortName">AN</obj_property>
+      <obj_property name="ObjectShortName">AN</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/redled">
+      <obj_property name="ElementShortName">redled</obj_property>
+      <obj_property name="ObjectShortName">redled</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/EXDES/s_axi_awready">
+      <obj_property name="ElementShortName">s_axi_awready</obj_property>
+      <obj_property name="ObjectShortName">s_axi_awready</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/EXDES/s_axi_awvalid">
+      <obj_property name="ElementShortName">s_axi_awvalid</obj_property>
+      <obj_property name="ObjectShortName">s_axi_awvalid</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/EXDES/s_axi_awaddr">
+      <obj_property name="ElementShortName">s_axi_awaddr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">s_axi_awaddr[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/EXDES/s_axi_wready">
+      <obj_property name="ElementShortName">s_axi_wready</obj_property>
+      <obj_property name="ObjectShortName">s_axi_wready</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/EXDES/s_axi_wvalid">
+      <obj_property name="ElementShortName">s_axi_wvalid</obj_property>
+      <obj_property name="ObjectShortName">s_axi_wvalid</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/EXDES/s_axi_wstrb">
+      <obj_property name="ElementShortName">s_axi_wstrb[3:0]</obj_property>
+      <obj_property name="ObjectShortName">s_axi_wstrb[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/EXDES/s_axi_wdata">
+      <obj_property name="ElementShortName">s_axi_wdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">s_axi_wdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/EXDES/s_axi_bready">
+      <obj_property name="ElementShortName">s_axi_bready</obj_property>
+      <obj_property name="ObjectShortName">s_axi_bready</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/EXDES/s_axi_bvalid">
+      <obj_property name="ElementShortName">s_axi_bvalid</obj_property>
+      <obj_property name="ObjectShortName">s_axi_bvalid</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/EXDES/s_axi_bresp">
+      <obj_property name="ElementShortName">s_axi_bresp[1:0]</obj_property>
+      <obj_property name="ObjectShortName">s_axi_bresp[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/EXDES/s_axi_arready">
+      <obj_property name="ElementShortName">s_axi_arready</obj_property>
+      <obj_property name="ObjectShortName">s_axi_arready</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/EXDES/s_axi_arvalid">
+      <obj_property name="ElementShortName">s_axi_arvalid</obj_property>
+      <obj_property name="ObjectShortName">s_axi_arvalid</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/EXDES/s_axi_araddr">
+      <obj_property name="ElementShortName">s_axi_araddr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">s_axi_araddr[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/EXDES/s_axi_rready">
+      <obj_property name="ElementShortName">s_axi_rready</obj_property>
+      <obj_property name="ObjectShortName">s_axi_rready</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/EXDES/s_axi_rvalid">
+      <obj_property name="ElementShortName">s_axi_rvalid</obj_property>
+      <obj_property name="ObjectShortName">s_axi_rvalid</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/EXDES/s_axi_rdata">
+      <obj_property name="ElementShortName">s_axi_rdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">s_axi_rdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/EXDES/s_axi_rresp">
+      <obj_property name="ElementShortName">s_axi_rresp[1:0]</obj_property>
+      <obj_property name="ObjectShortName">s_axi_rresp[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/RISCV_CORE/data_req_o">
+      <obj_property name="ElementShortName">data_req_o</obj_property>
+      <obj_property name="ObjectShortName">data_req_o</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/RISCV_CORE/data_gnt_i">
+      <obj_property name="ElementShortName">data_gnt_i</obj_property>
+      <obj_property name="ObjectShortName">data_gnt_i</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/RISCV_CORE/data_rvalid_i">
+      <obj_property name="ElementShortName">data_rvalid_i</obj_property>
+      <obj_property name="ObjectShortName">data_rvalid_i</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/RISCV_CORE/data_we_o">
+      <obj_property name="ElementShortName">data_we_o</obj_property>
+      <obj_property name="ObjectShortName">data_we_o</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/RISCV_CORE/data_be_o">
+      <obj_property name="ElementShortName">data_be_o[3:0]</obj_property>
+      <obj_property name="ObjectShortName">data_be_o[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/RISCV_CORE/data_addr_o">
+      <obj_property name="ElementShortName">data_addr_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data_addr_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/RISCV_CORE/data_wdata_o">
+      <obj_property name="ElementShortName">data_wdata_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data_wdata_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/RISCV_CORE/data_rdata_i">
+      <obj_property name="ElementShortName">data_rdata_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">data_rdata_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/RISCV_CORE/data_err_i">
+      <obj_property name="ElementShortName">data_err_i</obj_property>
+      <obj_property name="ObjectShortName">data_err_i</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/RISCV_CORE/instr_req_o">
+      <obj_property name="ElementShortName">instr_req_o</obj_property>
+      <obj_property name="ObjectShortName">instr_req_o</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/RISCV_CORE/instr_gnt_i">
+      <obj_property name="ElementShortName">instr_gnt_i</obj_property>
+      <obj_property name="ObjectShortName">instr_gnt_i</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/RISCV_CORE/instr_rvalid_i">
+      <obj_property name="ElementShortName">instr_rvalid_i</obj_property>
+      <obj_property name="ObjectShortName">instr_rvalid_i</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/RISCV_CORE/instr_addr_o">
+      <obj_property name="ElementShortName">instr_addr_o[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instr_addr_o[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/RISCV_CORE/instr_rdata_i">
+      <obj_property name="ElementShortName">instr_rdata_i[31:0]</obj_property>
+      <obj_property name="ObjectShortName">instr_rdata_i[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/tap_sel">
+      <obj_property name="ElementShortName">tap_sel</obj_property>
+      <obj_property name="ObjectShortName">tap_sel</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/eth_axi_awaddr">
+      <obj_property name="ElementShortName">eth_axi_awaddr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_awaddr[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/eth_axi_awprot">
+      <obj_property name="ElementShortName">eth_axi_awprot[2:0]</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_awprot[2:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/eth_axi_awvalid">
+      <obj_property name="ElementShortName">eth_axi_awvalid</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_awvalid</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/eth_axi_awready">
+      <obj_property name="ElementShortName">eth_axi_awready</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_awready</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/eth_axi_wdata">
+      <obj_property name="ElementShortName">eth_axi_wdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_wdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/eth_axi_wstrb">
+      <obj_property name="ElementShortName">eth_axi_wstrb[3:0]</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_wstrb[3:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/eth_axi_wvalid">
+      <obj_property name="ElementShortName">eth_axi_wvalid</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_wvalid</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/eth_axi_wready">
+      <obj_property name="ElementShortName">eth_axi_wready</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_wready</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/eth_axi_bresp">
+      <obj_property name="ElementShortName">eth_axi_bresp[1:0]</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_bresp[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/eth_axi_bvalid">
+      <obj_property name="ElementShortName">eth_axi_bvalid</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_bvalid</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/eth_axi_bready">
+      <obj_property name="ElementShortName">eth_axi_bready</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_bready</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/eth_axi_araddr">
+      <obj_property name="ElementShortName">eth_axi_araddr[31:0]</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_araddr[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/eth_axi_arvalid">
+      <obj_property name="ElementShortName">eth_axi_arvalid</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_arvalid</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/eth_axi_arready">
+      <obj_property name="ElementShortName">eth_axi_arready</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_arready</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/eth_axi_rdata">
+      <obj_property name="ElementShortName">eth_axi_rdata[31:0]</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_rdata[31:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/eth_axi_rvalid">
+      <obj_property name="ElementShortName">eth_axi_rvalid</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_rvalid</obj_property>
+   </wvobject>
+   <wvobject type="array" fp_name="/minion_tb/dut/msoc/eth_axi_rresp">
+      <obj_property name="ElementShortName">eth_axi_rresp[1:0]</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_rresp[1:0]</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/minion_tb/dut/msoc/eth_axi_rready">
+      <obj_property name="ElementShortName">eth_axi_rready</obj_property>
+      <obj_property name="ObjectShortName">eth_axi_rready</obj_property>
+   </wvobject>
+</wave_config>
