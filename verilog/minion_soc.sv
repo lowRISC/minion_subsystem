@@ -14,84 +14,166 @@
 
 module minion_soc
   (
- output wire             uart_tx,
- input wire             uart_rx,
+ output wire 	    uart_tx,
+ input wire 	    uart_rx,
  // clock and reset
- input wire             clk_100,
- input wire             clk_200MHz,
- input wire             pxl_clk,
- input wire             msoc_clk,
- input wire             rstn,
- output reg [15:0]   to_led,
- input wire [7:0]  from_dip,
- output wire             sd_sclk,
- input wire             sd_detect,
+ input wire 	    clk_locked,
+   input wire i_clk50,
+ input wire 	    clk_100,
+ input wire 	    clk_200MHz,
+ input wire 	    pxl_clk,
+ input wire 	    msoc_clk,
+ input wire 	    rstn,
+ output reg [15:0]  o_led,
+ input wire [7:0]   i_dip,
+ output wire 	    sd_sclk,
+ input wire 	    sd_detect,
  inout wire [3:0]   sd_dat,
- inout wire             sd_cmd,
- output reg             sd_reset,
+ inout wire 	    sd_cmd,
+ output reg 	    sd_reset,
  output wire [31:0] core_lsu_addr,
  output reg [31:0]  core_lsu_addr_dly,
  output wire [31:0] core_lsu_wdata,
  output wire [3:0]  core_lsu_be,
- output wire             ce_d,
- output wire             we_d,
- output wire             shared_sel,
+ output wire 	    ce_d,
+ output wire 	    we_d,
+ output wire 	    shared_sel,
  input wire [31:0]  shared_rdata,
  // pusb button array
- input wire             GPIO_SW_C,
- input wire             GPIO_SW_W,
- input wire             GPIO_SW_E,
- input wire             GPIO_SW_N,
- input wire             GPIO_SW_S,
+ input wire 	    GPIO_SW_C,
+ input wire 	    GPIO_SW_W,
+ input wire 	    GPIO_SW_E,
+ input wire 	    GPIO_SW_N,
+ input wire 	    GPIO_SW_S,
  //keyboard
- inout wire             PS2_CLK,
- inout wire             PS2_DATA,
+ inout wire 	    PS2_CLK,
+ inout wire 	    PS2_DATA,
  
    // display
- output wire             VGA_HS_O,
- output wire             VGA_VS_O,
+ output wire 	    VGA_HS_O,
+ output wire 	    VGA_VS_O,
  output wire [3:0]  VGA_RED_O,
  output wire [3:0]  VGA_BLUE_O,
  output wire [3:0]  VGA_GREEN_O,
 
  // debug port  
- input wire                 debug_req,
- output wire             debug_gnt,
- output wire             debug_rvalid,
- input wire [31:0]         debug_addr,
- input wire                 debug_we,
- input wire [31:0]         debug_wdata,
+ input wire 	    debug_req,
+ output wire 	    debug_gnt,
+ output wire 	    debug_rvalid,
+ input wire [31:0]  debug_addr,
+ input wire 	    debug_we,
+ input wire [31:0]  debug_wdata,
  output wire [31:0] debug_rdata,
- input wire                 debug_halt,
- output wire             debug_halted,
- input wire                 debug_resume,
- input wire             debug_blocksel,
- input wire    [3:0]        datamem_enb,
- output wire [31:0] datamem_doutb,            
- input wire    [3:0]        progmem_enb,
+ input wire 	    debug_halt,
+ output wire 	    debug_halted,
+ input wire 	    debug_resume,
+ input wire 	    debug_blocksel,
+ input wire [3:0]   datamem_enb,
+ output wire [31:0] datamem_doutb, 
+ input wire [3:0]   progmem_enb,
  output wire [31:0] progmem_doutb,
 
-   // AXI port to Xilinx eth_lite
- output wire [31 : 0] eth_axi_awaddr,
- output wire [2 : 0]  eth_axi_awprot,
- output wire 	       eth_axi_awvalid,
- input wire 	       eth_axi_awready,
- output wire [31 : 0] eth_axi_wdata,
- output wire [3 : 0]  eth_axi_wstrb,
- output wire 	       eth_axi_wvalid,
- input wire 	       eth_axi_wready,
- input wire [1 : 0]   eth_axi_bresp,
- input wire 	       eth_axi_bvalid,
- output wire 	       eth_axi_bready,
- output wire [31 : 0] eth_axi_araddr,
- output wire 	       eth_axi_arvalid,
- input wire 	       eth_axi_arready,
- input wire [31 : 0]  eth_axi_rdata,
- input wire 	       eth_axi_rvalid,
- input wire [1 : 0]   eth_axi_rresp,
- output wire 	       eth_axi_rready
+
+  //! Ethernet MAC PHY interface signals
+ output wire 	    o_erefclk , // RMII clock out
+input wire [1:0]    i_erxd ,
+ input wire 	    i_erx_dv ,
+ input wire 	    i_erx_er ,
+ input wire 	    i_emdint ,
+ output reg [1:0]   o_etxd ,
+ output wire 	    o_etx_en ,
+ output wire 	    o_emdc ,
+ inout wire 	    io_emdio ,
+ output wire 	    o_erstn   
+   
    );
- 
+
+
+wire  [31 : 0] eth_axi_awaddr;
+wire  [2 : 0]  eth_axi_awprot;
+wire 	       eth_axi_awvalid;
+wire  [31 : 0] eth_axi_wdata;
+wire  [3 : 0]  eth_axi_wstrb;
+wire 	       eth_axi_wvalid;
+wire 	       eth_axi_bready;
+wire  [31 : 0] eth_axi_araddr;
+wire 	       eth_axi_arvalid;
+wire 	       eth_axi_rready;
+wire        eth_axi_awready;
+wire        eth_axi_wready;
+wire [1 : 0] eth_axi_bresp;
+wire 	eth_axi_bvalid;
+wire        eth_axi_arready;
+wire [31 : 0] eth_axi_rdata;
+wire 	 eth_axi_rvalid;
+wire [1 : 0]  eth_axi_rresp;
+wire        eth_axi_aresetn;
+   
+wire io_emdio_i, phy_emdio_o, phy_emdio_t;
+reg phy_emdio_i, io_emdio_o, io_emdio_t;
+reg [15:0] i_dip_reg;
+   
+assign o_erstn = clk_locked;
+
+always @(posedge i_clk50)
+    begin
+    phy_emdio_i <= io_emdio_i;
+    io_emdio_o <= phy_emdio_o;
+    io_emdio_t <= phy_emdio_t;
+    i_dip_reg <= i_dip;
+    end
+
+   IOBUF #(
+      .DRIVE(12), // Specify the output drive strength
+      .IBUF_LOW_PWR("TRUE"),  // Low Power - "TRUE", High Performance = "FALSE" 
+      .IOSTANDARD("DEFAULT"), // Specify the I/O standard
+      .SLEW("SLOW") // Specify the output slew rate
+   ) IOBUF_inst (
+      .O(io_emdio_i),     // Buffer output
+      .IO(io_emdio),   // Buffer inout port (connect directly to top-level port)
+      .I(io_emdio_o),     // Buffer input
+      .T(io_emdio_t)      // 3-state enable input, high=input, low=output
+   );
+       
+mii_to_rmii_0_exdes EXDES (
+	.clk_50      ( i_clk50 ),
+	.clk_100     ( clk_100 ),
+	.locked      ( clk_locked ),
+    // SMSC ethernet PHY
+	.eth_crsdv   ( i_erx_dv ),
+	.eth_refclk  ( o_erefclk ),
+   
+	.eth_txd     ( o_etxd ),
+	.eth_txen    ( o_etx_en ),
+   
+	.eth_rxd     ( i_erxd ),
+	.eth_rxerr   ( i_erx_er ),
+   
+	.eth_mdc     ( o_emdc ),
+	.phy_mdio_i  ( phy_emdio_i ),
+	.phy_mdio_o  ( phy_emdio_o ),
+	.phy_mdio_t  ( phy_emdio_t ),
+	.s_axi_aclk              ( msoc_clk                 ),
+	.s_axi_aresetn           ( eth_axi_aresetn          ),
+        .s_axi_awready           ( eth_axi_awready          ),
+        .s_axi_awvalid           ( eth_axi_awvalid          ),
+        .s_axi_awaddr            ( eth_axi_awaddr           ),
+        .s_axi_wready            ( eth_axi_wready           ),
+        .s_axi_wvalid            ( eth_axi_wvalid           ),
+        .s_axi_wstrb             ( eth_axi_wstrb            ),
+        .s_axi_wdata             ( eth_axi_wdata            ),
+        .s_axi_bready            ( eth_axi_bready           ),
+        .s_axi_bvalid            ( eth_axi_bvalid           ),
+        .s_axi_bresp             ( eth_axi_bresp            ),
+        .s_axi_arready           ( eth_axi_arready          ),
+        .s_axi_arvalid           ( eth_axi_arvalid          ),
+        .s_axi_araddr            ( eth_axi_araddr           ),
+        .s_axi_rready            ( eth_axi_rready           ),
+        .s_axi_rvalid            ( eth_axi_rvalid           ),
+        .s_axi_rdata             ( eth_axi_rdata            ),
+        .s_axi_rresp             ( eth_axi_rresp            )
+);
+   
  wire [19:0] dummy;
  wire        irst, ascii_ready;
  wire [7:0]  readch, scancode;
@@ -471,7 +553,6 @@ assign one_hot_rdata[3] = {uart_wrcount,uart_almostfull,uart_full,uart_rderr,uar
    reg [31:0] sd_cmd_timeout;
 
    reg            sd_cmd_start, sd_cmd_rst, sd_data_rst, sd_clk_rst;
-   reg [7:0] from_dip_reg;
 
 logic [6:0] sd_clk_daddr;
 logic       sd_clk_dclk, sd_clk_den, sd_clk_drdy, sd_clk_dwe, sd_clk_locked;
@@ -482,7 +563,6 @@ assign sd_clk_dclk = msoc_clk;
 always @(posedge msoc_clk or negedge rstn)
   if (!rstn)
     begin
-    from_dip_reg <= 0;
         u_recv <= 0;
         core_lsu_addr_dly <= 0;
         sd_blksize_reg <= 0;
@@ -500,14 +580,13 @@ always @(posedge msoc_clk or negedge rstn)
         sd_cmd_rst <= 0;
         sd_clk_rst <= 0;
         sd_cmd_timeout_reg <= 0;
-        to_led <= 0;
+        o_led <= 0;
         u_baud <= 11'd54;
         u_trans <= 1'b0;
         u_tx_byte <= 8'b0;
     end
    else
      begin
-    from_dip_reg <= from_dip;
         u_recv <= received;
         core_lsu_addr_dly <= core_lsu_addr;
         if (core_lsu_req&core_lsu_we&one_hot_data_addr[6])
@@ -523,7 +602,7 @@ always @(posedge msoc_clk or negedge rstn)
            10: {sd_clk_dwe,sd_clk_den,sd_clk_daddr} <= core_lsu_wdata;
           endcase
         if (core_lsu_req&core_lsu_we&one_hot_data_addr[7])
-          to_led <= core_lsu_wdata;
+          o_led <= core_lsu_wdata;
         u_trans <= 1'b0;
     if (core_lsu_req&core_lsu_we&one_hot_data_addr[2])
       case(core_lsu_addr[5:2])
@@ -712,7 +791,7 @@ my_fifo #(.width(36)) rx_fifo (
 
    assign one_hot_rdata[5] = sd_status_reg; // legacy setting
    assign one_hot_rdata[6] = sd_cmd_resp_sel;
-   assign one_hot_rdata[7] = from_dip_reg;
+   assign one_hot_rdata[7] = i_dip_reg;
    assign one_hot_rdata[8] = shared_rdata;
 
 /*

@@ -79,7 +79,7 @@ logic mac_tx_enable, mac_tx_gap, mac_tx_byte_sent, mac_rx_frame, mac_rx_byte_rec
 logic [47:0] mac_address;
 logic  [7:0] rx_data_o1, rx_data_o2, rx_data_o3, rx_data_o, tx_data_i, mac_tx_data, mac_rx_data, mii_rx_data_i;
 logic [10:0] rx_frame_size_o, tx_frame_addr, rx_packet_length_o;   
-logic [15:0] tx_packet_length, tx_frame_size, o_led_unbuf, i_dip_reg;
+logic [15:0] tx_packet_length, tx_frame_size;
 reg [12:0] addr_tap, nxt_addr;
 reg [23:0] rx_byte, rx_nxt, rx_byte_dly;
 reg  [2:0] rx_pair;
@@ -170,120 +170,6 @@ jtag_dummy jtag1(
         .WEB    ( m_web                    )      // Port B Write Enable Input
         );
    endgenerate
-
-wire  [31 : 0] eth_axi_awaddr;
-wire  [2 : 0]  eth_axi_awprot;
-wire 	       eth_axi_awvalid;
-wire  [31 : 0] eth_axi_wdata;
-wire  [3 : 0]  eth_axi_wstrb;
-wire 	       eth_axi_wvalid;
-wire 	       eth_axi_bready;
-wire  [31 : 0] eth_axi_araddr;
-wire 	       eth_axi_arvalid;
-wire 	       eth_axi_rready;
-   
-wire  [31 : 0] s_axi_awaddr = eth_axi_awaddr;
-wire  [2 : 0]  s_axi_awprot = eth_axi_awprot;
-wire 	       s_axi_awvalid = eth_axi_awvalid;
-   wire        s_axi_awready;
-wire  [31 : 0] s_axi_wdata = eth_axi_wdata;
-wire  [3 : 0]  s_axi_wstrb = eth_axi_wstrb;
-wire 	       s_axi_wvalid = eth_axi_wvalid;
-   wire        s_axi_wready;
-   wire [1 : 0] s_axi_bresp;
-   wire 	s_axi_bvalid;
-wire 	       s_axi_bready = eth_axi_bready;
-wire  [31 : 0] s_axi_araddr = eth_axi_araddr;
-wire 	       s_axi_arvalid = eth_axi_arvalid;
-   wire        s_axi_arready;
-   wire [31 : 0] s_axi_rdata;
-   wire 	 s_axi_rvalid;
-   wire [1 : 0]  s_axi_rresp;
-wire 	       s_axi_rready = eth_axi_rready;
-   wire        s_axi_aclk = msoc_clk;
-   wire        s_axi_aresetn;
-   
-wire 	       eth_axi_awready = s_axi_awready;
-wire 	       eth_axi_wready = s_axi_wready;
-wire [1 : 0]   eth_axi_bresp = s_axi_bresp;
-wire 	       eth_axi_bvalid = s_axi_bvalid;
-wire 	       eth_axi_arready = s_axi_arready;
-wire [31 : 0]  eth_axi_rdata = s_axi_rdata;
-wire 	       eth_axi_rvalid = s_axi_rvalid;
-wire [1 : 0]   eth_axi_rresp = s_axi_rresp;
-
-wire 	       m_axi_lite_ch1_awready = s_axi_awready;
-wire 	       m_axi_lite_ch1_wready = s_axi_wready;
-wire [1 : 0]   m_axi_lite_ch1_bresp = s_axi_bresp;
-wire 	       m_axi_lite_ch1_bvalid = s_axi_bvalid;
-wire 	       m_axi_lite_ch1_arready = s_axi_arready;
-wire [31 : 0]  m_axi_lite_ch1_rdata = s_axi_rdata;
-wire 	       m_axi_lite_ch1_rvalid = s_axi_rvalid;
-wire [1 : 0]   m_axi_lite_ch1_rresp = s_axi_rresp;
-wire io_emdio_i, phy_emdio_o, phy_emdio_t;
-reg phy_emdio_i, io_emdio_o, io_emdio_t;
-
-assign o_erstn = clk_locked;
-
-always @(posedge i_clk50)
-    begin
-    phy_emdio_i <= io_emdio_i;
-    io_emdio_o <= phy_emdio_o;
-    io_emdio_t <= phy_emdio_t;
-    o_led <= o_led_unbuf;
-    i_dip_reg <= i_dip;
-    end
-
-   IOBUF #(
-      .DRIVE(12), // Specify the output drive strength
-      .IBUF_LOW_PWR("TRUE"),  // Low Power - "TRUE", High Performance = "FALSE" 
-      .IOSTANDARD("DEFAULT"), // Specify the I/O standard
-      .SLEW("SLOW") // Specify the output slew rate
-   ) IOBUF_inst (
-      .O(io_emdio_i),     // Buffer output
-      .IO(io_emdio),   // Buffer inout port (connect directly to top-level port)
-      .I(io_emdio_o),     // Buffer input
-      .T(io_emdio_t)      // 3-state enable input, high=input, low=output
-   );
-       
-mii_to_rmii_0_exdes EXDES (
-	.clk_50      ( i_clk50 ),
-	.clk_100     ( clk_100 ),
-	.locked      ( clk_locked ),
-    // SMSC ethernet PHY
-	.eth_crsdv   ( i_erx_dv ),
-	.eth_refclk  ( o_erefclk ),
-   
-	.eth_txd     ( o_etxd ),
-	.eth_txen    ( o_etx_en ),
-   
-	.eth_rxd     ( i_erxd ),
-	.eth_rxerr   ( i_erx_er ),
-   
-	.eth_mdc     ( o_emdc ),
-	.phy_mdio_i  ( phy_emdio_i ),
-	.phy_mdio_o  ( phy_emdio_o ),
-	.phy_mdio_t  ( phy_emdio_t ),
-	.s_axi_aclk              ( s_axi_aclk             ),
-	.s_axi_aresetn           ( s_axi_aresetn          ),
-        .s_axi_awready           ( s_axi_awready          ),
-        .s_axi_awvalid           ( s_axi_awvalid          ),
-        .s_axi_awaddr            ( s_axi_awaddr           ),
-        .s_axi_wready            ( s_axi_wready           ),
-        .s_axi_wvalid            ( s_axi_wvalid           ),
-        .s_axi_wstrb             ( s_axi_wstrb            ),
-        .s_axi_wdata             ( s_axi_wdata            ),
-        .s_axi_bready            ( s_axi_bready           ),
-        .s_axi_bvalid            ( s_axi_bvalid           ),
-        .s_axi_bresp             ( s_axi_bresp            ),
-        .s_axi_arready           ( s_axi_arready          ),
-        .s_axi_arvalid           ( s_axi_arvalid          ),
-        .s_axi_araddr            ( s_axi_araddr           ),
-        .s_axi_rready            ( s_axi_rready           ),
-        .s_axi_rvalid            ( s_axi_rvalid           ),
-        .s_axi_rdata             ( s_axi_rdata            ),
-        .s_axi_rresp             ( s_axi_rresp            )
-);
     
 //----------------------------------------------------------------------------
 //  Output     Output      Phase    Duty Cycle   Pk-to-Pk     Phase
@@ -312,15 +198,13 @@ mii_to_rmii_0_exdes EXDES (
    minion_soc
      msoc (
          .*,
-         .from_dip(i_dip_reg),
-         .to_led(o_led_unbuf),
          .rstn(clk_locked & rst_top)
         );
 
 reg [31:0] bcd_digits;
 
 always @*
-    casez(i_dip_reg[1:0])
+    casez(i_dip[1:0])
         2'b00: bcd_digits = debug_addr;
         2'b01: bcd_digits = debug_wdata;
         2'b10: bcd_digits = debug_dout;
