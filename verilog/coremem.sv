@@ -29,10 +29,8 @@ module coremem
    logic        aw_valid_o;
    logic        w_valid_o;
    logic        b_valid_i;
-   logic        b_ready_o;
    logic        ar_valid_o;
    logic        r_valid_i;
-   logic        r_ready_o;
 
    enum         logic [2:0] { IDLE, READ_WAIT, WRITE_WAIT } CS, NS;
 
@@ -48,9 +46,6 @@ module coremem
 
         aw_valid_o = 1'b0;
         ar_valid_o = 1'b0;
-        r_ready_o  = 1'b0;
-        w_valid_o  = 1'b0;
-        b_ready_o  = 1'b0;
 
         case (CS)
           // wait for a request to come in from the core
@@ -61,17 +56,16 @@ module coremem
                begin
                   // send address over aw channel for writes,
                   // over ar channels for reads
+                  data_gnt_o = 1'b1;
+
                   if (data_we_i)
                     begin
                        aw_valid_o = 1'b1;
-                       w_valid_o  = 1'b1;
 
-                       data_gnt_o = 1'b1;
                        NS = WRITE_WAIT;
                     end else begin
                        ar_valid_o = 1'b1;
 
-                       data_gnt_o = 1'b1;
                        NS = READ_WAIT;
                     end
                end else begin
@@ -83,8 +77,6 @@ module coremem
           // be done
           WRITE_WAIT:
             begin
-               b_ready_o = 1'b1;
-
                if (b_valid_i)
                  begin
                     data_rvalid_o = 1'b1;
@@ -99,7 +91,6 @@ module coremem
                if (r_valid_i)
                  begin
                     data_rvalid_o     = 1'b1;
-                    r_ready_o = 1'b1;
 
                     NS = IDLE;
                  end
@@ -125,7 +116,7 @@ module coremem
           begin
              CS     <= NS;
              r_valid_i <= data_gnt_o && ar_valid_o;
-             b_valid_i <= data_gnt_o && w_valid_o;
+             b_valid_i <= data_gnt_o && aw_valid_o;
           end
      end
 
