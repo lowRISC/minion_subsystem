@@ -34,7 +34,7 @@ module coremem
    logic        r_valid_i;
    logic        r_ready_o;
 
-   enum         logic [2:0] { IDLE, READ_WAIT, WRITE_DATA, WRITE_ADDR, WRITE_WAIT } CS, NS;
+   enum         logic [2:0] { IDLE, READ_WAIT, WRITE_WAIT } CS, NS;
 
    assign CE = aw_valid_o | ar_valid_o;
    assign WE = aw_valid_o;
@@ -77,25 +77,6 @@ module coremem
                end else begin
                   NS = IDLE;
                end
-          end
-
-          // if the bus has not accepted our write data right away, but has
-          // accepted the address already
-          WRITE_DATA: begin
-             w_valid_o = 1'b1;
-
-             data_gnt_o = 1'b1;
-             NS = WRITE_WAIT;
-          end
-
-          // the bus has accepted the write data, but not yet the address
-          // this happens very seldom, but we still have to deal with the
-          // situation
-          WRITE_ADDR: begin
-             aw_valid_o = 1'b1;
-
-             data_gnt_o = 1'b1;
-             NS = WRITE_WAIT;
           end
 
           // we have sent the address and data and just wait for the write data to
