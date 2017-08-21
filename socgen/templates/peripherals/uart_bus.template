@@ -1,0 +1,12 @@
+{% block uart_bus scoped %}
+  u_trans_{{per.peripheral_number}} <= 1'b0;
+  u_recv_{{per.peripheral_number}} <= received;
+  if (core_lsu_req&core_lsu_we&one_hot_data_addr[{{per.memory_region}}])
+    case(core_lsu_addr[5:2])
+      0: begin
+          u_trans_{{per.peripheral_number}} <= 1'b1;
+          u_tx_byte_{{per.peripheral_number}} <= core_lsu_wdata[7:0];
+        end
+      1: u_baud_{{per.peripheral_number}} <= core_lsu_wdata;
+    endcase
+{% endblock %}

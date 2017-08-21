@@ -1,0 +1,4 @@
+{% block ps2_port scoped %}
+  inout wire PS2_CLK,
+  inout wire PS2_DATA {% if not loop.last %} , {% endif %}
+{% endblock %}

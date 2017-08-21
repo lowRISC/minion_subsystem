@@ -1,0 +1,10 @@
+{% block core_port scoped %}
+  output wire [31:0] core_lsu_addr,
+  output reg  [31:0] core_lsu_addr_dly,
+  output wire [31:0] core_lsu_wdata,
+  output wire [3:0]  core_lsu_be,
+  output wire        ce_d,
+  output wire        we_d,
+  output wire        shared_sel,
+  input  wire [31:0] shared_rdata{% if not loop.last %} , {% endif %}
+{% endblock %}

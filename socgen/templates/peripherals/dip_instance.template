@@ -1,0 +1,3 @@
+{% block dip_instance scoped %}
+  assign one_hot_rdata[{{per.memory_region}}] = from_dip_reg;
+{% endblock %}
