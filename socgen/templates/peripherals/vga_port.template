@@ -1,0 +1,12 @@
+{% block vga_port scoped %}
+  output wire       VGA_HS_O,
+  output wire       VGA_VS_O,
+  output wire [3:0] VGA_RED_O,
+  output wire [3:0] VGA_BLUE_O,
+  output wire [3:0] VGA_GREEN_O,
+  input  wire       GPIO_SW_C,
+  input  wire       GPIO_SW_W,
+  input  wire       GPIO_SW_E,
+  input  wire       GPIO_SW_N,
+  input  wire       GPIO_SW_S{% if not loop.last %} , {% endif %}
+{% endblock %}

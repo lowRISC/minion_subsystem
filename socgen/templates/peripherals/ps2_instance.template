@@ -1,0 +1,44 @@
+{% block ps2_instance scoped %}
+
+wire [19:0] dummy;
+wire        irst, ascii_ready;
+wire [7:0]  readch, scancode;
+wire        keyb_almostfull, keyb_full, keyb_rderr, keyb_wrerr, keyb_empty;
+wire [11:0] keyb_wrcount, keyb_rdcount;
+reg  [31:0] keycode;
+wire [31:0] keyb_fifo_status = {keyb_empty,keyb_almostfull,keyb_full,keyb_rderr,keyb_wrerr,keyb_rdcount,keyb_wrcount};
+wire [35:0] keyb_fifo_out;
+
+assign one_hot_rdata[{{per.memory_region}}] = core_lsu_addr[2] ? {keyb_empty,keyb_fifo_out[15:0]} : keyb_fifo_status;
+
+ps2 keyb_mouse(
+  .clk(msoc_clk),
+  .rst(irst),
+  .PS2_K_CLK_IO(PS2_CLK}),
+  .PS2_K_DATA_IO(PS2_DATA}),
+  .PS2_M_CLK_IO(),
+  .PS2_M_DATA_IO(),
+  .ascii_code(readch[6:0]),
+  .ascii_data_ready(ascii_ready),
+  .rx_translated_scan_code(scancode),
+  .rx_ascii_read(ascii_ready)
+);
+
+my_fifo #(.width(36)) keyb_fifo (
+  .rd_clk(~msoc_clk),      // input wire read clk
+  .wr_clk(~msoc_clk),      // input wire write clk
+  .rst(~rstn),      // input wire rst
+  .din({19'b0, readch[6:0], scancode}),      // input wire [31 : 0] din
+  .wr_en(ascii_ready),  // input wire wr_en
+  .rd_en(core_lsu_req&core_lsu_we&one_hot_data_addr[{{per.memory_region}}]),  // input wire rd_en
+  .dout(keyb_fifo_out),    // output wire [31 : 0] dout
+  .rdcount(keyb_rdcount),         // 12-bit output: Read count
+  .rderr(keyb_rderr),             // 1-bit output: Read error
+  .wrcount(keyb_wrcount),         // 12-bit output: Write count
+  .wrerr(keyb_wrerr),             // 1-bit output: Write error
+  .almostfull(keyb_almostfull),   // output wire almost full
+  .full(keyb_full),    // output wire full
+  .empty(keyb_empty)  // output wire empty
+);
+
+{% endblock %}

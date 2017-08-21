@@ -1,0 +1,19 @@
+{% block sd_init scoped %}
+  sd_align_reg <= 0;
+  sd_blkcnt_reg <= 0;
+  sd_blksize_reg <= 0;
+  sd_data_start_reg <= 0;
+  sd_clk_din <= 0;
+  sd_clk_den <= 0;
+  sd_clk_dwe <= 0;
+  sd_clk_daddr <= 0;
+  sd_cmd_i_reg <= 0;
+  sd_cmd_arg_reg <= 0;
+  sd_cmd_setting_reg <= 0;
+  sd_cmd_start_reg <= 0;
+  sd_reset <= 0;
+  sd_data_rst <= 0;
+  sd_cmd_rst <= 0;
+  sd_clk_rst <= 0;
+  sd_cmd_timeout_reg <= 0;
+{% endblock %}
