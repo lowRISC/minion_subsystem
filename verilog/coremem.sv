@@ -32,7 +32,7 @@ module coremem
    logic        ar_valid_o;
    logic        r_valid_i;
 
-   enum         logic [2:0] { IDLE, READ_WAIT, WRITE_WAIT } CS, NS;
+   enum         logic [2:0] { IDLE, READ_WAIT, WRITE_DATA, WRITE_ADDR, WRITE_WAIT } CS, NS;
 
    assign CE = aw_valid_o | ar_valid_o;
    assign WE = aw_valid_o;
