@@ -33,20 +33,25 @@
 
 wire  [9:0] o_led;
 wire  [7:0] AN;
+
+   // clock and reset
+   
+    wire       uart_rts;
+    wire       uart_cts;
+
+    wire       CA;
+    wire       CB;
+    wire       CC;
+    wire       CD;
+    wire       CE;
+    wire       CF;
+    wire       CG;
+    wire       DP;
+ 
+    wire   redled;
+
 wire  [15:0] i_dip = 16'h88;
 
-  //! Ethernet MAC PHY interface signals
-wire   o_erefclk     ; // RMII clock out
-wire  [1:0] o_etxd   ;
-wire   o_etx_en      ;
-wire [1:0] i_erxd = o_etxd  ;
-wire    i_erx_dv = o_etx_en ;
-wire  i_erx_er = 1'b0   ;
-wire  i_emdint       ;
-wire   o_emdc        ;
-wire  io_emdio   ;
-wire   o_erstn    ;   
-   
    // clock and reset
    wire clk_p = clk;
    
@@ -77,16 +82,6 @@ eth_top dut
    .VGA_GREEN_O(VGA_GREEN_O),
    .o_led(o_led),
    .i_dip(i_dip),
-   .o_erefclk(o_erefclk),
-   .i_erxd(i_erxd),
-   .i_erx_dv(i_erx_dv),
-   .i_erx_er(i_erx_er),
-   .i_emdint(i_emdint),
-   .o_etxd(o_etxd),
-   .o_etx_en(o_etx_en),
-   .o_emdc(o_emdc),
-   .io_emdio(io_emdio),
-   .o_erstn(o_erstn),
    .clk_p(clk_p),
    .clk_n(clk_n),
    .rst_top(rst_top),
@@ -145,8 +140,8 @@ initial
    
 initial
     begin
-    @(posedge o_etx_en);
-    @(negedge o_etx_en)
+    @(posedge dut.o_etx_en);
+    @(negedge dut.o_etx_en)
     #50000 $stop;
     end
 

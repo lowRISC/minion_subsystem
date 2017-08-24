@@ -27,7 +27,7 @@ verilog_srcs = \
 	nexys4ddr_display.v \
 	jtag_addr.v jtag_dummy.v jtag_rom.v \
 	framing.v \
-	../vivado/srcs/eth_top_nexys4ddr.sv \
+	eth_lite_top.sv \
 	../pulpino/ips/riscv/include/riscv_defines.sv \
 	../pulpino/ips/riscv/controller.sv \
 	../pulpino/ips/riscv/cs_registers.sv \

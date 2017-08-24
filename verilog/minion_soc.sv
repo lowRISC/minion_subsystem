@@ -14,9 +14,22 @@
 
 module minion_soc
   (
+  //! Ethernet MAC PHY interface signals
+output wire   o_edutrefclk     , // RMII clock out
+input wire [1:0] i_edutrxd    ,
+input wire  i_edutrx_dv       ,
+input wire  i_edutrx_er       ,
+input wire  i_edutmdint       ,
+output reg  [1:0] o_eduttxd   ,
+output wire   o_eduttx_en      ,
+output wire   o_edutmdc        ,
+inout wire  io_edutmdio   ,
+output wire   o_edutrstn    ,   
+
  output wire             uart_tx,
  input wire             uart_rx,
  // clock and reset
+ input wire             clk_50,
  input wire             clk_100,
  input wire             clk_200MHz,
  input wire             pxl_clk,
@@ -91,7 +104,14 @@ module minion_soc
  input wire [1 : 0]   eth_axi_rresp,
  output wire 	       eth_axi_rready
    );
- 
+
+   wire                i_edutmdio ;
+   wire                o_edutmdio   ;
+   wire                oe_edutmdio   ;
+   
+   assign io_edutmdio =  oe_edutmdio ? o_edutmdio : 1'bz;
+   assign i_edutmdio = io_edutmdio;
+   
  wire [19:0] dummy;
  wire        irst, ascii_ready;
  wire [7:0]  readch, scancode;
@@ -163,6 +183,7 @@ logic [31:0] core_lsu_rdata, core_lsu_rdata_mem, core_lsu_rdata_eth;
    assign one_hot_rdata[10] = fstore_doutb;
    
     fstore2 the_fstore(
+      .msoc_clk(msoc_clk),
       .pixel2_clk(pxl_clk),
       .blank(),
       .DVI_D(),
@@ -180,8 +201,7 @@ logic [31:0] core_lsu_rdata, core_lsu_rdata_mem, core_lsu_rdata_eth;
       .enb(ce_d),
       .addrb(core_lsu_addr[14:2]),
       .doutb(fstore_doutb),
-      .irst(~rstn),
-      .clk_data(msoc_clk),
+      .rstn(rstn),
       .GPIO_SW_C(GPIO_SW_C),
       .GPIO_SW_N(GPIO_SW_N),
       .GPIO_SW_S(GPIO_SW_S),
@@ -773,6 +793,14 @@ sd_top sdtop(
     .sd_dat_oe(sd_dat_oe),
     .sd_cmd_oe(sd_cmd_oe)
     );
+
+   logic [31:0] framing_rdata;
+   wire framing_sel = one_hot_data_addr[13];
+   assign one_hot_rdata[13] = framing_rdata;
+
+ wire   redled;
+
+framing_top framing1( .* );
 
 endmodule // chip_top
 `default_nettype wire

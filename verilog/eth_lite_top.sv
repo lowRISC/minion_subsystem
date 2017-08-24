@@ -6,18 +6,18 @@ module eth_top
   //! LEDs.
 output reg [15:0] o_led,
 input wire  [7:0] i_dip,
-
-  //! Ethernet MAC PHY interface signals
-output wire   o_erefclk     , // RMII clock out
+   
+   // clock and reset
+output reg   o_erefclk     , // RMII clock out
 input wire [1:0] i_erxd    ,
 input wire  i_erx_dv       ,
 input wire  i_erx_er       ,
 input wire  i_emdint       ,
 output reg  [1:0] o_etxd   ,
-output wire   o_etx_en      ,
+output reg   o_etx_en      ,
 output wire   o_emdc        ,
 inout wire  io_emdio   ,
-output wire   o_erstn    ,   
+output reg   o_erstn    ,   
    
    // clock and reset
    input wire         clk_p,
@@ -34,7 +34,7 @@ output wire   o_erstn    ,
    inout wire [3:0]  sd_dat,
    inout wire        sd_cmd,
    output reg        sd_reset,
-// pusb button array
+// push button array
 input wire GPIO_SW_C,
 input wire GPIO_SW_W,
 input wire GPIO_SW_E,
@@ -61,10 +61,34 @@ output wire  [3:0]    VGA_GREEN_O,
    output wire       DP,
    output wire [7:0] AN,
 
-   output reg   redled
+   output wire       redled
    );
 
-logic clk_locked, clk_200MHz, msoc_clk, i_clk50, i_clk50_quad, clk_100;
+ wire   o_eliterefclk     ; // RMII clock out
+ wire  [1:0] o_elitetxd   ;
+ wire   o_elitetx_en      ;
+ wire   o_elitemdc        ;
+ wire  io_elitemdio   ;
+ wire   o_eliterstn    ;   
+//! Ethernet MAC PHY interface signals
+     wire   o_edutrefclk     ; // RMII clock out
+     wire [1:0] i_edutrxd = o_elitetxd   ;
+     wire  i_edutrx_dv = o_elitetx_en      ;
+     wire  i_edutrx_er = 1'b0      ;
+     wire  i_edutmdint = 1'b0      ;
+     wire [1:0] o_eduttxd   ;
+     wire   o_eduttx_en      ;
+     wire   o_edutmdc        ;
+     wire  io_edutmdio   ;
+     wire   o_edutrstn    ;   
+
+  //! Ethernet MAC PHY interface signals
+ wire [1:0] i_eliterxd = o_eduttxd   ;
+ wire  i_eliterx_dv = o_eduttx_en      ;
+ wire  i_eliterx_er = 1'b0      ;
+ wire  i_elitemdint = 1'b0     ;
+
+logic clk_locked, clk_200MHz, msoc_clk, clk_50, clk_50_quad, clk_100;
 logic [31:0] core_lsu_addr;
 logic [31:0] core_lsu_addr_dly;
 logic [31:0] core_lsu_wdata;
@@ -83,7 +107,23 @@ logic [15:0] tx_packet_length, tx_frame_size, o_led_unbuf, i_dip_reg;
 reg [12:0] addr_tap, nxt_addr;
 reg [23:0] rx_byte, rx_nxt, rx_byte_dly;
 reg  [2:0] rx_pair;
-reg        mii_rx_byte_received_i, full, byte_sync, mii_rx_frame_i, rx_frame_old, rx_pa;
+reg        mii_rx_byte_received_i, full, byte_sync, mii_rx_frame_i, rx_frame_old, rx_pa, rst_top_dly, rst_top_dly2;
+
+always @(posedge clk_100)
+    begin
+    o_erefclk = i_dip_reg[2] ? o_edutrefclk : o_eliterefclk; // RMII clock out
+    end
+    
+always @(posedge clk_50_quad)
+    begin
+    o_etxd = i_dip_reg[2] ? o_eduttxd : o_elitetxd;
+    o_etx_en = i_dip_reg[2] ? o_eduttx_en : o_elitetx_en;
+    o_erstn = clk_locked;   
+    end
+    
+wire [2:0] diff = {o_eduttx_en,o_eduttxd} ^ {o_elitetx_en,o_elitetxd};
+assign redled = |diff;
+
    // datamem shared port
    logic [3:0] 	sharedmem_en;
    logic [31:0] sharedmem_dout;
@@ -223,15 +263,21 @@ wire [1 : 0]   m_axi_lite_ch1_rresp = s_axi_rresp;
 wire io_emdio_i, phy_emdio_o, phy_emdio_t;
 reg phy_emdio_i, io_emdio_o, io_emdio_t;
 
-assign o_erstn = clk_locked;
+assign o_eliterstn = clk_locked;
 
-always @(posedge i_clk50)
+always @(posedge clk_50)
     begin
     phy_emdio_i <= io_emdio_i;
     io_emdio_o <= phy_emdio_o;
     io_emdio_t <= phy_emdio_t;
     o_led <= o_led_unbuf;
     i_dip_reg <= i_dip;
+    end
+
+always @(posedge msoc_clk)
+    begin
+    rst_top_dly <= rst_top;
+    rst_top_dly2 <= clk_locked & rst_top_dly;
     end
 
    IOBUF #(
@@ -246,21 +292,21 @@ always @(posedge i_clk50)
       .T(io_emdio_t)      // 3-state enable input, high=input, low=output
    );
        
-mii_to_rmii_0_exdes EXDES (
-	.clk_50      ( i_clk50 ),
+mii_to_rmii_0_open exdes (
+	.clk_50      ( clk_50 ),
 	.clk_100     ( clk_100 ),
 	.locked      ( clk_locked ),
     // SMSC ethernet PHY
 	.eth_crsdv   ( i_erx_dv ),
-	.eth_refclk  ( o_erefclk ),
+	.eth_refclk  ( o_eliterefclk ),
    
-	.eth_txd     ( o_etxd ),
-	.eth_txen    ( o_etx_en ),
+	.eth_txd     ( o_elitetxd ),
+	.eth_txen    ( o_elitetx_en ),
    
 	.eth_rxd     ( i_erxd ),
 	.eth_rxerr   ( i_erx_er ),
    
-	.eth_mdc     ( o_emdc ),
+	.eth_mdc     ( o_elitemdc ),
 	.phy_mdio_i  ( phy_emdio_i ),
 	.phy_mdio_o  ( phy_emdio_o ),
 	.phy_mdio_t  ( phy_emdio_t ),
@@ -296,25 +342,25 @@ mii_to_rmii_0_exdes EXDES (
 // CLK_OUT5___120.000______0.000______50.0______112.035_____87.180
 // CLK_OUT6___100.000______0.000______50.0______115.831_____87.180
 
-  clk_wiz_nexys4ddr_0 clk_gen
+  clk_wiz_nexys4ddr_1 clk_gen
    (
    .clk_in1     ( clk_p         ), // 100 MHz onboard
    .clk_200     ( clk_200MHz    ), // 200 MHz
    .clk_25      ( msoc_clk      ), // 25 MHz (for minion SOC)
-   .clk_50      ( i_clk50       ), // 50 MHz
-   .clk_50_quad ( i_clk50_quad  ), // 50 MHz
+   .clk_50      ( clk_50       ), // 50 MHz
+   .clk_50_quad ( clk_50_quad  ), // 50 MHz
    .clk_120     ( pxl_clk       ), // 120 MHz
    .clk_100     ( clk_100       ), // 100 MHz
     // Status and control signals
       .locked      ( clk_locked    )
       );
 
-   minion_soc
+    minion_soc
      msoc (
          .*,
          .from_dip(i_dip_reg),
          .to_led(o_led_unbuf),
-         .rstn(clk_locked & rst_top)
+         .rstn(rst_top_dly2)
         );
 
 reg [31:0] bcd_digits;

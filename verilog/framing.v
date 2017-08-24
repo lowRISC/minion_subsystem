@@ -197,6 +197,7 @@ module framing(
             tx_busy_o <= 1'b1;
             tx_padding_required <= 0;
             tx_fcs_o <= 32'b0;
+            mii_tx_data_o <= 8'b0;
         end
         else
         begin 

@@ -33,8 +33,8 @@ module fstore2(
                input wire [7:0]  dinb,
                input wire [12:0] addrb,
                input wire        web, enb,
-               input wire        clk_data,
-               input wire        irst,
+               input wire        msoc_clk,
+               input wire        rstn,
 
                input             GPIO_SW_C,
                input             GPIO_SW_N,
@@ -75,20 +75,29 @@ module fstore2(
    
    // 100 MHz / 2100 is 47.6kHz.  Divide by further 788 to get 60.4 Hz.
    // Aim for 1024x768 non interlaced at 60 Hz.  
-   
+
    reg [11:0]                    hreg, vreg;
 
-   reg                           bitmapped_pixel;
+   reg                           bitmapped_pixel, rstn_dly, rstn_dly2, rstn_dly3;
    
    wire [7:0]                    red_in, green_in, blue_in;
    assign dvi_mux = hreg[0];
 
    dualmem ram1(.clka(pixel2_clk),
                 .dina(addra[7:0]), .addra(addra), .wea(clear), .douta(dout), .ena(1'b1),
-                .clkb(clk_data), .dinb(dinb), .addrb(addrb), .web(web), .doutb(doutb), .enb(enb));
-   
+                .clkb(msoc_clk), .dinb(dinb), .addrb(addrb), .web(web), .doutb(doutb), .enb(enb));
+
+   always @(posedge msoc_clk)
+                   rstn_dly <= rstn;
+                  
+   always @(negedge pixel2_clk)
+                   rstn_dly2 <= rstn_dly;
+                                     
+   always @(posedge pixel2_clk)
+                   rstn_dly3 <= rstn_dly2;
+                                                     
    always @(posedge pixel2_clk) // or posedge reset) // JRRK - does this need async ?
-   if (irst)
+   if (~rstn_dly3)
      begin
         hreg <= 0;
         hstart <= 0;

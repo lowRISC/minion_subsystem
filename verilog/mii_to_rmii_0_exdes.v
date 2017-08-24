@@ -68,7 +68,6 @@ module mii_to_rmii_0_exdes(
 clk_50,
 clk_100,
 locked,
-sw,
 eth_rstn,
 eth_crsdv,
 eth_refclk,
@@ -98,13 +97,13 @@ s_axi_arready,
 s_axi_rdata,
 s_axi_rresp,
 s_axi_rvalid,
-s_axi_rready
+s_axi_rready,
+ip2intc_irpt
 );
 
 input clk_50;
 input clk_100;
 input locked;
-input[15:0] sw;
 // SMSC ethernet PHY
 output eth_rstn;
 input eth_crsdv;
@@ -136,12 +135,11 @@ output[31:0] s_axi_rdata;
 output[1:0] s_axi_rresp;
 output wire s_axi_rvalid;
 input wire s_axi_rready;
-
+output wire ip2intc_irpt;
    
 wire   clk_50;
 wire   clk_100;
 wire   locked;
-wire  [15:0] sw;
 wire   eth_rstn;
 wire   eth_crsdv;
 wire   eth_refclk;
@@ -176,16 +174,16 @@ wire   m_axi_rready;
 
 
 wire  phy_tx_en;
-wire [3:0] phy_rst_n;
+wire phy_rst_n;
 wire [3:0] phy_tx_data;
-wire [3:0] phy_tx_clk;
+wire  phy_tx_clk;
 wire  phy_rx_clk;
-wire [3:0] phy_col;
-wire [31:0] phy_crs;
-wire [1:0] phy_dv;
-wire [1:0] phy_rx_er;
+wire phy_col;
+wire phy_crs;
+wire phy_dv;
+wire phy_rx_er;
 wire [3:0] phy_rx_data;
-wire [31:0] rmii2phy_tx_en;
+wire rmii2phy_tx_en;
 wire [1:0] rmii2phy_txd;
 wire [32:0] const0;
 reg [1:0] Count;
@@ -209,7 +207,7 @@ wire  zero;
   assign m_axi_aresetn = exdes_resetn;
   
   always @(posedge phy_tx_clk) begin
-    if(((locked == 1'b 0) || (sw[1]  == 1'b 1))) begin
+    if(((locked == 1'b 0))) begin
       Count <= 2'b 00;
     end
     else begin
@@ -250,7 +248,7 @@ wire  zero;
   axi_ethernetlite_0 ETH_SRC(
       .s_axi_aclk(m_axi_aclk),
     .s_axi_aresetn(exdes_resetn),
-    .ip2intc_irpt(),
+    .ip2intc_irpt(ip2intc_irpt),
     .s_axi_awaddr(m_axi_awaddr[12:0] ),
     .s_axi_awvalid(m_axi_awvalid),
     .s_axi_awready(m_axi_awready),
