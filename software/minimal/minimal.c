@@ -6,6 +6,8 @@ int main() {
 
   init(temp[0]);
 
+  uart_init();
+
   char str[] = "Hello minion\n";
   uart_send_buf(str, 13);
 
@@ -18,7 +20,7 @@ int main() {
 
     if(uart_bytes_available() > 0) {
       char c = uart_recv();
-      uart_send(c+1);
+      uart_send(c);
     }
 
     delay();

@@ -10,7 +10,13 @@ void delay();
 
 void to_led(unsigned int data);
 
+void uart_init();
+
 int uart_get_status();
+
+unsigned int uart_bytes_available();
+
+unsigned long int uart_status();
 
 void uart_send_buf(const char *buf, const int len);
 
