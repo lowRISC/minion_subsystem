@@ -25,8 +25,7 @@ module minion_soc (
   output wire        we_d,
   output wire        shared_sel,
   input  wire [31:0] shared_rdata ,                        output wire uart_tx_1,
-  input wire 	uart_rx_1 ,                        output wire uart_tx_2,
-  input wire 	uart_rx_2 ,                        output reg [7:0] to_led_1  ,                                   output wire      sd_sclk,
+  input wire 	uart_rx_1 ,                        output reg [7:0] to_led_1  ,                        input wire [15:0] from_dip_2  ,                        output wire      sd_sclk,
   input wire       sd_detect,
   inout wire [3:0] sd_dat,
   inout wire       sd_cmd,
@@ -68,7 +67,6 @@ logic [31:0] irq_i = 32'b0;
 logic        core_busy_o;
 logic        clock_gating_i = 1'b1;
 logic [31:0] boot_addr_i = 32'h80;
-logic  [7:0] core_lsu_rx_byte;
 
 assign one_hot_rdata[8] = shared_rdata;
 
@@ -206,6 +204,7 @@ wire [11:0] uart_wrcount_1;
 wire [11:0] uart_rdcount_1;
 wire  [8:0] uart_fifo_data_out_1;
 reg   [7:0] u_tx_byte_1;
+logic  [7:0] core_lsu_rx_byte_1;
 
 assign one_hot_rdata[3] = {uart_wrcount_1,
                            uart_almostfull_1,
@@ -218,9 +217,6 @@ assign one_hot_rdata[3] = {uart_wrcount_1,
                            ~uart_empty_1,
                            uart_fifo_data_out_1[7:0]
                           };
-
-wire tx_rd_fifo_1;
-wire rx_wr_fifo_1;
 
 rx_delay uart_rx_dly_1 (
   .clk(msoc_clk),
@@ -236,7 +232,7 @@ uart i_uart_1 (
   .transmit(u_trans_1), // Signal to transmit
   .tx_byte(u_tx_byte_1), // Byte to transmit
   .received(received_1), // Indicated that a byte has been received.
-  .rx_byte(core_lsu_rx_byte), // Byte received
+  .rx_byte(core_lsu_rx_byte_1), // Byte received
   .is_receiving(is_recv_1), // Low when receive line is idle.
   .is_transmitting(is_trans_1), // Low when transmit line is idle.
   .recv_error(recv_err_1), // Indicates error in receiving packet.
@@ -248,7 +244,7 @@ my_fifo #(.width(9)) uart_rx_fifo_1 (
   .rd_clk(~msoc_clk),      // input wire read clk
   .wr_clk(~msoc_clk),      // input wire write clk
   .rst(~rstn),      // input wire rst
-  .din({recv_err_1,core_lsu_rx_byte}),      // input wire [width-1 : 0] din
+  .din({recv_err_1,core_lsu_rx_byte_1}),      // input wire [width-1 : 0] din
   .wr_en(received_1&&!u_recv_1),  // input wire wr_en
   .rd_en(core_lsu_req&core_lsu_we&one_hot_data_addr[3]),  // input wire rd_en
   .dout(uart_fifo_data_out_1),    // output wire [width-1 : 0] dout
@@ -261,82 +257,10 @@ my_fifo #(.width(9)) uart_rx_fifo_1 (
   .empty(uart_empty_1)  // output wire empty
 );
 
-        
-reg         u_trans_2;
-reg         u_recv_2;
-reg  [15:0] u_baud_2;
-wire        received_2;
-wire        recv_err_2;
-wire        is_recv_2;
-wire        is_trans_2;
-wire        uart_maj_2;
+          
+  reg [15:0] from_dip_reg_2;
 
-wire        uart_almostfull_2;
-wire        uart_full_2;
-wire        uart_rderr_2;
-wire        uart_wrerr_2;
-wire        uart_empty_2;
-
-wire [11:0] uart_wrcount_2;
-wire [11:0] uart_rdcount_2;
-wire  [8:0] uart_fifo_data_out_2;
-reg   [7:0] u_tx_byte_2;
-
-assign one_hot_rdata[3] = {uart_wrcount_2,
-                           uart_almostfull_2,
-                           uart_full_2,
-                           uart_rderr_2,
-                           uart_wrerr_2,
-                           uart_fifo_data_out_2[8],
-                           is_trans_2,
-                           is_recv_2,
-                           ~uart_empty_2,
-                           uart_fifo_data_out_2[7:0]
-                          };
-
-wire tx_rd_fifo_2;
-wire rx_wr_fifo_2;
-
-rx_delay uart_rx_dly_2 (
-  .clk(msoc_clk),
-  .in(uart_rx_2),
-  .maj(uart_maj_2)
-);
-
-uart i_uart_2 (
-  .clk(msoc_clk), // The master clock for this module
-  .rst(~rstn), // Synchronous reset.
-  .rx(uart_maj_2), // Incoming serial line
-  .tx(uart_tx_2), // Outgoing serial line
-  .transmit(u_trans_2), // Signal to transmit
-  .tx_byte(u_tx_byte_2), // Byte to transmit
-  .received(received_2), // Indicated that a byte has been received.
-  .rx_byte(core_lsu_rx_byte), // Byte received
-  .is_receiving(is_recv_2), // Low when receive line is idle.
-  .is_transmitting(is_trans_2), // Low when transmit line is idle.
-  .recv_error(recv_err_2), // Indicates error in receiving packet.
-  .baud(u_baud_2),
-  .recv_ack(u_recv_2)
-);
-
-my_fifo #(.width(9)) uart_rx_fifo_2 (
-  .rd_clk(~msoc_clk),      // input wire read clk
-  .wr_clk(~msoc_clk),      // input wire write clk
-  .rst(~rstn),      // input wire rst
-  .din({recv_err_2,core_lsu_rx_byte}),      // input wire [width-1 : 0] din
-  .wr_en(received_2&&!u_recv_2),  // input wire wr_en
-  .rd_en(core_lsu_req&core_lsu_we&one_hot_data_addr[12]),  // input wire rd_en
-  .dout(uart_fifo_data_out_2),    // output wire [width-1 : 0] dout
-  .rdcount(uart_rdcount_2),         // 12-bit output: Read count
-  .rderr(uart_rderr_2),             // 1-bit output: Read error
-  .wrcount(uart_wrcount_2),         // 12-bit output: Write count
-  .wrerr(uart_wrerr_2),             // 1-bit output: Write error
-  .almostfull(uart_almostfull_2),   // output wire almost full
-  .full(uart_full_2),    // output wire full
-  .empty(uart_empty_2)  // output wire empty
-);
-
-            assign one_hot_rdata[7] = from_dip_reg;
+  assign one_hot_rdata[7] = from_dip_reg_2;
         
 wire       sd_data_busy, data_crc_ok, sd_dat_oe;
 wire [3:0] sd_dat_to_mem, sd_dat_to_host, sd_dat_to_host_maj;
@@ -369,13 +293,13 @@ reg [31:0] sd_cmd_arg;
 reg [31:0] sd_cmd_timeout;
 
 reg 	     sd_cmd_start, sd_cmd_rst, sd_data_rst, sd_clk_rst;
-reg [15:0] from_dip_reg;
 
 logic  [6:0] sd_clk_daddr;
 logic        sd_clk_dclk, sd_clk_den, sd_clk_drdy, sd_clk_dwe, sd_clk_locked;
 logic [15:0] sd_clk_din, sd_clk_dout;
 
-assign sd_clk_dclk = msoc_clk;
+wire tx_rd_fifo;
+wire rx_wr_fifo;
 
 assign one_hot_rdata[5] = sd_status_reg; // legacy setting
 assign one_hot_rdata[6] = sd_cmd_resp_sel;
@@ -615,8 +539,8 @@ assign one_hot_rdata[9] = core_lsu_addr[2] ? {keyb_empty,keyb_fifo_out[15:0]} : 
 ps2 keyb_mouse(
   .clk(msoc_clk),
   .rst(irst),
-  .PS2_K_CLK_IO(PS2_CLK}),
-  .PS2_K_DATA_IO(PS2_DATA}),
+  .PS2_K_CLK_IO(PS2_CLK),
+  .PS2_K_DATA_IO(PS2_DATA),
   .PS2_M_CLK_IO(),
   .PS2_M_DATA_IO(),
   .ascii_code(readch[6:0]),
@@ -698,10 +622,6 @@ always @(posedge msoc_clk or negedge rstn)
   u_trans_1 <= 1'b0;
   u_tx_byte_1 <= 8'b0;
   u_recv_1 <= 0;
-                          u_baud_2 <= 16'd87;
-  u_trans_2 <= 1'b0;
-  u_tx_byte_2 <= 8'b0;
-  u_recv_2 <= 0;
                           to_led_1 <= 0;
                             from_dip_reg_2 <= 0;
                           sd_align_reg <= 0;
@@ -724,7 +644,7 @@ always @(posedge msoc_clk or negedge rstn)
                                 end else begin
     core_lsu_addr_dly <= core_lsu_addr;
                               u_trans_1 <= 1'b0;
-  u_recv_1 <= received;
+  u_recv_1 <= received_1;
   if (core_lsu_req&core_lsu_we&one_hot_data_addr[2])
     case(core_lsu_addr[5:2])
       0: begin
@@ -733,19 +653,9 @@ always @(posedge msoc_clk or negedge rstn)
         end
       1: u_baud_1 <= core_lsu_wdata;
     endcase
-                          u_trans_2 <= 1'b0;
-  u_recv_2 <= received;
-  if (core_lsu_req&core_lsu_we&one_hot_data_addr[11])
-    case(core_lsu_addr[5:2])
-      0: begin
-          u_trans_2 <= 1'b1;
-          u_tx_byte_2 <= core_lsu_wdata[7:0];
-        end
-      1: u_baud_2 <= core_lsu_wdata;
-    endcase
                           if (core_lsu_req&core_lsu_we&one_hot_data_addr[7])
     to_led_1 <= core_lsu_wdata;
-                          from_dip_reg_2 <= from_dip;
+                          from_dip_reg_2 <= from_dip_2;
                           if (core_lsu_req&core_lsu_we&one_hot_data_addr[6])
     case(core_lsu_addr[5:2])
       0: sd_align_reg <= core_lsu_wdata;

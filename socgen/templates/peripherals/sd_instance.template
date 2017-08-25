@@ -31,13 +31,13 @@ reg [31:0] sd_cmd_arg;
 reg [31:0] sd_cmd_timeout;
 
 reg 	     sd_cmd_start, sd_cmd_rst, sd_data_rst, sd_clk_rst;
-reg [15:0] from_dip_reg;
 
 logic  [6:0] sd_clk_daddr;
 logic        sd_clk_dclk, sd_clk_den, sd_clk_drdy, sd_clk_dwe, sd_clk_locked;
 logic [15:0] sd_clk_din, sd_clk_dout;
 
-assign sd_clk_dclk = msoc_clk;
+wire tx_rd_fifo;
+wire rx_wr_fifo;
 
 assign one_hot_rdata[{{per.memory_region + 1}}] = sd_status_reg; // legacy setting
 assign one_hot_rdata[{{per.memory_region + 2}}] = sd_cmd_resp_sel;
