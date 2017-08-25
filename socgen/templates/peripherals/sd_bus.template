@@ -1,0 +1,16 @@
+{% block sd_bus scoped %}
+  if (core_lsu_req&core_lsu_we&one_hot_data_addr[{{per.memory_region + 2}}])
+    case(core_lsu_addr[5:2])
+      0: sd_align_reg <= core_lsu_wdata;
+      1: sd_clk_din <= core_lsu_wdata;
+      2: sd_cmd_arg_reg <= core_lsu_wdata;
+      3: sd_cmd_i_reg <= core_lsu_wdata;
+      4: {sd_data_start_reg,sd_cmd_setting_reg[2:0]} <= core_lsu_wdata;
+      5: sd_cmd_start_reg <= core_lsu_wdata;
+      6: {sd_reset,sd_clk_rst,sd_data_rst,sd_cmd_rst} <= core_lsu_wdata;
+      7: sd_blkcnt_reg <= core_lsu_wdata;
+      8: sd_blksize_reg <= core_lsu_wdata;
+      9: sd_cmd_timeout_reg <= core_lsu_wdata;
+      10: {sd_clk_dwe,sd_clk_den,sd_clk_daddr} <= core_lsu_wdata;
+    endcase
+{% endblock %}

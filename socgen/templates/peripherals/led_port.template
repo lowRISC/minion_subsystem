@@ -1,0 +1,3 @@
+{% block led_port scoped %}
+  output reg [7:0] to_led_{{port.peripheral_number}} {% if not loop.last %} , {% endif %}
+{% endblock %}

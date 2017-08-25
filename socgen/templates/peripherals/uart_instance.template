@@ -1,0 +1,75 @@
+{% block uart_instance scoped %}
+
+reg         u_trans_{{per.peripheral_number}};
+reg         u_recv_{{per.peripheral_number}};
+reg  [15:0] u_baud_{{per.peripheral_number}};
+wire        received_{{per.peripheral_number}};
+wire        recv_err_{{per.peripheral_number}};
+wire        is_recv_{{per.peripheral_number}};
+wire        is_trans_{{per.peripheral_number}};
+wire        uart_maj_{{per.peripheral_number}};
+
+wire        uart_almostfull_{{per.peripheral_number}};
+wire        uart_full_{{per.peripheral_number}};
+wire        uart_rderr_{{per.peripheral_number}};
+wire        uart_wrerr_{{per.peripheral_number}};
+wire        uart_empty_{{per.peripheral_number}};
+
+wire [11:0] uart_wrcount_{{per.peripheral_number}};
+wire [11:0] uart_rdcount_{{per.peripheral_number}};
+wire  [8:0] uart_fifo_data_out_{{per.peripheral_number}};
+reg   [7:0] u_tx_byte_{{per.peripheral_number}};
+logic  [7:0] core_lsu_rx_byte_{{per.peripheral_number}};
+
+assign one_hot_rdata[3] = {uart_wrcount_{{per.peripheral_number}},
+                           uart_almostfull_{{per.peripheral_number}},
+                           uart_full_{{per.peripheral_number}},
+                           uart_rderr_{{per.peripheral_number}},
+                           uart_wrerr_{{per.peripheral_number}},
+                           uart_fifo_data_out_{{per.peripheral_number}}[8],
+                           is_trans_{{per.peripheral_number}},
+                           is_recv_{{per.peripheral_number}},
+                           ~uart_empty_{{per.peripheral_number}},
+                           uart_fifo_data_out_{{per.peripheral_number}}[7:0]
+                          };
+
+rx_delay uart_rx_dly_{{per.peripheral_number}} (
+  .clk(msoc_clk),
+  .in(uart_rx_{{per.peripheral_number}}),
+  .maj(uart_maj_{{per.peripheral_number}})
+);
+
+uart i_uart_{{per.peripheral_number}} (
+  .clk(msoc_clk), // The master clock for this module
+  .rst(~rstn), // Synchronous reset.
+  .rx(uart_maj_{{per.peripheral_number}}), // Incoming serial line
+  .tx(uart_tx_{{per.peripheral_number}}), // Outgoing serial line
+  .transmit(u_trans_{{per.peripheral_number}}), // Signal to transmit
+  .tx_byte(u_tx_byte_{{per.peripheral_number}}), // Byte to transmit
+  .received(received_{{per.peripheral_number}}), // Indicated that a byte has been received.
+  .rx_byte(core_lsu_rx_byte_{{per.peripheral_number}}), // Byte received
+  .is_receiving(is_recv_{{per.peripheral_number}}), // Low when receive line is idle.
+  .is_transmitting(is_trans_{{per.peripheral_number}}), // Low when transmit line is idle.
+  .recv_error(recv_err_{{per.peripheral_number}}), // Indicates error in receiving packet.
+  .baud(u_baud_{{per.peripheral_number}}),
+  .recv_ack(u_recv_{{per.peripheral_number}})
+);
+
+my_fifo #(.width(9)) uart_rx_fifo_{{per.peripheral_number}} (
+  .rd_clk(~msoc_clk),      // input wire read clk
+  .wr_clk(~msoc_clk),      // input wire write clk
+  .rst(~rstn),      // input wire rst
+  .din({recv_err_{{per.peripheral_number}},core_lsu_rx_byte_{{per.peripheral_number}}}),      // input wire [width-1 : 0] din
+  .wr_en(received_{{per.peripheral_number}}&&!u_recv_{{per.peripheral_number}}),  // input wire wr_en
+  .rd_en(core_lsu_req&core_lsu_we&one_hot_data_addr[{{per.memory_region + 1}}]),  // input wire rd_en
+  .dout(uart_fifo_data_out_{{per.peripheral_number}}),    // output wire [width-1 : 0] dout
+  .rdcount(uart_rdcount_{{per.peripheral_number}}),         // 12-bit output: Read count
+  .rderr(uart_rderr_{{per.peripheral_number}}),             // 1-bit output: Read error
+  .wrcount(uart_wrcount_{{per.peripheral_number}}),         // 12-bit output: Write count
+  .wrerr(uart_wrerr_{{per.peripheral_number}}),             // 1-bit output: Write error
+  .almostfull(uart_almostfull_{{per.peripheral_number}}),   // output wire almost full
+  .full(uart_full_{{per.peripheral_number}}),    // output wire full
+  .empty(uart_empty_{{per.peripheral_number}})  // output wire empty
+);
+
+{% endblock %}

@@ -1,0 +1,99 @@
+// Copyright 2015 ETH Zurich, University of Bologna, and University of Cambridge
+// Copyright and related rights are licensed under the Solderpad Hardware
+// License, Version 0.51 (the "License"); you may not use this file except in
+// compliance with the License. You may obtain a copy of the License at
+// http://solderpad.org/licenses/SHL-0.51. Unless required by applicable law
+// or agreed to in writing, software, hardware and materials distributed under
+// this License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+// See LICENSE for license details.
+
+`include "config.sv"
+`default_nettype none
+
+module minion_soc (
+  input wire clk_200MHz,
+  input wire pxl_clk,
+  input wire msoc_clk,
+  input wire rstn,
+  {% for port in module %}
+    {% if not loop.last %} {% endif %}
+    {% if   port.peripheral_type == 'UART' %}
+      {% include "peripherals/uart_port.template" %}
+    {% elif port.peripheral_type == 'LED' %}
+      {% include "peripherals/led_port.template" %}
+    {% elif port.peripheral_type == 'PS2' %}
+      {% include "peripherals/ps2_port.template" %}
+    {% elif port.peripheral_type == 'VGA' %}
+      {% include "peripherals/vga_port.template" %}
+    {% elif port.peripheral_type == 'SD' %}
+      {% include "peripherals/sd_port.template" %}
+    {% elif port.peripheral_type == 'DIP' %}
+      {% include "peripherals/dip_port.template" %}
+    {% elif port.peripheral_type == 'CORE' %}
+      {% include "core/pulp_port.template" %}
+    {% endif %}
+  {% endfor %}
+);
+
+{% for per in module %}
+  {% if  per.peripheral_type == 'CORE' %}
+    {% include "core/pulp_instance.template" %}
+  {% elif per.peripheral_type == 'UART' %}
+    {% include "peripherals/uart_instance.template" %}
+  {% elif per.peripheral_type == 'PS2' %}
+    {% include "peripherals/ps2_instance.template" %}
+  {% elif per.peripheral_type == 'VGA' %}
+    {% include "peripherals/vga_instance.template" %}
+  {% elif per.peripheral_type == 'SD' %}
+    {% include "peripherals/sd_instance.template" %}
+  {% elif per.peripheral_type == 'DIP' %}
+    {% include "peripherals/dip_instance.template" %}
+  {% endif %}
+{% endfor %}
+
+
+logic [15:0] one_hot_data_addr;
+logic [31:0] one_hot_rdata[15:0];
+
+always_comb begin:onehot
+  integer i;
+  core_lsu_rdata = 32'b0;
+  for (i = 0; i < 16; i++) begin
+    one_hot_data_addr[i] = core_lsu_addr[23:20] == i;
+    core_lsu_rdata |= (one_hot_data_addr[i] ? one_hot_rdata[i] : 32'b0);
+  end
+end
+
+always @(posedge msoc_clk or negedge rstn)
+  if (!rstn) begin
+    core_lsu_addr_dly <= 0;
+    {% for per in module %}
+      {% if per.peripheral_type == 'UART' %}
+        {% include "peripherals/uart_init.template" %}
+      {% elif per.peripheral_type == 'LED' %}
+        {% include "peripherals/led_init.template" %}
+      {% elif per.peripheral_type == 'DIP' %}
+        {% include "peripherals/dip_init.template" %}
+      {% elif per.peripheral_type == 'SD' %}
+        {% include "peripherals/sd_init.template" %}
+      {% endif %}
+    {% endfor %}
+  end else begin
+    core_lsu_addr_dly <= core_lsu_addr;
+    {% for per in module %}
+      {% if per.peripheral_type == 'UART' %}
+        {% include "peripherals/uart_bus.template" %}
+      {% elif per.peripheral_type == 'LED' %}
+        {% include "peripherals/led_bus.template" %}
+      {% elif per.peripheral_type == 'DIP' %}
+        {% include "peripherals/dip_bus.template" %}
+      {% elif per.peripheral_type == 'SD' %}
+        {% include "peripherals/sd_bus.template" %}
+      {% endif %}
+    {% endfor %}
+  end
+
+endmodule // chip_top
+`default_nettype wire

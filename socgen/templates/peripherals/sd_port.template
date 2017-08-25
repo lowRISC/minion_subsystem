@@ -1,0 +1,7 @@
+{% block sd_port scoped %}
+  output wire      sd_sclk,
+  input wire       sd_detect,
+  inout wire [3:0] sd_dat,
+  inout wire       sd_cmd,
+  output reg       sd_reset{% if not loop.last %} , {% endif %}
+{% endblock %}
