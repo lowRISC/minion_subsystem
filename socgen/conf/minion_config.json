@@ -11,11 +11,6 @@
     "peripheral_number" : 1
   },
   {
-    "peripheral_type"   : "UART",
-    "memory_region"     : 11,
-    "peripheral_number" : 2
-  },
-  {
     "peripheral_type"   : "LED",
     "memory_region"     : 7,
     "peripheral_number" : 1
