@@ -29,6 +29,8 @@ module minion_soc (
       {% include "peripherals/vga_port.template" %}
     {% elif port.peripheral_type == 'SD' %}
       {% include "peripherals/sd_port.template" %}
+    {% elif port.peripheral_type == 'DIP' %}
+      {% include "peripherals/dip_port.template" %}
     {% elif port.peripheral_type == 'CORE' %}
       {% include "core/pulp_port.template" %}
     {% endif %}

@@ -1,3 +1,3 @@
 {% block led_bus scoped %}
-  from_dip_reg_{{per.peripheral_number}} <= from_dip;
+  from_dip_reg_{{per.peripheral_number}} <= from_dip_{{per.peripheral_number}};
 {% endblock %}

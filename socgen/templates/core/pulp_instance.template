@@ -25,7 +25,6 @@ logic [31:0] irq_i = 32'b0;
 logic        core_busy_o;
 logic        clock_gating_i = 1'b1;
 logic [31:0] boot_addr_i = 32'h80;
-logic  [7:0] core_lsu_rx_byte;
 
 assign one_hot_rdata[{{per.memory_region}}] = shared_rdata;
 

@@ -14,8 +14,8 @@ assign one_hot_rdata[{{per.memory_region}}] = core_lsu_addr[2] ? {keyb_empty,key
 ps2 keyb_mouse(
   .clk(msoc_clk),
   .rst(irst),
-  .PS2_K_CLK_IO(PS2_CLK}),
-  .PS2_K_DATA_IO(PS2_DATA}),
+  .PS2_K_CLK_IO(PS2_CLK),
+  .PS2_K_DATA_IO(PS2_DATA),
   .PS2_M_CLK_IO(),
   .PS2_M_DATA_IO(),
   .ascii_code(readch[6:0]),

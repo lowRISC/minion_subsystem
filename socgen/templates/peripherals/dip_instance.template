@@ -1,3 +1,6 @@
 {% block dip_instance scoped %}
-  assign one_hot_rdata[{{per.memory_region}}] = from_dip_reg;
+
+  reg [15:0] from_dip_reg_{{per.peripheral_number}};
+
+  assign one_hot_rdata[{{per.memory_region}}] = from_dip_reg_{{per.peripheral_number}};
 {% endblock %}
