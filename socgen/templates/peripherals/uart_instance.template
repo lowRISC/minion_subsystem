@@ -17,11 +17,12 @@ wire        uart_empty_{{per.peripheral_number}};
 
 wire [11:0] uart_wrcount_{{per.peripheral_number}};
 wire [11:0] uart_rdcount_{{per.peripheral_number}};
+wire [11:0] uart_rdata_avail_{{per.peripheral_number}};
 wire  [8:0] uart_fifo_data_out_{{per.peripheral_number}};
 reg   [7:0] u_tx_byte_{{per.peripheral_number}};
 logic  [7:0] core_lsu_rx_byte_{{per.peripheral_number}};
 
-assign one_hot_rdata[3] = {uart_wrcount_{{per.peripheral_number}},
+assign one_hot_rdata[{{per.memory_region + 1}}] = {uart_rdata_avail_{{per.peripheral_number}},
                            uart_almostfull_{{per.peripheral_number}},
                            uart_full_{{per.peripheral_number}},
                            uart_rderr_{{per.peripheral_number}},
@@ -32,6 +33,7 @@ assign one_hot_rdata[3] = {uart_wrcount_{{per.peripheral_number}},
                            ~uart_empty_{{per.peripheral_number}},
                            uart_fifo_data_out_{{per.peripheral_number}}[7:0]
                           };
+assing uart_rdata_avail_{{per.peripheral_number}} = uart_wrcount_{{per.peripheral_number}} - uart_rdcount_{{per.peripheral_number}};
 
 rx_delay uart_rx_dly_{{per.peripheral_number}} (
   .clk(msoc_clk),
