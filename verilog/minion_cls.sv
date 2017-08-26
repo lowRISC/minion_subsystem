@@ -276,50 +276,6 @@ RISCV_CORE_slave_2
 );
 
 //------------------------------------------------------------------------------
-//
-// fault injection unit
-//
-//------------------------------------------------------------------------------
-
-//wire       finj_fault;
-//wire [7:0] finj_index;
-
-vio_0 finj_fpga(
-.clk(clk_i),
-.probe_in0(instr_addr_o_cls1),
-.probe_in1(fault_cls),
-.probe_in2(instr_req_o_cls1),
-.probe_in3(instr_req_o_cls1_fj),
-.probe_out0(finj_fault)
-);
-
-fault_injection_assist finj_assist (
-  .finj_fault(finj_fault),
-  //.finj_index(finj_index),
-  //.finj_index(1),
-
-  .instr_req_cls1_i(instr_req_o_cls1),
-//  .instr_addr_cls1_i(instr_addr_o_cls1),
-
-//  .data_req_cls1_i(data_req_o_cls1),
-//  .data_addr_cls1_i(data_addr_o_cls1),
-
-  .instr_req_cls1_o(instr_req_o_cls1_fj)
-//  .instr_addr_cls1_o(instr_addr_o_cls1_fj),
-
-//  .data_req_cls1_o(data_req_o_cls1_fj),
-//  .data_addr_cls1_o(data_addr_o_cls1_fj)
-);
-
-//pseudo_random_gen cls_random_finj (
-//  .clk(clk_i),
-//  .rst(rst_ni),
-
-//  .fault(finj_fault),
-//  .index(finj_index)
-//);
-
-//------------------------------------------------------------------------------
 
 wire rst_cls;
 wire fault_cls;
@@ -340,7 +296,7 @@ cls_cmp_unit cls_assist (
   .data_wdata_ms(data_wdata_o),
   .core_busy_ms(core_busy_o),
 
-  .instr_req_sl1(instr_req_o_cls1_fj),
+  .instr_req_sl1(instr_req_o_cls1),
   .instr_addr_sl1(instr_addr_o_cls1),
 
   .data_req_sl1(data_req_o_cls1),
