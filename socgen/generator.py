@@ -7,21 +7,14 @@
 #
 
 import json
+import sys
 from jinja2 import Environment, FileSystemLoader
-
-# mod = [
-#     {'peripheral_type' : 'UART',
-#      'peripheral_number' : 1 },
-#     {'peripheral_type' : 'UART',
-#      'peripheral_number' : 2 },
-#     {'peripheral_type' : 'LED',
-#      'peripheral_number' : 2 } ]
 
 mod = []
 
-def get_configuration():
+def get_configuration(file):
     global mod
-    json_file = open('conf/minion_config.json')
+    json_file = open(file)
     json_str = json_file.read()
     mod = json.loads(json_str)
     print mod
@@ -43,5 +36,9 @@ def code_generation():
         f.write(output_from_parsed_template)
 
 if __name__ == '__main__':
-    get_configuration()
+    if len(sys.argv) <= 1:
+        file = 'conf/minion_config.json'
+    else:
+        file = sys.argv[1]
+    get_configuration(file)
     code_generation()

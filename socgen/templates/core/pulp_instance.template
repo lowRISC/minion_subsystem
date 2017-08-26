@@ -30,7 +30,7 @@ assign one_hot_rdata[{{per.memory_region}}] = shared_rdata;
 
 assign shared_sel = one_hot_data_addr[{{per.memory_region}}];
 
-riscv_core
+riscv_core{% if per.core_lockstep %}_cls{% endif %}
 #(
   .N_EXT_PERF_COUNTERS ( 0 )
 )
