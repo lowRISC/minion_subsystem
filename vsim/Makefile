@@ -5,11 +5,8 @@ ifndef VERILATOR_ROOT
 $(error Please set environment for the Verilator simulator)
 endif
 
-#DATAMEM=../software/c_test/data.mem1
-#CODEMEM=../software/c_test/code.mem1
-
-DATAMEM=../software/asm_test/data.mem1
-CODEMEM=../software/asm_test/code.mem1
+DATAMEM=../software/minimal/data.mem1
+CODEMEM=../software/minimal/code.mem1
 
 all: clean veri sim copy
 
