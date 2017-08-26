@@ -32,7 +32,7 @@ module coremem
    logic        ar_valid_o;
    logic        r_valid_i;
 
-   enum         logic [2:0] { IDLE, READ_WAIT, WRITE_DATA, WRITE_ADDR, WRITE_WAIT } CS, NS;
+   enum         logic [2:0] { IDLE, READ_WAIT, WRITE_DATA, WRITE_ADDR, WRITE_WAIT, WRITE_ISOLATION } CS, NS;
 
    assign CE = aw_valid_o | ar_valid_o;
    assign WE = aw_valid_o;
@@ -56,14 +56,14 @@ module coremem
                begin
                   // send address over aw channel for writes,
                   // over ar channels for reads
-                  data_gnt_o = 1'b1;
 
                   if (data_we_i)
                     begin
-                       aw_valid_o = 1'b1;
 
-                       NS = WRITE_WAIT;
+                       NS = WRITE_ISOLATION;
                     end else begin
+                       data_gnt_o = 1'b1;
+
                        ar_valid_o = 1'b1;
 
                        NS = READ_WAIT;
@@ -72,6 +72,16 @@ module coremem
                   NS = IDLE;
                end
           end
+
+          // Add one cycle delay for memory fault isolation
+          WRITE_ISOLATION:
+            begin
+               data_gnt_o = 1'b1;
+
+               aw_valid_o = 1'b1;
+
+               NS = WRITE_WAIT;
+            end
 
           // we have sent the address and data and just wait for the write data to
           // be done
