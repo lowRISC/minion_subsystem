@@ -61,6 +61,8 @@ int main(int argc, char** argv) {
 
     top->eval();
 
+    cout<<"Starting simulation"<<endl;
+
     while(!Verilated::gotFinish() && (!exit_code || exit_delay > 1) &&
           (max_time == 0 || main_time < max_time) &&
           (exit_delay != 1)
