@@ -70,10 +70,10 @@ int main(int argc, char** argv) {
         top->rstn = 1;
       }
       if((main_time % 10) == 0) { // 10ns clk
-        top->clk_in1 = 1;
+        top->msoc_clk = 1;
       }
       if((main_time % 10) == 5) {
-        top->clk_in1 = 0;
+        top->msoc_clk = 0;
       }
 
       top->eval();
