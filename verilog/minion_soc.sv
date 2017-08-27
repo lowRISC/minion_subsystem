@@ -300,7 +300,7 @@ reg u_recv;
 reg [15:0] u_baud;
 wire received, recv_err, is_recv, is_trans, uart_maj;
 wire uart_almostfull, uart_full, uart_rderr, uart_wrerr, uart_empty;
-wire [11:0] uart_wrcount, uart_rdcount;
+wire [11:0] uart_wrcount, uart_rdcount, uart_rdata_avail;
 wire [8:0] uart_fifo_data_out;
 reg  [7:0] u_tx_byte;
 
@@ -325,7 +325,8 @@ uart i_uart(
     .recv_ack(u_recv)
     );
 
-assign one_hot_rdata[3] = {uart_wrcount,uart_almostfull,uart_full,uart_rderr,uart_wrerr,uart_fifo_data_out[8],is_trans,is_recv,~uart_empty,uart_fifo_data_out[7:0]};
+assign one_hot_rdata[3] = {uart_rdata_avail,uart_almostfull,uart_full,uart_rderr,uart_wrerr,uart_fifo_data_out[8],is_trans,is_recv,~uart_empty,uart_fifo_data_out[7:0]};
+assing uart_rdata_avail = uart_wrcount - uart_rdcount;
 
    wire    tx_rd_fifo;
    wire    rx_wr_fifo;
