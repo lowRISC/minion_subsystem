@@ -33,6 +33,9 @@ module minion_soc (
       {% include "peripherals/dip_port.template" %}
     {% elif port.peripheral_type == 'CORE' %}
       {% include "core/pulp_port.template" %}
+      {% if port.fault_injection == true %}
+        {% include "soc/finj_port.template" %}
+      {% endif %}
     {% endif %}
   {% endfor %}
 );

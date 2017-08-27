@@ -1,0 +1,84 @@
+module top_arty(
+
+    //! LEDs.
+    output [7:0] LED,
+
+    // clock and reset
+    input         CLK100MHZ,
+    input         ck_rst,
+
+    output wire 	  uart_rxd_out,
+    input wire      uart_txd_in,
+
+    // pusb button array
+    input wire [3:0]  btn,
+    input wire [3:0]  sw,
+
+    {% if par.pin %}
+    input wire       ard_finj,
+    {% endif %}
+
+    output wire [11:0] rgb_led
+
+);
+
+clk_wiz_arty_0 clk_gen (
+  .clk_in1     ( CLK100MHZ     ), // 100 MHz onboard
+  .clk_out1    ( clk_200MHz    ), // 200 MHz
+  .clk_out2    ( msoc_clk      ), // 25 MHz (for minion SOC)
+  .clk_out3    ( pxl_clk       ),
+  // Status and control signals
+  .reset      ( !ck_rst       ),
+  .locked      ( clk_locked    )
+);
+
+{% if par.finj %}
+
+wire finj_vio;
+wire finj_btn;
+wire finj_pin;
+
+wire finj_fault = finj_vio | finj_btn | finj_pin ;
+
+{% if par.vio %}
+vio_0 finj_troublemaker(
+  .clk(msoc_clk),
+  .probe_out0(finj_vio)
+);
+{% else %}
+assign finj_vio = 0;
+{% endif %}
+
+{% if par.btn %}
+assign finj_btn = btn[0];
+{% else %}
+assign finj_btn = 0;
+{% endif %}
+
+{% if par.pin %}
+assign finj_pin = !ard_finj;
+{% else %}
+assign finj_pin = 0;
+{% endif %}
+
+{% endif %}
+
+minion_soc msoc (
+  .clk_200MHz (clk_200MHz),
+  .msoc_clk(msoc_clk),
+  .pxl_clk(pxl_clk),
+
+  .rstn(clk_locked),
+{% if par.finj %}
+  .finj_fault(finj_fault),
+  .finj_index(1),
+  //.finj_index(finj_index),
+{% endif %}
+  .uart_tx_1(uart_rxd_out),
+  .uart_rx_1(uart_txd_in),
+
+  .to_led_1(rgb_led[7:0]),
+  .from_dip_2(btn)
+);
+
+endmodule
