@@ -8,47 +8,68 @@ endif
 DATAMEM=../software/minimal/data.mem1
 CODEMEM=../software/minimal/code.mem1
 
-all: clean veri sim copy
+all:  clean veri sim copy
 
+cls:  clean cls veri sim copy
+
+finj: clean finj veri sim copy
 #--------------------------------------------------------------------
 # Sources
 #--------------------------------------------------------------------
 
 verilog_srcs = \
-	../verilog/minion_soc.sv \
-	../verilog/coremem.sv \
-	../verilog/debouncer.v \
-	../verilog/dpram.v \
-	../verilog/dualmem.v \
-	../verilog/fstore2.v \
-	../verilog/my_fifo.v \
-	../verilog/rambyte.v \
-	../verilog/rx_delay.v \
-	../verilog/uart.v \
-	../pulpino/ips/riscv/include/riscv_defines.sv \
-	../pulpino/ips/riscv/controller.sv \
-	../pulpino/ips/riscv/cs_registers.sv \
-	../pulpino/ips/riscv/debug_unit.sv \
-	../pulpino/ips/riscv/decoder.sv \
-	../pulpino/ips/riscv/exc_controller.sv \
-	../pulpino/ips/riscv/ex_stage.sv \
-	../pulpino/ips/riscv/hwloop_controller.sv \
-	../pulpino/ips/riscv/hwloop_regs.sv \
-	../pulpino/ips/riscv/id_stage.sv \
-	../pulpino/ips/riscv/if_stage.sv \
-	../pulpino/ips/riscv/include/riscv_config.sv \
-	../pulpino/ips/riscv/load_store_unit.sv \
-	../pulpino/ips/riscv/mult.sv \
-	../pulpino/ips/riscv/prefetch_L0_buffer.sv \
-	../pulpino/ips/riscv/register_file_ff.sv \
-	../pulpino/ips/riscv/riscv_core.sv \
-	../pulpino/rtl/components/cluster_clock_gating.sv \
-	../pulpino/ips/riscv/alu.sv \
-	../pulpino/ips/riscv/alu_div.sv \
-	../pulpino/ips/riscv/compressed_decoder.sv \
-	../pulpino/ips/riscv/prefetch_buffer.sv \
-	src/mem_tb.v \
-  src/xilinx_tb.v \
+		../socgen/minion_soc.sv \
+		../socgen/coremem.sv \
+		../verilog/debouncer.v \
+		../verilog/dpram.v \
+		../verilog/dualmem.v \
+		../verilog/fstore2.v \
+		../verilog/my_fifo.v \
+		../verilog/rambyte.v \
+		../verilog/rx_delay.v \
+		../verilog/uart.v \
+		../pulpino/ips/riscv/include/riscv_defines.sv \
+		../pulpino/ips/riscv/controller.sv \
+		../pulpino/ips/riscv/cs_registers.sv \
+		../pulpino/ips/riscv/debug_unit.sv \
+		../pulpino/ips/riscv/decoder.sv \
+		../pulpino/ips/riscv/exc_controller.sv \
+		../pulpino/ips/riscv/ex_stage.sv \
+		../pulpino/ips/riscv/hwloop_controller.sv \
+		../pulpino/ips/riscv/hwloop_regs.sv \
+		../pulpino/ips/riscv/id_stage.sv \
+		../pulpino/ips/riscv/if_stage.sv \
+		../pulpino/ips/riscv/include/riscv_config.sv \
+		../pulpino/ips/riscv/load_store_unit.sv \
+		../pulpino/ips/riscv/mult.sv \
+		../pulpino/ips/riscv/prefetch_L0_buffer.sv \
+		../pulpino/ips/riscv/register_file_ff.sv \
+		../pulpino/ips/riscv/riscv_core.sv \
+		../pulpino/rtl/components/cluster_clock_gating.sv \
+		../pulpino/ips/riscv/alu.sv \
+		../pulpino/ips/riscv/alu_div.sv \
+		../pulpino/ips/riscv/compressed_decoder.sv \
+		../pulpino/ips/riscv/prefetch_buffer.sv \
+		src/mem_tb.v \
+	  src/xilinx_tb.v \
+
+all: tb_src = \
+        src/veri_top.cc \
+
+cls: tb_src = \
+        src/veri_top.cc \
+
+finj: tb_src = \
+        src/veri_top_finj.cc \
+
+cls: cls_srcs := \
+		../socgen/minion_cls.sv \
+		../verilog/cls_unit.sv \
+
+finj: finj_srcs := \
+		../socgen/minion_cls.sv \
+		../verilog/cls_unit.sv \
+		../verilog/fault_injection.sv \
 
 #--------------------------------------------------------------------
 # Build rules (verilator)
@@ -57,6 +78,8 @@ veri:
 	verilator \
 	  --cc \
     $(verilog_srcs) \
+		$(cls_srcs) \
+		$(finj_srcs) \
 	  -DVERILATOR_GCC \
 	  +incdir+../verilog \
 		      +incdir+src \
@@ -72,7 +95,7 @@ veri:
 	  -CFLAGS "-I/media/nanimo/lowRISC_repo/minion_subsystem/vsim" \
 	  -LDFLAGS "-pthread" \
 	  --trace \
-	 	--exe src/veri_top.cc
+	 	--exe $(tb_src)
 
 #--------------------------------------------------------------
 # Build the simulator (verilator)
