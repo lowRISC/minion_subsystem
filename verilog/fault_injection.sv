@@ -101,32 +101,29 @@ module fault_injection_assist
   output wire       core_busy_cls2_o
 );
 
-//assign instr_addr_cls1_o = instr_addr_cls1_i;
-//assign data_addr_cls1_o  = data_addr_cls1_i;
-
 fault_injection_mux finj_mux_instr_req_cls1 (
-  .sel(finj_fault),// & (finj_index == 1)),
+  .sel(finj_fault & (finj_index == 1)),
   .in(instr_req_cls1_i),
   .out(instr_req_cls1_o)
 );
 
-//fault_injection_mux finj_mux_instr_addr_cls1 (
-//  .sel(finj_fault & (finj_index == 2)),
-//  .in(instr_addr_cls1_i[7]),
-//  .out(instr_addr_cls1_o[7])
-//);
+fault_injection_mux finj_mux_instr_addr_cls1 (
+  .sel(finj_fault & (finj_index == 2)),
+  .in(instr_addr_cls1_i[7]),
+  .out(instr_addr_cls1_o[7])
+);
 
-//fault_injection_mux finj_mux_data_req_cls1 (
-//  .sel(finj_fault & (finj_index == 4)),
-//  .in(data_req_cls1_i),
-//  .out(data_req_cls1_o)
-//);
+fault_injection_mux finj_mux_data_req_cls1 (
+  .sel(finj_fault & (finj_index == 4)),
+  .in(data_req_cls1_i),
+  .out(data_req_cls1_o)
+);
 
-//fault_injection_mux finj_mux_data_addr_cls1 (
-//  .sel(finj_fault & (finj_index == 8)),
-//  .in(data_addr_cls1_i[7]),
-//  .out(data_addr_cls1_o[7])
-//);
+fault_injection_mux finj_mux_data_addr_cls1 (
+  .sel(finj_fault & (finj_index == 8)),
+  .in(data_addr_cls1_i[7]),
+  .out(data_addr_cls1_o[7])
+);
 
 endmodule
 
