@@ -123,7 +123,7 @@ my_fifo #(.width(36)) tx_fifo (
 .wr_clk(~msoc_clk),      // input wire write clk
 .rst(data_rst),      // input wire rst
 .din({dummy[3:0],core_lsu_wdata}),      // input wire [31 : 0] din
-.wr_en(core_lsu_req&core_lsu_we&one_hot_data_addr[5]),  // input wire wr_en
+.wr_en(we_d&one_hot_data_addr[5]),  // input wire wr_en
 .rd_en(tx_rd_fifo),  // input wire rd_en
 .dout({dummy[7:4],data_out_tx_fifo}),    // output wire [31 : 0] dout
 .rdcount(tx_rdcount),         // 12-bit output: Read count
@@ -141,7 +141,7 @@ my_fifo #(.width(36)) rx_fifo (
 .rst(data_rst),      // input wire rst
 .din({dummy[11:8],data_in_rx_fifo}),      // input wire [31 : 0] din
 .wr_en(rx_wr_fifo),  // input wire wr_en
-.rd_en(core_lsu_req&core_lsu_we&one_hot_data_addr[4]),  // input wire rd_en
+.rd_en(we_d&one_hot_data_addr[4]),  // input wire rd_en
 .dout({dummy[15:12],one_hot_rdata[{{per.memory_region}}]}),    // output wire [31 : 0] dout
 .rdcount(rx_rdcount),         // 12-bit output: Read count
 .rderr(rx_rderr),             // 1-bit output: Read error

@@ -33,7 +33,7 @@ assign one_hot_rdata[{{per.memory_region + 1}}] = {uart_rdata_avail_{{per.periph
                            ~uart_empty_{{per.peripheral_number}},
                            uart_fifo_data_out_{{per.peripheral_number}}[7:0]
                           };
-assing uart_rdata_avail_{{per.peripheral_number}} = uart_wrcount_{{per.peripheral_number}} - uart_rdcount_{{per.peripheral_number}};
+assign uart_rdata_avail_{{per.peripheral_number}} = uart_wrcount_{{per.peripheral_number}} - uart_rdcount_{{per.peripheral_number}};
 
 rx_delay uart_rx_dly_{{per.peripheral_number}} (
   .clk(msoc_clk),
@@ -63,7 +63,7 @@ my_fifo #(.width(9)) uart_rx_fifo_{{per.peripheral_number}} (
   .rst(~rstn),      // input wire rst
   .din({recv_err_{{per.peripheral_number}},core_lsu_rx_byte_{{per.peripheral_number}}}),      // input wire [width-1 : 0] din
   .wr_en(received_{{per.peripheral_number}}&&!u_recv_{{per.peripheral_number}}),  // input wire wr_en
-  .rd_en(core_lsu_req&core_lsu_we&one_hot_data_addr[{{per.memory_region + 1}}]),  // input wire rd_en
+  .rd_en(we_d&one_hot_data_addr[{{per.memory_region + 1}}]),  // input wire rd_en
   .dout(uart_fifo_data_out_{{per.peripheral_number}}),    // output wire [width-1 : 0] dout
   .rdcount(uart_rdcount_{{per.peripheral_number}}),         // 12-bit output: Read count
   .rderr(uart_rderr_{{per.peripheral_number}}),             // 1-bit output: Read error
