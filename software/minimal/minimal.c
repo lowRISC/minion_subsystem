@@ -23,6 +23,11 @@ int main() {
       uart_send(c);
     }
 
+    if(from_dip() != 0) {
+      uart_send_buf("You pressed a button!\n", 22);
+      while(from_dip()) { }
+    }
+
     delay();
   }
 }

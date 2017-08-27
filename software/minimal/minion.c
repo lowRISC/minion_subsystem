@@ -3,7 +3,7 @@
 #define ADD_UART_TX        0x200000
 #define ADD_UART_BAUD      0x200004
 #define ADD_UART_STATUS    0x300000
-#define ADD_LED_OUT        0x700000
+#define ADD_GPIO           0x700000
 
 #define SIM_DELAY 250
 #define REAL_DELAY 250000
@@ -19,7 +19,11 @@ void delay() {
 
 void to_led(unsigned int data)
 {
-  *(volatile unsigned int*)(ADD_LED_OUT) = data;
+  *(volatile unsigned int*)(ADD_GPIO) = data;
+}
+
+unsigned int from_dip(){
+  return *(volatile unsigned int*)(ADD_GPIO);
 }
 
 void uart_init() {

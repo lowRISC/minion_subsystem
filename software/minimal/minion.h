@@ -10,6 +10,8 @@ void delay();
 
 void to_led(unsigned int data);
 
+unsigned int from_dip();
+
 void uart_init();
 
 int uart_get_status();
