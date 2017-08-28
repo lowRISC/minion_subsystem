@@ -6,7 +6,7 @@
 #define ADD_GPIO           0x700000
 #define ADD_RST            0xB00000
 
-#define SIM_DELAY 250
+#define SIM_DELAY  60
 #define REAL_DELAY 60
 
 int init(int temp) {

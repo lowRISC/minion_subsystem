@@ -12,7 +12,7 @@ int main() {
 
   char pkt[11] = {0x7E, 0x08, 0x02, 0xC0, 0x3C,  0, 0x11, 0x02, 0xFB, 0x7F};
 
-  int i;
+  char i      = 0;
   int *cnt     = 0x100100;
   int *start   = 0x100104;
   int *tx_flag = 0x100108;
@@ -40,6 +40,7 @@ int main() {
           }
           *start = 0;
           *cnt = 0;
+          delay();
         } else {
           *cnt = 0;
         }
