@@ -7,7 +7,7 @@
 #define ADD_RST            0xB00000
 
 #define SIM_DELAY 250
-#define REAL_DELAY 250000
+#define REAL_DELAY 60
 
 int init(int temp) {
   return temp + 1;

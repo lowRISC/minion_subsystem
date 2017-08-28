@@ -19,11 +19,11 @@ time.sleep(1)
 
 #                              start    TC   APP   SEQ   PKT ACK   SER   SER   CRC  stop
 #                               flag          ID  flag   LEN      type  subT        flag
-test_packet = array.array('B', [0x7E, 0x18, 0x01, 0xC0, 0x3C,  0, 0x11, 0x01, 0xFB, 0x7F]).tostring()
+test_packet = array.array('B', [0x7E, 0x18, 0x01, 0xC0, 0x3C,  0, 0x11, 0x01, 0x00, 0x7F]).tostring()
 
 #            start    TM   APP   SEQ   PKT ACK   SER   SER   CRC  stop
 #             flag          ID  flag   LEN      type  subT        flag
-cmp_packet = [0x7E, 0x08, 0x02, 0xC0, 0x3C,  0, 0x11, 0x02, 0xFB, 0x7F]
+cmp_packet = [0x7E, 0x08, 0x02, 0xC0, 0x3C,  0, 0x11, 0x02, 0x00, 0x7F]
 
 def write_to_port():
     global port, tx_pkt_counter, this_is_the_end
