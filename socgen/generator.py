@@ -65,7 +65,7 @@ def code_generation():
                         # trim_blocks=True)
     template = env.get_template('minion_soc.template')
     output_from_parsed_template = template.render(module= mod)
-    print output_from_parsed_template
+    print "minion_soc.sv file generated"
     with open("minion_soc.sv", "wb") as f:
         f.write(output_from_parsed_template)
 
@@ -73,20 +73,20 @@ def code_generation():
 
     template = env.get_template('soc/coremem.template')
     output_from_parsed_template = template.render(cls = params['cls'])
-    print output_from_parsed_template
+    print "coremem.sv file generated"
     with open("coremem.sv", "wb") as f:
         f.write(output_from_parsed_template.encode('utf8'))
 
     template = env.get_template('soc/top_arty.template')
     output_from_parsed_template = template.render(par = params)
-    print output_from_parsed_template
+    print "top_arty.sv file generated"
     with open("top_arty.sv", "wb") as f:
         f.write(output_from_parsed_template.encode('utf8'))
 
     if params['finj']:
         template = env.get_template('soc/minion_cls.template')
         output_from_parsed_template = template.render(finj = params['finj'])
-        print output_from_parsed_template
+        print "minion_cls.sv file generated"
         with open("minion_cls.sv", "wb") as f:
             f.write(output_from_parsed_template.encode('utf8'))
 
