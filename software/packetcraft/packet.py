@@ -5,8 +5,10 @@ import threading
 import sys
 import os
 import signal
+import random
 
 port = serial.Serial("/dev/ttyUSB1", baudrate=9600, timeout=1.0)
+f_port = serial.Serial("/dev/ttyACM0", baudrate=9600, timeout=1.0)
 
 buffer = ""
 
@@ -65,6 +67,14 @@ def check_packet(buf, pkt_len):
         rx_pkt_counter += 1
         #print "good to go"
 
+def fault_injection():
+    global f_port, this_is_the_end
+    time.sleep(5)
+    while not this_is_the_end:
+        f_port.write('t')
+        ti = uniform(0,2)
+        time.sleep(ti)
+
 def sg_handler(signal, frame):
     global this_is_the_end
     print "Time to go, bye!"
@@ -75,17 +85,21 @@ def testing():
     thread_rx  = threading.Thread(target=read_from_port)
     thread_tx  = threading.Thread(target=write_to_port)
     thread_ch  = threading.Thread(target=find_packet)
+    thread_fj  = threading.Thread(target=fault_injection)
 
     thread_rx.start()
     thread_tx.start()
     thread_ch.start()
+    thread_fj.start()
     while not this_is_the_end:
         print "Lost packets", tx_pkt_counter - rx_pkt_counter, "/ Rx, Tx:",  rx_pkt_counter, tx_pkt_counter
         time.sleep(1)
     thread_rx.join()
     thread_tx.join()
     thread_ch.join()
+    thread_fj.join()
     port.close()
+    f_port.close()
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, sg_handler)
