@@ -14,6 +14,7 @@ buffer = ""
 
 rx_pkt_counter = 0
 tx_pkt_counter = 0
+fj_counter = 0
 
 this_is_the_end = False
 
@@ -68,11 +69,12 @@ def check_packet(buf, pkt_len):
         #print "good to go"
 
 def fault_injection():
-    global f_port, this_is_the_end
+    global f_port, this_is_the_end, fj_counter
     time.sleep(5)
     while not this_is_the_end:
         f_port.write('t')
-        ti = uniform(0,2)
+        ti = random.uniform(0,2)
+        fj_counter += 1
         time.sleep(ti)
 
 def sg_handler(signal, frame):
@@ -92,7 +94,7 @@ def testing():
     thread_ch.start()
     thread_fj.start()
     while not this_is_the_end:
-        print "Lost packets", tx_pkt_counter - rx_pkt_counter, "/ Rx, Tx:",  rx_pkt_counter, tx_pkt_counter
+        print "Lost packets", tx_pkt_counter - rx_pkt_counter, "/ Rx, Tx:",  rx_pkt_counter, tx_pkt_counter, "FJ: ", fj_counter
         time.sleep(1)
     thread_rx.join()
     thread_tx.join()
