@@ -5,9 +5,6 @@ ifndef VERILATOR_ROOT
 $(error Please set environment for the Verilator simulator)
 endif
 
-DATAMEM=../software/minimal/data.mem1
-CODEMEM=../software/minimal/code.mem1
-
 all:  clean veri sim copy
 
 cls:  clean cls veri sim copy
@@ -70,6 +67,16 @@ finj: finj_srcs := \
 		../socgen/minion_cls.sv \
 		../verilog/cls_unit.sv \
 		../verilog/fault_injection.sv \
+
+all: DATAMEM=../software/minimal/data.mem1
+all: CODEMEM=../software/minimal/code.mem1
+
+cls: DATAMEM=../software/minimal_cls/data.mem1
+cls: CODEMEM=../software/minimal_cls/code.mem1
+
+finj: DATAMEM=../software/minimal_cls/data.mem1
+finj: CODEMEM=../software/minimal_cls/code.mem1
+
 
 #--------------------------------------------------------------------
 # Build rules (verilator)

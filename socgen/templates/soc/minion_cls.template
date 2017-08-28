@@ -57,6 +57,8 @@ module riscv_core_cls
   // CPU Control Signals
   input  logic        fetch_enable_i,
   output logic        core_busy_o,
+
+  output logic triggered,
   {% if finj %}
   input logic       finj_fault,
   input logic [9:0] finj_index,
@@ -338,7 +340,8 @@ cls_handler_unit cls_terminator (
 
     .rst_o(rst_cls),
 
-    .fault(fault_cls)
+    .fault(fault_cls),
+    .trg_o(triggered)
 );
 
 endmodule

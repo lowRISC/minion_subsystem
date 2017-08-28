@@ -77,6 +77,9 @@ RISCV_CORE
 
   .fetch_enable_i  ( fetch_enable_i    ),
   .core_busy_o     ( core_busy_o       ),
+  {% if per.core_lockstep %}
+  .triggered(rst_cls),
+  {% endif %}
   {% if per.fault_injection %}
   .finj_fault(finj_fault),
   .finj_index(finj_index),

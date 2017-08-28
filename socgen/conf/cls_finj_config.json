@@ -3,6 +3,7 @@
     "memory_region"     : 8,
     "rom_region"        : 0,
     "ram_region"        : 1,
+    "rst_src_region"    : 11,
     "core_lockstep"     : true,
     "fault_injection"   : true,
     "vio"               : true,

@@ -102,7 +102,8 @@ module cls_handler_unit
   input  wire rst_i,
 
   input  wire fault,
-  output reg  rst_o
+  output reg  rst_o,
+  output reg  trg_o
 );
 
 reg [1:0] state = WORKING;
@@ -112,11 +113,13 @@ parameter WORKING  = 2'b00, FAULT_DETECTED = 2'b01, RST_CYCLE = 2'b11 ;
 always @(negedge rst_i or posedge clk) begin
   if (!rst_i) begin
      rst_o <= rst_i;
+     trg_o <= 1'b0;
      state <= WORKING;
      $display("In reset\n");
   end else begin
     if(state == WORKING && fault) begin
       rst_o <= 0;
+      trg_o <= 1'b1;
       state <= FAULT_DETECTED;
       $display("Fault detected, lets reset everything\n");
     end else if (state == FAULT_DETECTED) begin

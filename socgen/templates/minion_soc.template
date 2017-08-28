@@ -43,6 +43,9 @@ module minion_soc (
 {% for per in module %}
   {% if  per.peripheral_type == 'CORE' %}
     {% include "core/pulp_instance.template" %}
+    {% if per.core_lockstep %}
+      {% include "peripherals/rst_src_instance.template" %}
+    {% endif %}
   {% elif per.peripheral_type == 'UART' %}
     {% include "peripherals/uart_instance.template" %}
   {% elif per.peripheral_type == 'PS2' %}

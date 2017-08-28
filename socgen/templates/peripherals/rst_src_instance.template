@@ -1,0 +1,6 @@
+{% block rst_src_instance scoped %}
+
+wire rst_cls;
+assign one_hot_rdata[{{per.rst_src_region}}] = rst_cls | 32'b0;
+
+{% endblock %}
