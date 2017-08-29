@@ -1,0 +1,151 @@
+{% block core_instance scoped %}
+
+logic        core_instr_req;
+logic        core_instr_gnt;
+logic        core_instr_rvalid;
+logic [31:0] core_instr_addr;
+
+logic        core_lsu_req;
+logic        core_lsu_gnt;
+logic        core_lsu_rvalid;
+logic        core_lsu_we;
+logic [31:0] core_lsu_rdata;
+
+logic        debug_req = 1'b0;
+logic        debug_gnt;
+logic        debug_rvalid;
+logic [14:0] debug_addr = 15'b0;
+logic        debug_we = 1'b0;
+logic [31:0] debug_wdata = 32'b0;
+logic [31:0] debug_rdata;
+logic [31:0] core_instr_rdata;
+
+logic        fetch_enable_i = 1'b1;
+logic [31:0] irq_i = 32'b0;
+logic        core_busy_o;
+logic        clock_gating_i = 1'b1;
+logic [31:0] boot_addr_i = 32'h80;
+
+assign one_hot_rdata[{{per.memory_region}}] = shared_rdata;
+
+assign shared_sel = one_hot_data_addr[{{per.memory_region}}];
+
+riscv_core{% if per.core_lockstep %}_cls{% endif %}
+#(
+  .N_EXT_PERF_COUNTERS ( 0 )
+)
+RISCV_CORE
+(
+  .clk_i           ( msoc_clk          ),
+  .rst_ni          ( rstn              ),
+
+  .clock_en_i      ( 1'b1              ),
+  .test_en_i       ( 1'b0              ),
+
+  .boot_addr_i     ( {{per.boot_address }} ),
+  .core_id_i       ( 4'h0              ),
+  .cluster_id_i    ( 6'h0              ),
+
+  .instr_addr_o    ( core_instr_addr   ),
+  .instr_req_o     ( core_instr_req    ),
+  .instr_rdata_i   ( core_instr_rdata  ),
+  .instr_gnt_i     ( core_instr_gnt    ),
+  .instr_rvalid_i  ( core_instr_rvalid ),
+
+  .data_addr_o     ( core_lsu_addr     ),
+  .data_wdata_o    ( core_lsu_wdata    ),
+  .data_we_o       ( core_lsu_we       ),
+  .data_req_o      ( core_lsu_req      ),
+  .data_be_o       ( core_lsu_be       ),
+  .data_rdata_i    ( core_lsu_rdata    ),
+  .data_gnt_i      ( core_lsu_gnt      ),
+  .data_rvalid_i   ( core_lsu_rvalid   ),
+  .data_err_i      ( 1'b0              ),
+
+  .irq_i           ( irq_i             ),
+
+  .debug_req_i     ( debug_req         ),
+  .debug_gnt_o     ( debug_gnt         ),
+  .debug_rvalid_o  ( debug_rvalid      ),
+  .debug_addr_i    ( debug_addr        ),
+  .debug_we_i      ( debug_we          ),
+  .debug_wdata_i   ( debug_wdata       ),
+  .debug_rdata_o   ( debug_rdata       ),
+  .debug_halted_o  (                   ),
+  .debug_halt_i    ( 1'b0              ),
+  .debug_resume_i  ( 1'b1              ),
+
+  .fetch_enable_i  ( fetch_enable_i    ),
+  .core_busy_o     ( core_busy_o       ),
+  {% if per.core_lockstep %}
+  .triggered(rst_cls),
+  {% endif %}
+  {% if per.fault_injection %}
+  .finj_fault(finj_fault),
+  .finj_index(finj_index),
+  {% endif %}
+  .ext_perf_counters_i (  2'b0         )
+);
+
+//----------------------------------------------------------------------------//
+// Data RAM
+//----------------------------------------------------------------------------//
+
+coremem coremem_d (
+  .clk_i(msoc_clk),
+  .rst_ni(rstn),
+  .data_req_i(core_lsu_req),
+  .data_gnt_o(core_lsu_gnt),
+  .data_rvalid_o(core_lsu_rvalid),
+  .data_we_i(core_lsu_we),
+  .CE(ce_d),
+  .WE(we_d)
+);
+
+datamem block_d (
+  .clk(msoc_clk),
+  .wea(ce_d & one_hot_data_addr[{{per.ram_region}}] & we_d),
+  .ena(we_d ? core_lsu_be : 4'b1111),
+  .addra(core_lsu_addr[15:2]),
+  .dina(core_lsu_wdata),
+  .douta(one_hot_rdata[1]),
+  .web(1'b0),
+  .enb(4'b0000),
+  .addrb(core_lsu_addr[15:2]),
+  .dinb(core_lsu_wdata),
+  .doutb()
+);
+
+//----------------------------------------------------------------------------//
+// Instruction RAM
+//----------------------------------------------------------------------------//
+
+logic ce_i;
+logic we_i;
+
+coremem coremem_i (
+  .clk_i(msoc_clk),
+  .rst_ni(rstn),
+  .data_req_i(core_instr_req),
+  .data_gnt_o(core_instr_gnt),
+  .data_rvalid_o(core_instr_rvalid),
+  .data_we_i(1'b0),
+  .CE(ce_i),
+  .WE(we_i)
+);
+
+progmem block_i (
+  .clk(msoc_clk),
+  .wea(1'b0),
+  .ena(4'b1111),
+  .addra(core_instr_addr[15:2]),
+  .dina(32'b0),
+  .douta(core_instr_rdata),
+  .web(ce_d & one_hot_data_addr[{{per.rom_region}}] & we_d),
+  .enb(we_d ? core_lsu_be : 4'b1111),
+  .addrb(core_lsu_addr[15:2]),
+  .dinb(core_lsu_wdata),
+  .doutb(one_hot_rdata[{{per.rom_region}}])
+);
+
+{% endblock %}

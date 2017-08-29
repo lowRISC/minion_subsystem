@@ -1,0 +1,37 @@
+[ {
+    "peripheral_type"   : "CORE",
+    "memory_region"     : 8,
+    "rom_region"        : 0,
+    "ram_region"        : 1,
+    "rst_src_region"    : 11,
+    "core_lockstep"     : true,
+    "boot_address"      : "32'h80"
+  },
+  {
+    "peripheral_type"   : "UART",
+    "memory_region"     : 2,
+    "peripheral_number" : 1
+  },
+  {
+    "peripheral_type"   : "LED",
+    "memory_region"     : 7,
+    "peripheral_number" : 1
+  },
+  {
+    "peripheral_type"   : "DIP",
+    "memory_region"     : 7,
+    "peripheral_number" : 2
+  },
+  {
+    "peripheral_type"   : "SD",
+    "memory_region"     : 4
+  },
+  {
+    "peripheral_type"   : "PS2",
+    "memory_region"     : 9
+  },
+  {
+    "peripheral_type"   : "VGA",
+    "memory_region"     : 10
+  }
+]

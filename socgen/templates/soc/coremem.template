@@ -59,8 +59,15 @@ module coremem
 
                   if (data_we_i)
                     begin
-
+                       {% if cls %}
                        NS = WRITE_ISOLATION;
+                       {% else %}
+                       data_gnt_o = 1'b1;
+
+                       aw_valid_o = 1'b1;
+
+                       NS = WRITE_WAIT;
+                       {% endif %}
                     end else begin
                        data_gnt_o = 1'b1;
 

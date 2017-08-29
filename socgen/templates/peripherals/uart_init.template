@@ -1,0 +1,6 @@
+{% block uart_init scoped %}
+  u_baud_{{per.peripheral_number}} <= 16'd87;
+  u_trans_{{per.peripheral_number}} <= 1'b0;
+  u_tx_byte_{{per.peripheral_number}} <= 8'b0;
+  u_recv_{{per.peripheral_number}} <= 0;
+{% endblock %}

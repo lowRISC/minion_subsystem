@@ -1,0 +1,4 @@
+{% block finj_port scoped %}
+input  logic       finj_fault,
+input logic [9:0] finj_index{% if not loop.last %} , {% endif %}
+{% endblock %}

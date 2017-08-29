@@ -1,0 +1,4 @@
+{% block led_bus scoped %}
+  if (core_lsu_req&core_lsu_we&one_hot_data_addr[{{per.memory_region}}])
+    to_led_{{per.peripheral_number}} <= core_lsu_wdata;
+{% endblock %}

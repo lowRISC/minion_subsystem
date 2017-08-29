@@ -1,0 +1,4 @@
+{% block uart_port scoped %}
+  output wire uart_tx_{{port.peripheral_number}},
+  input wire 	uart_rx_{{port.peripheral_number}}{% if not loop.last %} , {% endif %}
+{% endblock %}
