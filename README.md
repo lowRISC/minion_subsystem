@@ -1,2 +1,2 @@
 # Minion subsystem
-Demonstration of SD card controller using Pulpino and Nexys4-ddr board. Integrated into rocket for first release.
+This branch has a minion SoC in a core lock step configuration. The version is compatible with the minion-v0.4.
