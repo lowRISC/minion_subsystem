@@ -122,10 +122,10 @@ int main(int argc, char** argv) {
         randFaultTime = rand()%(MAX_FTIME-MIN_FTIME + 1) + MIN_FTIME;
         randFaultTime += main_time;
 
-        cout<<"Fault injected? just give index ";
-        cout<<"-1 for no fault injection for this cycle";
-        cout<<"-2 for no fault injection anymore";
-        cout<<"-3 for exit";
+        cout<<"Fault injected? just give index"<<endl;;
+        cout<<"-1 for no fault injection for this cycle"<<endl;;
+        cout<<"-2 for no fault injection anymore"<<endl;;
+        cout<<"-3 for exit"<<endl;;
         cin>>findex;
         if(findex == -1) {
           cout<<"No fault injection for this cycle"<<endl;
