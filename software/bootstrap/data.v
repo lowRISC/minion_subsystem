@@ -54,7 +54,7 @@ module datamem(clk, dina, addra, wea, douta, ena, dinb, addrb, web, doutb, enb);
 
 parameter rwidth = 14;
 
-input clk;
+input wire clk;
 input [31:0] dina;
 input [13:0] addra;
 input [0:0] wea;

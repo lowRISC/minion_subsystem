@@ -3,7 +3,7 @@ module dualmem(clka, clkb, dina, dinb, addra, addrb, wea, web, douta, doutb, ena
 
    parameter rwidth = 13;
 
-   input clka, clkb;
+   input wire clka, clkb;
    input [7:0] dina, dinb;
    input [rwidth-1:0] addra, addrb;
    input [0:0]        wea, web;

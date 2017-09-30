@@ -74,12 +74,12 @@ parameter CMD_SIZE = 40;
 parameter RESP_SIZE_LONG = 127;
 parameter RESP_SIZE_SHORT = 39;
 //---------------Input ports---------------
-input sd_clk;
-input rst;
+input wire sd_clk;
+input wire rst;
 input [2:0] setting_i;
 input [37:0] cmd_i;
-input start_i;
-input cmd_dat_i;
+input wire start_i;
+input wire cmd_dat_i;
 input [31:0] timeout_i;   
 //---------------Output ports---------------
 output reg [BITS_TO_SEND-1:0] packet_o;

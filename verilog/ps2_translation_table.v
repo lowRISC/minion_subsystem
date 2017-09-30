@@ -79,7 +79,7 @@ module ps2_translation_table
    rx_released_i
    ) ;
 
-   input reset_i,
+   input wire reset_i,
          clock_i,
          translate_i ;
 
@@ -87,18 +87,18 @@ module ps2_translation_table
    output [7:0] code_o ;
    input [7:0]  address_i ;
    input [7:0]  data_i ;
-   input        we_i,
+   input        wire we_i,
                 re_i ;
 
    output [7:0] data_o ;
 
-   input        rx_data_ready_i,
+   input        wire rx_data_ready_i,
                 rx_read_i ;
 
-   output       rx_translated_data_ready_o ;
-   output       rx_read_o ;
+   output       wire rx_translated_data_ready_o ;
+   output       wire rx_read_o ;
 
-   input        rx_released_i ;
+   input        wire rx_released_i ;
 
    wire         translation_table_write_enable  = we_i && (!translate_i || !rx_data_ready_i) ;
    wire [7:0]   translation_table_address = ((we_i || re_i) && (!rx_data_ready_i || !translate_i)) ? address_i : code_i ;

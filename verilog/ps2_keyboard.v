@@ -217,21 +217,21 @@ module ps2_keyboard (
 
 
    // I/O declarations
-   input clock_i;
-   input reset_i;
-   output ps2_clk_en_o_ ;
-   output ps2_data_en_o_ ;
-   input  ps2_clk_i ;
-   input  ps2_data_i ;
+   input wire clock_i;
+   input wire reset_i;
+   output wire ps2_clk_en_o_ ;
+   output wire ps2_data_en_o_ ;
+   input  wire ps2_clk_i ;
+   input  wire ps2_data_i ;
    output rx_released;
    output [7:0] rx_scan_code;
    output       rx_data_ready;
-   input        rx_read;
+   input        wire rx_read;
    input [7:0]  tx_data;
-   input        tx_write;
-   output       tx_write_ack_o;
-   output       tx_error_no_keyboard_ack;
-   input        translate ;
+   input        wire tx_write;
+   output       wire tx_write_ack_o;
+   output       wire tx_error_no_keyboard_ack;
+   input        wire translate ;
 
    input [15:0] divide_reg_i;
 
