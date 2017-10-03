@@ -51,10 +51,8 @@ module periph_soc
  wire [19:0] dummy;
  wire        irst, ascii_ready;
  wire [7:0]  readch, scancode;
- wire        keyb_almostfull, keyb_full, keyb_rderr, keyb_wrerr, keyb_empty;   
- wire [11:0] keyb_wrcount, keyb_rdcount;
+ wire        keyb_empty;   
  reg [31:0]  keycode;
- wire [31:0] keyb_fifo_status = {keyb_empty,keyb_almostfull,keyb_full,keyb_rderr,keyb_wrerr,keyb_rdcount,keyb_wrcount};
  wire [35:0] keyb_fifo_out;
  
     ps2 keyb_mouse(
@@ -75,16 +73,18 @@ module periph_soc
        .rst(~rstn),      // input wire rst
        .din({19'b0, readch[6:0], scancode}),      // input wire [31 : 0] din
        .wr_en(ascii_ready),  // input wire wr_en
-       .rd_en(hid_req&hid_we&one_hot_data_addr[0]),  // input wire rd_en
+       .rd_en(hid_en&hid_we&one_hot_data_addr[0]),  // input wire rd_en
        .dout(keyb_fifo_out),    // output wire [31 : 0] dout
-       .rdcount(keyb_rdcount),         // 12-bit output: Read count
-       .rderr(keyb_rderr),             // 1-bit output: Read error
-       .wrcount(keyb_wrcount),         // 12-bit output: Write count
-       .wrerr(keyb_wrerr),             // 1-bit output: Write error
-       .almostfull(keyb_almostfull),   // output wire almost full
-       .full(keyb_full),    // output wire full
+       .rdcount(),         // 12-bit output: Read count
+       .rderr(),             // 1-bit output: Read error
+       .wrcount(),         // 12-bit output: Write count
+       .wrerr(),             // 1-bit output: Write error
+       .almostfull(),   // output wire almost full
+       .full(),    // output wire full
        .empty(keyb_empty)  // output wire empty
      );
+
+    assign one_hot_rdata[0] = {keyb_empty,keyb_fifo_out[15:0]};
     
     wire [7:0] red,  green, blue;
  
@@ -129,27 +129,6 @@ logic         core_instr_gnt;
 logic         core_instr_rvalid;
 logic [31:0]  core_instr_addr;
 
-logic         hid_req;
-logic         hid_gnt;
-logic         hid_rvalid;
-logic         hid_we;
-
-  logic                  debug_req = 1'b0;
-  logic                  debug_gnt;
-  logic                  debug_rvalid;
-  logic [14:0]           debug_addr = 15'b0;
-  logic                  debug_we = 1'b0;
-  logic [31: 0]          debug_wdata = 32'b0;
-  logic [31: 0]          debug_rdata;
-  logic [31: 0]          core_instr_rdata;
-
-  logic        fetch_enable_i = 1'b1;
-  logic [31:0] irq_i = 32'b0;
-  logic        core_busy_o;
-  logic        clock_gating_i = 1'b1;
-  logic [31:0] boot_addr_i = 32'h80;
-  logic  [7:0] hid_rx_byte;
-
   logic [3:0] one_hot_data_addr;
   logic [31:0] one_hot_rdata[3:0];
 
@@ -164,8 +143,8 @@ always_comb
        end
   end
 
-   wire    tx_rd_fifo;
-   wire    rx_wr_fifo;
+   wire    tx_rd;
+   wire    rx_wr;
    wire       sd_data_busy, data_crc_ok, sd_dat_oe;
    wire [3:0] sd_dat_to_mem, sd_dat_to_host, sd_dat_to_host_maj;
    wire       sd_cmd_to_mem, sd_cmd_to_host, sd_cmd_to_host_maj, sd_cmd_oe;
@@ -231,7 +210,7 @@ always @(posedge msoc_clk or negedge rstn)
    else
      begin
     from_dip_reg <= from_dip;
-	if (hid_req&hid_we&one_hot_data_addr[2]&~hid_addr[14])
+	if (hid_en&hid_we&one_hot_data_addr[2]&~hid_addr[14])
 	  case(hid_addr[5:2])
 	    0: sd_align_reg <= hid_wrdata;
 	    1: sd_clk_din <= hid_wrdata;
@@ -261,15 +240,10 @@ always @(posedge sd_clk_o)
 	sd_cmd_timeout <= sd_cmd_timeout_reg;
     end
 
-   //Tx Fifo
-   wire [31:0] data_in_rx_fifo;
-   wire        tx_almostfull, tx_full, tx_rderr, tx_wrerr, tx_empty;   
-   wire [11:0] tx_wrcount, tx_rdcount;
-   //Rx Fifo
-   wire [31:0] data_out_tx_fifo;
-   wire        rx_almostfull, rx_full, rx_rderr, rx_wrerr, rx_empty;   
-   wire [11:0] rx_wrcount, rx_rdcount;
-   wire data_rst = ~(sd_data_rst&rstn);
+   //Tx SD data
+   wire [31:0] data_in_rx;
+   //Rx SD data
+   wire [31:0] data_out_tx;
    
    parameter iostd = "LVTTL";
    parameter slew = "FAST";
@@ -325,40 +299,6 @@ always @(posedge sd_clk_o)
         end
         
    endgenerate					
-				   
-my_fifo #(.width(36)) tx_fifo (
-  .rd_clk(~sd_clk_o),      // input wire read clk
-  .wr_clk(~msoc_clk),      // input wire write clk
-  .rst(data_rst),      // input wire rst
-  .din({dummy[3:0],hid_wrdata}),      // input wire [31 : 0] din
-  .wr_en(hid_req&hid_we&one_hot_data_addr[2]&hid_addr[14]),  // input wire wr_en
-  .rd_en(tx_rd_fifo),  // input wire rd_en
-  .dout({dummy[7:4],data_out_tx_fifo}),    // output wire [31 : 0] dout
-  .rdcount(tx_rdcount),         // 12-bit output: Read count
-  .rderr(tx_rderr),             // 1-bit output: Read error
-  .wrcount(tx_wrcount),         // 12-bit output: Write count
-  .wrerr(tx_wrerr),             // 1-bit output: Write error
-  .almostfull(tx_almostfull),   // output wire almost full
-  .full(tx_full),    // output wire full
-  .empty(tx_empty)  // output wire empty
-);
-
-my_fifo #(.width(36)) rx_fifo (
-  .rd_clk(~msoc_clk),      // input wire read clk
-  .wr_clk(sd_clk_o),      // input wire write clk
-  .rst(data_rst),      // input wire rst
-  .din({dummy[11:8],data_in_rx_fifo}),      // input wire [31 : 0] din
-  .wr_en(rx_wr_fifo),  // input wire wr_en
-  .rd_en(hid_req&hid_we&one_hot_data_addr[3]),  // input wire rd_en
-  .dout({dummy[15:12],one_hot_rdata[3]}),    // output wire [31 : 0] dout
-  .rdcount(rx_rdcount),         // 12-bit output: Read count
-  .rderr(rx_rderr),             // 1-bit output: Read error
-  .wrcount(rx_wrcount),         // 12-bit output: Write count
-  .wrerr(rx_wrerr),             // 1-bit output: Write error
-  .almostfull(rx_almostfull),   // output wire almost full
-  .full(rx_full),    // output wire full
-  .empty(rx_empty)  // output wire empty
-);
 
    logic [133:0]    sd_cmd_response, sd_cmd_response_reg;
    logic [31:0] 	sd_cmd_resp_sel, sd_status_reg;
@@ -367,18 +307,59 @@ my_fifo #(.width(36)) rx_fifo (
    logic [47:0] 	sd_cmd_packet, sd_cmd_packet_reg;
    logic [15:0] 	sd_transf_cnt, sd_transf_cnt_reg;
    logic            sd_detect_reg;
-   
-   wire [31:0]  rx_fifo_status = {rx_almostfull,rx_full,rx_rderr,rx_wrerr,rx_rdcount,rx_wrcount};
-   wire [31:0]  tx_fifo_status = {tx_almostfull,tx_full,tx_rderr,tx_wrerr,tx_rdcount,tx_wrcount};
-   	
+
+   RAMB16_S36_S36 RAMB16_S1_inst_tx (
+                                   .CLKA(~sd_clk_o),             // Port A Clock
+                                   .CLKB(~msoc_clk),             // Port A Clock
+                                   .DOA(data_out_tx),            // Port A 32-bit Data Output
+                                   .ADDRA(sd_transf_cnt),        // Port A 11-bit Address Input
+                                   .DIA(32'b0),                  // Port A 32-bit Data Input
+                                   .DIPA(1'b0),                  // Port A parity unused
+                                   .SSRA(1'b0),                  // Port A Synchronous Set/Reset Input
+                                   .ENA(tx_rd),                  // Port A RAM Enable Input
+                                   .WEA(1'b0),                   // Port A Write Enable Input
+                                   .DOB(),                       // Port B 32-bit Data Output
+                                   .DOPB(),                      // Port B parity unused
+                                   .ADDRB(hid_addr[10:2]),       // Port B 9-bit Address Input
+                                   .DIB(hid_wrdata),             // Port B 32-bit Data Input
+                                   .DIPB(4'b0),                  // Port B parity unused
+                                   .ENB(hid_en&one_hot_data_addr[2]&hid_addr[14]),
+				                                 // Port B RAM Enable Input
+                                   .SSRB(1'b0),                  // Port B Synchronous Set/Reset Input
+                                   .WEB(hid_we)                  // Port B Write Enable Input
+                                   );
+
+   RAMB16_S36_S36 RAMB16_S1_inst_rx (
+                                   .CLKA(sd_clk_o),              // Port A Clock
+                                   .CLKB(~msoc_clk),             // Port A Clock
+                                   .DOA(),                       // Port A 32-bit Data Output
+                                   .ADDRA(sd_transf_cnt),        // Port A 11-bit Address Input
+                                   .DIA(data_in_rx),             // Port A 32-bit Data Input
+                                   .DIPA(1'b0),                  // Port A parity unused
+                                   .SSRA(1'b0),                  // Port A Synchronous Set/Reset Input
+                                   .ENA(rx_wr),                  // Port A RAM Enable Input
+                                   .WEA(rx_wr),                  // Port A Write Enable Input
+                                   .DOB(one_hot_rdata[3]),       // Port B 32-bit Data Output
+                                   .DOPB(),                      // Port B parity unused
+                                   .ADDRB(hid_addr[10:2]),       // Port B 9-bit Address Input
+                                   .DIB(hid_wrdata),             // Port B 32-bit Data Input
+                                   .DIPB(4'b0),                  // Port B parity unused
+                                   .ENB(hid_en&one_hot_data_addr[3]),
+				                                 // Port B RAM Enable Input
+                                   .SSRB(1'b0),                  // Port B Synchronous Set/Reset Input
+                                   .WEB(hid_we)                  // Port B Write Enable Input
+                                   );
+
    always @(posedge msoc_clk)
      begin
-     sd_status_reg = sd_status;
-     sd_cmd_response_reg = sd_cmd_response;
-     sd_cmd_wait_reg = sd_cmd_wait;
-     sd_data_wait_reg = sd_data_wait;
-     sd_cmd_packet_reg = sd_cmd_packet;
-     sd_transf_cnt_reg = sd_transf_cnt;	
+     sd_status_reg <= sd_status;
+     sd_cmd_response_reg <= sd_cmd_response;
+     sd_cmd_wait_reg <= sd_cmd_wait;
+     sd_data_wait_reg <= sd_data_wait;
+     sd_cmd_packet_reg <= sd_cmd_packet;
+     sd_transf_cnt_reg <= sd_transf_cnt;
+     sd_detect_reg <= sd_detect;
+        
      case(hid_addr[6:2])
        0: sd_cmd_resp_sel = sd_cmd_response_reg[38:7];
        1: sd_cmd_resp_sel = sd_cmd_response_reg[70:39];
@@ -390,8 +371,8 @@ my_fifo #(.width(36)) rx_fifo (
        7: sd_cmd_resp_sel = sd_cmd_packet_reg[47:32];       
        8: sd_cmd_resp_sel = sd_data_wait_reg;
        9: sd_cmd_resp_sel = sd_transf_cnt_reg;
-      10: sd_cmd_resp_sel = rx_fifo_status;
-      11: sd_cmd_resp_sel = tx_fifo_status;
+      10: sd_cmd_resp_sel = 0;
+      11: sd_cmd_resp_sel = 0;
       12: sd_cmd_resp_sel = sd_detect_reg;
       15: sd_cmd_resp_sel = {sd_clk_locked,sd_clk_drdy,sd_clk_dout};
  	  16: sd_cmd_resp_sel = sd_align_reg;
@@ -411,7 +392,7 @@ my_fifo #(.width(36)) rx_fifo (
      endcase // case (hid_addr[6:2])
      end
    
-   assign sd_status[3:0] = {tx_full,tx_empty,rx_full,rx_empty};
+   assign sd_status[3:0] = 4'b0;
 
    assign one_hot_rdata[2] = sd_cmd_resp_sel;
  
@@ -436,7 +417,7 @@ clk_wiz_1 sd_clk_div
 sd_top sdtop(
     .sd_clk     (sd_clk_o),
     .cmd_rst    (~(sd_cmd_rst&rstn)),
-    .data_rst   (data_rst),
+    .data_rst   (~(sd_data_rst&rstn)),
     .setting_i  (sd_cmd_setting),
     .timeout_i  (sd_cmd_timeout),
     .cmd_i      (sd_cmd_i),
@@ -446,7 +427,7 @@ sd_top sdtop(
     .sd_align_i(sd_align),
     .sd_blkcnt_i(sd_blkcnt),
     .sd_blksize_i(sd_blksize),
-    .sd_data_i(data_out_tx_fifo),
+    .sd_data_i(data_out_tx),
     .sd_dat_to_host(sd_dat_to_host_maj),
     .sd_cmd_to_host(sd_cmd_to_host_maj),
     .finish_cmd_o(sd_cmd_finish),
@@ -465,9 +446,9 @@ sd_top sdtop(
     .packet1_o(sd_cmd_packet[47:32]),
     .crc_val_o(sd_cmd_crc_val),
     .crc_actual_o(sd_cmd_response[6:0]),
-    .sd_rd_o(tx_rd_fifo),
-    .sd_we_o(rx_wr_fifo),
-    .sd_data_o(data_in_rx_fifo),    
+    .sd_rd_o(tx_rd),
+    .sd_we_o(rx_wr),
+    .sd_data_o(data_in_rx),    
     .sd_dat_to_mem(sd_dat_to_mem),
     .sd_cmd_to_mem(sd_cmd_to_mem),
     .sd_dat_oe(sd_dat_oe),
