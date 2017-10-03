@@ -28,7 +28,8 @@ module periph_soc
  input wire        hid_rst, hid_clk, hid_en,
  input wire [3:0]  hid_we,
  input wire [16:0] hid_addr,
- input wire [31:0] hid_wrdata,  hid_rddata,
+ input wire [31:0] hid_wrdata,
+ output reg [31:0] hid_rddata,
  // pusb button array
  input wire GPIO_SW_C,
  input wire GPIO_SW_W,
