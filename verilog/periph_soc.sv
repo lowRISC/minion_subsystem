@@ -132,7 +132,6 @@ logic         hid_req;
 logic         hid_gnt;
 logic         hid_rvalid;
 logic         hid_we;
-logic [31:0]  hid_rdata;
 
   logic                  debug_req = 1'b0;
   logic                  debug_gnt;
@@ -156,11 +155,11 @@ logic [31:0]  hid_rdata;
 always_comb
   begin:onehot
      integer i;
-     hid_rdata = 32'b0;
+     hid_rddata = 32'b0;
      for (i = 0; i < 4; i++)
        begin
 	   one_hot_data_addr[i] = hid_addr[16:15] == i;
-	   hid_rdata |= (one_hot_data_addr[i] ? one_hot_rdata[i] : 32'b0);
+	   hid_rddata |= (one_hot_data_addr[i] ? one_hot_rdata[i] : 32'b0);
        end
   end
 
