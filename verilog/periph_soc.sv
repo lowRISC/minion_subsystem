@@ -231,7 +231,7 @@ always @(posedge msoc_clk or negedge rstn)
    else
      begin
     from_dip_reg <= from_dip;
-	if (hid_req&hid_we&one_hot_data_addr[2])
+	if (hid_req&hid_we&one_hot_data_addr[2]&~hid_addr[14])
 	  case(hid_addr[5:2])
 	    0: sd_align_reg <= hid_wrdata;
 	    1: sd_clk_din <= hid_wrdata;
@@ -244,7 +244,7 @@ always @(posedge msoc_clk or negedge rstn)
 	    8: sd_blksize_reg <= hid_wrdata;
 	    9: sd_cmd_timeout_reg <= hid_wrdata;
 	   10: {sd_clk_dwe,sd_clk_den,sd_clk_daddr} <= hid_wrdata;
-	   // Not structly related, but can indicate SD-card activity and so on
+	   // Not strictly related, but can indicate SD-card activity and so on
 	   15: to_led <= hid_wrdata;
 	  endcase
     end
@@ -331,7 +331,7 @@ my_fifo #(.width(36)) tx_fifo (
   .wr_clk(~msoc_clk),      // input wire write clk
   .rst(data_rst),      // input wire rst
   .din({dummy[3:0],hid_wrdata}),      // input wire [31 : 0] din
-  .wr_en(hid_req&hid_we&one_hot_data_addr[2]),  // input wire wr_en
+  .wr_en(hid_req&hid_we&one_hot_data_addr[2]&hid_addr[14]),  // input wire wr_en
   .rd_en(tx_rd_fifo),  // input wire rd_en
   .dout({dummy[7:4],data_out_tx_fifo}),    // output wire [31 : 0] dout
   .rdcount(tx_rdcount),         // 12-bit output: Read count
@@ -349,8 +349,8 @@ my_fifo #(.width(36)) rx_fifo (
   .rst(data_rst),      // input wire rst
   .din({dummy[11:8],data_in_rx_fifo}),      // input wire [31 : 0] din
   .wr_en(rx_wr_fifo),  // input wire wr_en
-  .rd_en(hid_req&hid_we&one_hot_data_addr[2]),  // input wire rd_en
-  .dout({dummy[15:12],one_hot_rdata[2]}),    // output wire [31 : 0] dout
+  .rd_en(hid_req&hid_we&one_hot_data_addr[3]),  // input wire rd_en
+  .dout({dummy[15:12],one_hot_rdata[3]}),    // output wire [31 : 0] dout
   .rdcount(rx_rdcount),         // 12-bit output: Read count
   .rderr(rx_rderr),             // 1-bit output: Read error
   .wrcount(rx_wrcount),         // 12-bit output: Write count
@@ -413,7 +413,7 @@ my_fifo #(.width(36)) rx_fifo (
    
    assign sd_status[3:0] = {tx_full,tx_empty,rx_full,rx_empty};
 
-   assign one_hot_rdata[3] = sd_cmd_resp_sel;
+   assign one_hot_rdata[2] = sd_cmd_resp_sel;
  
 clk_wiz_1 sd_clk_div
      (
