@@ -1,6 +1,6 @@
 module rx_delay(
-                input      clk,
-                input      in,
+                input wire clk,
+                input wire in,
                 output reg maj
                 );
 

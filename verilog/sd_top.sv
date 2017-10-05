@@ -98,8 +98,8 @@ module sd_top(
  output wire [3:0] 	 sd_dat_to_mem,
  output wire 	 sd_cmd_to_mem,
  output wire 	 sd_cmd_oe,
- output wire 	 sd_dat_oe);
-
+ output wire 	 sd_dat_oe,
+ output reg [8:0]  sd_xfr_addr);
 
    reg 		    sd_cmd_to_host_dly;
    reg [3:0] 	    sd_dat_to_host_dly;
@@ -115,6 +115,13 @@ module sd_top(
 	    
 always @(negedge sd_clk)
   begin
+     if (data_rst)
+       sd_xfr_addr <= 0;
+     else
+       begin
+        if (sd_rd_o|sd_we_o)
+            sd_xfr_addr <= sd_xfr_addr + 1;          
+       end
      sd_cmd_to_host_dly <= sd_cmd_to_host;
      sd_dat_to_host_dly <= sd_dat_to_host;
   end

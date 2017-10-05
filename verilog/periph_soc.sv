@@ -178,6 +178,8 @@ always_comb
    reg 	   sd_cmd_start, sd_cmd_rst, sd_data_rst, sd_clk_rst;
    reg [15:0] from_dip_reg;
 
+   wire [8:0] sd_xfr_addr;
+   
 logic [6:0] sd_clk_daddr;
 logic       sd_clk_dclk, sd_clk_den, sd_clk_drdy, sd_clk_dwe, sd_clk_locked;
 logic [15:0] sd_clk_din, sd_clk_dout;
@@ -187,7 +189,7 @@ assign sd_clk_dclk = msoc_clk;
 always @(posedge msoc_clk or negedge rstn)
   if (!rstn)
     begin
-    from_dip_reg <= 0;
+       from_dip_reg <= 0;
 	sd_align_reg <= 0;
 	sd_blkcnt_reg <= 0;
 	sd_blksize_reg <= 0;
@@ -209,7 +211,7 @@ always @(posedge msoc_clk or negedge rstn)
    end
    else
      begin
-    from_dip_reg <= from_dip;
+        from_dip_reg <= from_dip;
 	if (hid_en&hid_we&one_hot_data_addr[2]&~hid_addr[14])
 	  case(hid_addr[5:2])
 	    0: sd_align_reg <= hid_wrdata;
@@ -308,36 +310,15 @@ always @(posedge sd_clk_o)
    logic [15:0] 	sd_transf_cnt, sd_transf_cnt_reg;
    logic            sd_detect_reg;
 
-   RAMB16_S36_S36 RAMB16_S1_inst_tx (
+   RAMB16_S36_S36 RAMB16_S1_inst_sd (
                                    .CLKA(~sd_clk_o),             // Port A Clock
                                    .CLKB(~msoc_clk),             // Port A Clock
                                    .DOA(data_out_tx),            // Port A 32-bit Data Output
-                                   .ADDRA(sd_transf_cnt),        // Port A 11-bit Address Input
-                                   .DIA(32'b0),                  // Port A 32-bit Data Input
-                                   .DIPA(1'b0),                  // Port A parity unused
-                                   .SSRA(1'b0),                  // Port A Synchronous Set/Reset Input
-                                   .ENA(tx_rd),                  // Port A RAM Enable Input
-                                   .WEA(1'b0),                   // Port A Write Enable Input
-                                   .DOB(),                       // Port B 32-bit Data Output
-                                   .DOPB(),                      // Port B parity unused
-                                   .ADDRB(hid_addr[10:2]),       // Port B 9-bit Address Input
-                                   .DIB(hid_wrdata),             // Port B 32-bit Data Input
-                                   .DIPB(4'b0),                  // Port B parity unused
-                                   .ENB(hid_en&one_hot_data_addr[2]&hid_addr[14]),
-				                                 // Port B RAM Enable Input
-                                   .SSRB(1'b0),                  // Port B Synchronous Set/Reset Input
-                                   .WEB(hid_we)                  // Port B Write Enable Input
-                                   );
-
-   RAMB16_S36_S36 RAMB16_S1_inst_rx (
-                                   .CLKA(sd_clk_o),              // Port A Clock
-                                   .CLKB(~msoc_clk),             // Port A Clock
-                                   .DOA(),                       // Port A 32-bit Data Output
-                                   .ADDRA(sd_transf_cnt),        // Port A 11-bit Address Input
+                                   .ADDRA(sd_xfr_addr),          // Port A 11-bit Address Input
                                    .DIA(data_in_rx),             // Port A 32-bit Data Input
                                    .DIPA(1'b0),                  // Port A parity unused
                                    .SSRA(1'b0),                  // Port A Synchronous Set/Reset Input
-                                   .ENA(rx_wr),                  // Port A RAM Enable Input
+                                   .ENA(tx_rd|rx_wr),            // Port A RAM Enable Input
                                    .WEA(rx_wr),                  // Port A Write Enable Input
                                    .DOB(one_hot_rdata[3]),       // Port B 32-bit Data Output
                                    .DOPB(),                      // Port B parity unused
@@ -374,6 +355,7 @@ always @(posedge sd_clk_o)
       10: sd_cmd_resp_sel = 0;
       11: sd_cmd_resp_sel = 0;
       12: sd_cmd_resp_sel = sd_detect_reg;
+      13: sd_cmd_resp_sel = sd_xfr_addr;
       15: sd_cmd_resp_sel = {sd_clk_locked,sd_clk_drdy,sd_clk_dout};
  	  16: sd_cmd_resp_sel = sd_align_reg;
       17: sd_cmd_resp_sel = sd_clk_din;
@@ -452,7 +434,8 @@ sd_top sdtop(
     .sd_dat_to_mem(sd_dat_to_mem),
     .sd_cmd_to_mem(sd_cmd_to_mem),
     .sd_dat_oe(sd_dat_oe),
-    .sd_cmd_oe(sd_cmd_oe)
+    .sd_cmd_oe(sd_cmd_oe),
+    .sd_xfr_addr(sd_xfr_addr)
     );
 
 endmodule // chip_top
