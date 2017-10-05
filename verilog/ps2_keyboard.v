@@ -230,7 +230,7 @@ module ps2_keyboard (
    input [7:0]  tx_data;
    input        wire tx_write;
    output       wire tx_write_ack_o;
-   output       wire tx_error_no_keyboard_ack;
+   output       reg tx_error_no_keyboard_ack;
    input        wire translate ;
 
    input [15:0] divide_reg_i;
@@ -238,8 +238,7 @@ module ps2_keyboard (
    reg          rx_released;
    reg [7:0]    rx_scan_code;
    reg          rx_data_ready;
-   reg          tx_error_no_keyboard_ack;
-
+ 
    // Internal signal declarations
    wire         timer_60usec_done;
    wire         timer_5usec_done;
