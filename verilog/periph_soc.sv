@@ -25,6 +25,7 @@ module periph_soc
  inout wire [3:0]  sd_dat,
  inout wire 	   sd_cmd,
  output reg 	   sd_reset,
+ output reg 	   sd_irq,
  input wire        hid_rst, hid_clk, hid_en,
  input wire [3:0]  hid_we,
  input wire [16:0] hid_addr,
@@ -183,7 +184,8 @@ always_comb
 logic [6:0] sd_clk_daddr;
 logic       sd_clk_dclk, sd_clk_den, sd_clk_drdy, sd_clk_dwe, sd_clk_locked;
 logic [15:0] sd_clk_din, sd_clk_dout;
-
+logic [3:0] sd_irq_en_reg, sd_irq_stat_reg;
+   
 assign sd_clk_dclk = msoc_clk;
 
 always @(posedge msoc_clk or negedge rstn)
@@ -207,10 +209,15 @@ always @(posedge msoc_clk or negedge rstn)
 	sd_cmd_rst <= 0;
 	sd_clk_rst <= 0;
 	sd_cmd_timeout_reg <= 0;
+        sd_irq_stat_reg <= 0;
+        sd_irq_en_reg <= 0;
+        sd_irq <= 0;
 	to_led <= 0;
    end
    else
      begin
+        sd_irq_stat_reg <= {~sd_detect_reg,sd_detect_reg,sd_status[10],sd_status[8]};
+        sd_irq <= |(sd_irq_en_reg & sd_irq_stat_reg);
         from_dip_reg <= from_dip;
 	if (hid_en&hid_we&one_hot_data_addr[2]&~hid_addr[14])
 	  case(hid_addr[5:2])
@@ -225,6 +232,8 @@ always @(posedge msoc_clk or negedge rstn)
 	    8: sd_blksize_reg <= hid_wrdata;
 	    9: sd_cmd_timeout_reg <= hid_wrdata;
 	   10: {sd_clk_dwe,sd_clk_den,sd_clk_daddr} <= hid_wrdata;
+           11: sd_irq_en_reg <= hid_wrdata;
+            
 	   // Not strictly related, but can indicate SD-card activity and so on
 	   15: to_led <= hid_wrdata;
 	  endcase
@@ -356,8 +365,9 @@ always @(posedge sd_clk_o)
       11: sd_cmd_resp_sel = 0;
       12: sd_cmd_resp_sel = sd_detect_reg;
       13: sd_cmd_resp_sel = sd_xfr_addr;
+      14: sd_cmd_resp_sel = sd_irq_stat_reg;
       15: sd_cmd_resp_sel = {sd_clk_locked,sd_clk_drdy,sd_clk_dout};
- 	  16: sd_cmd_resp_sel = sd_align_reg;
+      16: sd_cmd_resp_sel = sd_align_reg;
       17: sd_cmd_resp_sel = sd_clk_din;
       18: sd_cmd_resp_sel = sd_cmd_arg_reg;
       19: sd_cmd_resp_sel = sd_cmd_i_reg;
@@ -368,6 +378,7 @@ always @(posedge sd_clk_o)
       24: sd_cmd_resp_sel = sd_blksize_reg;
       25: sd_cmd_resp_sel = sd_cmd_timeout_reg;
       26: sd_cmd_resp_sel = {sd_clk_dwe,sd_clk_den,sd_clk_daddr};
+      27: sd_cmd_resp_sel = sd_irq_en_reg;
       // not really related but we can decide if we want to autoboot, and so on.
       31: sd_cmd_resp_sel = from_dip_reg;
       default: sd_cmd_resp_sel = 32'HDEADBEEF;
