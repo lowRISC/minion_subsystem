@@ -44,7 +44,7 @@
                 .SIM_DEVICE("7SERIES"),            // Must be set to "7SERIES" for simulation behavior
                 .SRVAL(36'h000000000)              // Set/Reset value for output port
                 )
-      FIFO18E1_inst_36 (
+      FIFO18E2_inst_36 (
                         // Read Data: 32-bit (each) output: Read output data
                         .DO(DO),                   // 32-bit output: Data output
                         .DOP(DOP),                 // 4-bit output: Parity data output
